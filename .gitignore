@@ -9,6 +9,8 @@ docs/doctrees/*
 .project
 .pydevproject
 .directory
+.idea
+env
 
 # ignore demo attachments that user might have added
 demo/demodesk/media/helpdesk/attachments/*
