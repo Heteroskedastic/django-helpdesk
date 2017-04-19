@@ -1,0 +1,14 @@
+{% extends "helpdesk/ticket_time_track_add.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+{% block helpdesk_title %}{% trans "Edit Ticket Time Track" %}{% endblock %}
+
+{% block helpdesk_pagetitle %}
+{% blocktrans with ticket=object.ticket %}<h3>Edit Time Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
+{% endblock %}
+
+{% block helpdesk_formbuttons %}
+<button type="submit" class="btn btn-primary" name="submit"><span class="fa fa-save"></span> Update Time</button>
+<a class="btn btn-default" href="{% url 'helpdesk:view' object.ticket.pk %}"><span class="fa fa-close"></span> Cancel</a>
+{% endblock %}

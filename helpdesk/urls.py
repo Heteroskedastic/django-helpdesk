@@ -104,6 +104,18 @@ urlpatterns = [
         staff.attachment_del,
         name='attachment_del'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/time_track/add/$',
+        staff.AddTicketTimeTrackView.as_view(),
+        name='ticket_time_track_add'),
+
+    url(r'^tickets/time_track/edit/(?P<pk>[0-9]+)/$',
+        staff.UpdateTicketTimeTrackView.as_view(),
+        name='ticket_time_track_edit'),
+
+    url(r'^tickets/time_track/delete/(?P<pk>[0-9]+)/$',
+        staff.DeleteTicketTimeTrackView.as_view(),
+        name='ticket_time_track_delete'),
+
     url(r'^raw/(?P<type>\w+)/$',
         staff.raw_details,
         name='raw'),

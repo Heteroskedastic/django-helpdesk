@@ -598,6 +598,20 @@ class Ticket(models.Model):
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
 
+    def total_time_tracked(self, user=None):
+        q = self.time_track
+        if user:
+            q = q.filter(tracked_by=user)
+        res = q.aggregate(models.Sum('time'))
+        return res['time__sum']
+
+
+    def records_time_tracked(self, user=None):
+        q = self.time_track
+        if user:
+            q = q.filter(tracked_by=user)
+        return q.count()
+
 
 class FollowUpManager(models.Manager):
 
@@ -1455,3 +1469,26 @@ class TicketDependency(models.Model):
 
     def __str__(self):
         return '%s / %s' % (self.ticket, self.depends_on)
+
+
+@python_2_unicode_compatible
+class TicketTimeTrack(models.Model):
+    """
+    A model to track time spending on a ticket.
+    """
+    ticket = models.ForeignKey(Ticket, verbose_name=_('Ticket'), related_name='time_track',
+                               on_delete=models.CASCADE)
+    time = models.DurationField(_('Time Spent'), help_text=_('Time spent on ticket (formats: h:m:s | m:s | s)'))
+    tracked_at = models.DateTimeField(_('Tracked At'), help_text=_('Date/Time tracked'), default=timezone.now)
+    tracked_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Tracked By'), related_name='time_track',
+                                   on_delete=models.CASCADE)
+
+    class Meta:
+        permissions = (
+            ('change_others_tickettimetrack', 'Can change ticket time track of others'),
+            ('delete_others_tickettimetrack', 'Can delete ticket time track of others'),
+        )
+
+
+    def __str__(self):
+        return str(self.time)

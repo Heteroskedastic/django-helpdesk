@@ -1,5 +1,7 @@
 {% load i18n humanize %}
 {% load static from staticfiles %}
+{% load helpdesk_util_tags %}
+{% load humanize %}
 
 <div class="row">
                 <div class="col-lg-12">
@@ -75,6 +77,31 @@
                                                 <p><a data-toggle='tooltip' href='{% url 'helpdesk:ticket_dependency_add' ticket.id %}' title="{% trans "Click on 'Add Dependency', if you want to make this ticket dependent on another ticket. A ticket may not be closed until all tickets it depends on are closed." %}"><button type="button" class="btn btn-primary btn-xs"><i class="fa fa-child"></i>&nbsp;{% trans "Add Dependency" %}</button></a></p>
                                             </td>
                                         </tr>
+                                        <tr>
+                                            <th>{% trans "Time Spent" %} <a href="{% url 'helpdesk:ticket_time_track_add' ticket.pk %}" class="btn btn-xs btn-success" title="{% trans 'New time track' %}"><span class="fa fa-plus"></span></a></th>
+                                            {% with ticket.total_time_tracked as total_time_track %}
+                                            <td>
+                                            {% if total_time_track %}
+                                                <strong>{{ total_time_track|humanize_duration }}</strong>
+                                                <small class="text-muted">({{ total_time_track }}) - {% blocktrans with ticket.records_time_tracked as records_time_tracked %}{{ records_time_tracked }} Records{% endblocktrans %} <button class="btn btn-sm btn-link" data-toggle="collapse" data-target="#time-spent-details">{% trans 'Show/Hide Details' %}</button></small>
+                                                <div id="time-spent-details" class="collapse">
+                                                    <hr>
+                                                    {% for tt in ticket.time_track.all|order_by:'-tracked_at' %}
+                                                    <p><span class="fa fa-clock-o"></span> {{tt.time|humanize_duration}} ({{tt.time}}) <small class="text-muted" title="{{tt.tracked_at}}">{% blocktrans with tracked_by=tt.tracked_by tracked_at=tt.tracked_at tracked_at_humanize=tt.tracked_at|naturaltime %}by {{tracked_by}},  {{tracked_at_humanize}}{% endblocktrans %}</small>
+                                                        {% if tt.tracked_by == user or perms.helpdesk.change_others_tickettimetrack %}
+                                                        <a href="{% url 'helpdesk:ticket_time_track_edit' tt.pk %}" title="{% trans 'Edit' %}"><span class="fa fa-pencil-square-o text-primary"></span></a>
+                                                        {% endif %}
+                                                        {% if tt.tracked_by == user or perms.helpdesk.delete_others_tickettimetrack %}
+                                                        <a href="{% url 'helpdesk:ticket_time_track_delete' tt.pk %}"  title="{% trans 'Delete' %}"><span class="fa fa-trash text-danger"></span></a></p>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">{% trans '[NO TIME]' %}</span>
+                                            {% endif %}</td>
+                                            {% endwith %}
+                                        </tr>
+
                                     </tbody>
                                 </table>
                             </div>

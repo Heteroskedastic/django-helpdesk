@@ -10,6 +10,7 @@ from __future__ import unicode_literals
 from datetime import datetime, timedelta
 
 from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.core.urlresolvers import reverse
@@ -20,15 +21,18 @@ from django.db.models import Q
 from django.http import HttpResponseRedirect, Http404, HttpResponse
 from django.shortcuts import render, get_object_or_404
 from django.utils.dates import MONTHS_3
+from django.utils.decorators import method_decorator
 from django.utils.translation import ugettext as _
 from django.utils.html import escape
 from django import forms
 from django.utils import timezone
+from django.views.generic import CreateView, UpdateView, DeleteView
+from django.views.generic.detail import SingleObjectMixin
 
 from helpdesk.forms import (
     TicketForm, UserSettingsForm, EmailIgnoreForm, EditTicketForm, TicketCCForm,
-    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm
-)
+    TicketCCEmailForm, TicketCCUserForm, EditFollowUpForm, TicketDependencyForm,
+    TicketTimeTrackForm)
 from helpdesk.lib import (
     send_templated_mail, query_to_dict, apply_query, safe_template_context,
     process_attachments,
@@ -36,7 +40,7 @@ from helpdesk.lib import (
 from helpdesk.models import (
     Ticket, Queue, FollowUp, TicketChange, PreSetReply, Attachment, SavedSearch,
     IgnoreEmail, TicketCC, TicketDependency,
-)
+    TicketTimeTrack)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -1545,3 +1549,92 @@ def date_rel_to_today(today, offset):
 def sort_string(begin, end):
     return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class AddTicketTimeTrackView(CreateView):
+    template_name = "helpdesk/ticket_time_track_add.html"
+    model = TicketTimeTrack
+    form_class = TicketTimeTrackForm
+    pk_url_kwarg = 'ticket_id'
+    _ticket = None
+
+    def get_form(self, form_class=None):
+        form = super(AddTicketTimeTrackView, self).get_form(form_class=form_class)
+        form.instance.tracked_by = self.request.user
+        form.instance.ticket = self.get_ticket()
+        return form
+
+    def get_context_data(self, **kwargs):
+        ctx = super(AddTicketTimeTrackView, self).get_context_data(**kwargs)
+        ctx['ticket'] = self.get_ticket()
+        return ctx
+
+    def get_ticket(self):
+        if not self._ticket:
+            ticket_id = self.kwargs.get(self.pk_url_kwarg)
+            self._ticket = get_object_or_404(Ticket, id=ticket_id)
+        return self._ticket
+
+    def form_valid(self, form):
+        now = timezone.now()
+        if form.instance.tracked_at > now:
+            form.instance.tracked_at = now
+        result = super(AddTicketTimeTrackView, self).form_valid(form)
+        messages.success(self.request, '"{}" added to "{}" successfully.'.format(form.instance, form.instance.ticket))
+        return result
+
+    def get_success_url(self):
+        return self.get_ticket().get_absolute_url()
+
+
+def _has_access_change_track_Time(user, track_time):
+    return (user == track_time.tracked_by) or user.has_perm('helpdesk.change_others_tickettimetrack')
+
+
+def _has_access_delete_track_Time(user, track_time):
+    return (user == track_time.tracked_by) or user.has_perm('helpdesk.delete_others_tickettimetrack')
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class UpdateTicketTimeTrackView(UpdateView):
+    pk_url_kwarg = 'pk'
+    template_name = "helpdesk/ticket_time_track_edit.html"
+    model = TicketTimeTrack
+    form_class = TicketTimeTrackForm
+
+    def get_object(self, queryset=None):
+        object = super(UpdateTicketTimeTrackView, self).get_object(queryset=queryset)
+        if not _has_access_change_track_Time(self.request.user, object):
+            raise PermissionDenied()
+        return object
+
+    def form_valid(self, form):
+        now = timezone.now()
+        if form.instance.tracked_at > now:
+            form.instance.tracked_at = now
+        result = super(UpdateTicketTimeTrackView, self).form_valid(form)
+        messages.success(self.request, 'a time of ticket "{}" updated successfully.'.format(form.instance.ticket))
+        return result
+
+    def get_success_url(self):
+        return self.object.ticket.get_absolute_url()
+
+
+@method_decorator(staff_member_required, name='dispatch')
+class DeleteTicketTimeTrackView(DeleteView):
+    model = TicketTimeTrack
+    template_name = 'helpdesk/ticket_time_track_confirm_delete.html'
+
+    def get_object(self, queryset=None):
+        object = super(DeleteTicketTimeTrackView, self).get_object(queryset=queryset)
+        if not _has_access_delete_track_Time(self.request.user, object):
+            raise PermissionDenied()
+        return object
+
+    def delete(self, request, *args, **kwargs):
+        res = super(DeleteTicketTimeTrackView, self).delete(request, *args, **kwargs)
+        messages.success(self.request, '"{}" time deleted from "{}" successfully.'.format(self.object, self.object.ticket))
+        return res
+    def get_success_url(self):
+        return self.object.ticket.get_absolute_url()
