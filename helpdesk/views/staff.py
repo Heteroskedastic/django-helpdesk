@@ -1581,7 +1581,8 @@ class AddTicketTimeTrackView(CreateView):
         if form.instance.tracked_at > now:
             form.instance.tracked_at = now
         result = super(AddTicketTimeTrackView, self).form_valid(form)
-        messages.success(self.request, '"{}" added to "{}" successfully.'.format(form.instance, form.instance.ticket))
+        messages.success(self.request, '"{}" time added to "{}" successfully.'.format(form.instance,
+                                                                                      form.instance.ticket))
         return result
 
     def get_success_url(self):
@@ -1670,7 +1671,8 @@ class AddTicketMoneyTrackView(CreateView):
         if form.instance.tracked_at > now:
             form.instance.tracked_at = now
         result = super(AddTicketMoneyTrackView, self).form_valid(form)
-        messages.success(self.request, '"{}" added to "{}" successfully.'.format(form.instance, form.instance.ticket))
+        messages.success(self.request, '"${}" money added to "{}" successfully.'.format(form.instance,
+                                                                                        form.instance.ticket))
         return result
 
     def get_success_url(self):
@@ -1723,7 +1725,7 @@ class DeleteTicketMoneyTrackView(DeleteView):
 
     def delete(self, request, *args, **kwargs):
         res = super(DeleteTicketMoneyTrackView, self).delete(request, *args, **kwargs)
-        messages.success(self.request, '"{}" money deleted from "{}" successfully.'.format(self.object, self.object.ticket))
+        messages.success(self.request, '"${}" money deleted from "{}" successfully.'.format(self.object, self.object.ticket))
         return res
     def get_success_url(self):
         return self.object.ticket.get_absolute_url()

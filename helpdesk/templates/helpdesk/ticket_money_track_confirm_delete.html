@@ -1,6 +1,7 @@
 {% extends "helpdesk/base.html" %}
 {% load i18n %}
 {% load static from staticfiles %}
+{% load intcomma from humanize %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket Money Track" %}{% endblock %}
 
@@ -8,14 +9,14 @@
 
 <div class="panel panel-primary">
     <div class="panel-heading">
-        {% blocktrans with ticket=object.ticket %}<h3>Delete Money Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
+        {% blocktrans with ticket=object.ticket money=object.money|intcomma %}<h3>Delete Money Track "${{money}}" of "{{ticket}}"</h3>{% endblocktrans %}
     </div>
     <!-- /.panel-heading -->
     <div class="panel-body">
         <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
           {% csrf_token %}
             <div class="">
-                <p class="text-danger">{% blocktrans with ticket=object.ticket %}Are you sure you want to delete Money Track "{{object}}" of "{{ticket}}" ticket?{% endblocktrans %}</p>
+                <p class="text-danger">{% blocktrans with ticket=object.ticket money=object.money|intcomma %}Are you sure you want to delete Money Track "${{money}}" of "{{ticket}}" ticket?{% endblocktrans %}</p>
             </div>
           <hr>
           <div class="form-group">

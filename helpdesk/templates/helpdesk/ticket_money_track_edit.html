@@ -1,11 +1,12 @@
 {% extends "helpdesk/ticket_money_track_add.html" %}
 {% load i18n %}
 {% load static from staticfiles %}
+{% load intcomma from humanize %}
 
 {% block helpdesk_title %}{% trans "Edit Ticket Money Track" %}{% endblock %}
 
 {% block helpdesk_pagetitle %}
-{% blocktrans with ticket=object.ticket %}<h3>Edit Money Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
+{% blocktrans with ticket=object.ticket money=object.money|intcomma %}<h3>Edit Money Track "${{money}}" of "{{ticket}}"</h3>{% endblocktrans %}
 {% endblock %}
 
 {% block helpdesk_formbuttons %}
