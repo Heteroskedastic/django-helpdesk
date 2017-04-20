@@ -78,7 +78,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th>{% trans "Time Spent" %} <a href="{% url 'helpdesk:ticket_time_track_add' ticket.pk %}" class="btn btn-xs btn-success" title="{% trans 'New time track' %}"><span class="fa fa-plus"></span></a></th>
+                                            <th><span class="fa fa-clock-o text-info"></span> {% trans "Time Spent" %} <a href="{% url 'helpdesk:ticket_time_track_add' ticket.pk %}" class="btn btn-xs btn-success" title="{% trans 'New time track' %}"><span class="fa fa-plus"></span></a></th>
                                             {% with ticket.total_time_tracked as total_time_track %}
                                             <td>
                                             {% if total_time_track %}
@@ -98,6 +98,31 @@
                                                 </div>
                                             {% else %}
                                                 <span class="text-muted">{% trans '[NO TIME]' %}</span>
+                                            {% endif %}</td>
+                                            {% endwith %}
+                                        </tr>
+
+                                        <tr>
+                                            <th><span class="fa fa-dollar text-info"></span> {% trans "Money Spent" %} <a href="{% url 'helpdesk:ticket_money_track_add' ticket.pk %}" class="btn btn-xs btn-success" title="{% trans 'New money track' %}"><span class="fa fa-plus"></span></a></th>
+                                            {% with ticket.total_money_tracked as total_money_track %}
+                                            <td>
+                                            {% if total_money_track %}
+                                                <strong>${{ total_money_track|intcomma }}</strong>
+                                                <small class="text-muted"> - {% blocktrans with ticket.records_money_tracked as records_money_tracked %}{{ records_money_tracked }} Records{% endblocktrans %} <button class="btn btn-sm btn-link" data-toggle="collapse" data-target="#money-spent-details">{% trans 'Show/Hide Details' %}</button></small>
+                                                <div id="money-spent-details" class="collapse">
+                                                    <hr>
+                                                    {% for tt in ticket.money_track.all|order_by:'-tracked_at' %}
+                                                    <p>${{tt.money|intcomma}} <small class="text-muted" title="{{tt.tracked_at}}">{% blocktrans with tracked_by=tt.tracked_by tracked_at=tt.tracked_at tracked_at_humanize=tt.tracked_at|naturaltime %}by {{tracked_by}},  {{tracked_at_humanize}}{% endblocktrans %}</small>
+                                                        {% if tt.tracked_by == user or perms.helpdesk.change_others_ticketmoneytrack %}
+                                                        <a href="{% url 'helpdesk:ticket_money_track_edit' tt.pk %}" title="{% trans 'Edit' %}"><span class="fa fa-pencil-square-o text-primary"></span></a>
+                                                        {% endif %}
+                                                        {% if tt.tracked_by == user or perms.helpdesk.delete_others_ticketmoneytrack %}
+                                                        <a href="{% url 'helpdesk:ticket_money_track_delete' tt.pk %}"  title="{% trans 'Delete' %}"><span class="fa fa-trash text-danger"></span></a></p>
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                            {% else %}
+                                                <span class="text-muted">{% trans '[NO MONEY]' %}</span>
                                             {% endif %}</td>
                                             {% endwith %}
                                         </tr>

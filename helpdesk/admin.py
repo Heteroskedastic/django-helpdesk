@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
-from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketTimeTrack
+from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketTimeTrack, TicketMoneyTrack
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
 from helpdesk.models import TicketChange, Attachment, IgnoreEmail
 from helpdesk.models import CustomField
@@ -62,6 +62,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 @admin.register(TicketTimeTrack)
 class TicketTimeTrackAdmin(admin.ModelAdmin):
     list_display = ('ticket', 'time', 'tracked_at', 'tracked_by')
+
+
+@admin.register(TicketMoneyTrack)
+class TicketMoneyTrackAdmin(admin.ModelAdmin):
+    list_display = ('ticket', 'money', 'tracked_at', 'tracked_by')
 
 
 admin.site.register(PreSetReply)

@@ -1,0 +1,33 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+
+{% block helpdesk_title %}{% trans "Delete Ticket Money Track" %}{% endblock %}
+
+{% block helpdesk_body %}
+
+<div class="panel panel-primary">
+    <div class="panel-heading">
+        {% blocktrans with ticket=object.ticket %}<h3>Delete Money Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
+    </div>
+    <!-- /.panel-heading -->
+    <div class="panel-body">
+        <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
+          {% csrf_token %}
+            <div class="">
+                <p class="text-danger">{% blocktrans with ticket=object.ticket %}Are you sure you want to delete Money Track "{{object}}" of "{{ticket}}" ticket?{% endblocktrans %}</p>
+            </div>
+          <hr>
+          <div class="form-group">
+            <div class="col-md-9">
+              {% block helpdesk_formbuttons %}
+              <button type="submit" class="btn btn-danger" name="submit"><span class="fa fa-trash"></span> {% trans "Yes - Delete It!" %}</button>
+              <a class="btn btn-default" href="{% url 'helpdesk:view' object.ticket.pk %}"><span class="fa fa-close"></span> Cancel</a>
+              {% endblock %}
+            </div>
+          </div>
+
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -116,6 +116,18 @@ urlpatterns = [
         staff.DeleteTicketTimeTrackView.as_view(),
         name='ticket_time_track_delete'),
 
+    url(r'^tickets/(?P<ticket_id>[0-9]+)/money_track/add/$',
+        staff.AddTicketMoneyTrackView.as_view(),
+        name='ticket_money_track_add'),
+
+    url(r'^tickets/money_track/edit/(?P<pk>[0-9]+)/$',
+        staff.UpdateTicketMoneyTrackView.as_view(),
+        name='ticket_money_track_edit'),
+
+    url(r'^tickets/money_track/delete/(?P<pk>[0-9]+)/$',
+        staff.DeleteTicketMoneyTrackView.as_view(),
+        name='ticket_money_track_delete'),
+
     url(r'^raw/(?P<type>\w+)/$',
         staff.raw_details,
         name='raw'),

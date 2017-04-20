@@ -19,7 +19,7 @@ from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack)
+                             CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack, TicketMoneyTrack)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -491,4 +491,12 @@ class TicketTimeTrackForm(forms.ModelForm):
 
     class Meta:
         model = TicketTimeTrack
+        exclude = ('ticket', 'tracked_by',)
+
+
+class TicketMoneyTrackForm(forms.ModelForm):
+    ''' Adds a money tracking for a Ticket '''
+
+    class Meta:
+        model = TicketMoneyTrack
         exclude = ('ticket', 'tracked_by',)

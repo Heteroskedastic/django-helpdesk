@@ -605,9 +605,21 @@ class Ticket(models.Model):
         res = q.aggregate(models.Sum('time'))
         return res['time__sum']
 
-
     def records_time_tracked(self, user=None):
         q = self.time_track
+        if user:
+            q = q.filter(tracked_by=user)
+        return q.count()
+
+    def total_money_tracked(self, user=None):
+        q = self.money_track
+        if user:
+            q = q.filter(tracked_by=user)
+        res = q.aggregate(models.Sum('money'))
+        return res['money__sum']
+
+    def records_money_tracked(self, user=None):
+        q = self.money_track
         if user:
             q = q.filter(tracked_by=user)
         return q.count()
@@ -1492,3 +1504,26 @@ class TicketTimeTrack(models.Model):
 
     def __str__(self):
         return str(self.time)
+
+
+@python_2_unicode_compatible
+class TicketMoneyTrack(models.Model):
+    """
+    A model to track money spending on a ticket.
+    """
+    ticket = models.ForeignKey(Ticket, verbose_name=_('Ticket'), related_name='money_track',
+                               on_delete=models.CASCADE)
+    money = models.PositiveIntegerField(_('Money Spent'), help_text=_('Money spent on ticket'))
+    tracked_at = models.DateTimeField(_('Tracked At'), help_text=_('Date/Time tracked'), default=timezone.now)
+    tracked_by = models.ForeignKey(settings.AUTH_USER_MODEL, verbose_name=_('Tracked By'), related_name='money_track',
+                                   on_delete=models.CASCADE)
+
+    class Meta:
+        permissions = (
+            ('change_others_ticketmoneytrack', 'Can change ticket money track of others'),
+            ('delete_others_ticketmoneytrack', 'Can delete ticket money track of others'),
+        )
+
+
+    def __str__(self):
+        return str(self.money)
