@@ -28,6 +28,7 @@ class QuickDjangoTest(object):
         'django.contrib.sites',
         'django.contrib.staticfiles',
         'bootstrapform',
+        'bootstrap3',
     )
     MIDDLEWARE_CLASSES = [
         'django.contrib.sessions.middleware.SessionMiddleware',
