@@ -175,7 +175,7 @@ urlpatterns += [
         name='home'),
 
     url(r'^view/$',
-        public.view_ticket,
+        public.view_ticket if helpdesk_settings.HELPDESK_VIEW_A_TICKET_PUBLIC else login_required(public.view_ticket),
         name='public_view'),
 
     url(r'^change_language/$',
