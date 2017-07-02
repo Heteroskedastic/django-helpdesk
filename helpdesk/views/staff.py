@@ -7,6 +7,8 @@ views/staff.py - The bulk of the application - provides most business logic and
                  renders all staff-facing views.
 """
 from __future__ import unicode_literals
+
+import traceback
 from datetime import datetime, timedelta
 
 from django.conf import settings
@@ -620,6 +622,11 @@ def update_ticket(request, ticket_id, public=False):
         )
 
     ticket.save()
+    if new_status != old_status:
+        try:
+            ticket.send_notifications()
+        except Exception:
+            traceback.print_exc()
 
     # auto subscribe user if enabled
     if helpdesk_settings.HELPDESK_AUTO_SUBSCRIBE_ON_TICKET_RESPONSE and request.user.is_authenticated():

@@ -1,0 +1,11 @@
+[
+    {
+        "pk": 1,
+        "model": "helpdesk.smstemplate",
+        "fields": {
+            "template_name": "ticket_notification",
+            "text": "Hello,\n{% if ticket.status == 1 %}Ticket Opened: {% else %}Ticket {{ticket.get_status}}: {% endif %}{{ ticket.ticket }}\nQueue: {{ queue.title }}\nTitle: {{ ticket.title }}\nSubmitter: {{ ticket.submitter_email|default:\"-\" }}\nPriority: {{ ticket.get_priority_display }}\nAssigned to: {{ ticket.get_assigned_to|default:\"-\" }}\nView Online: {{ ticket.staff_url }}",
+            "locale": "en"
+        }
+    }
+]

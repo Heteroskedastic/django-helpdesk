@@ -24,7 +24,7 @@ from django.db.models import Q
 from django.utils.encoding import smart_text
 from django.utils.safestring import mark_safe
 
-from helpdesk.models import Attachment, EmailTemplate
+from helpdesk.models import Attachment, EmailTemplate, SMSTemplate
 
 logger = logging.getLogger('helpdesk')
 
@@ -120,6 +120,33 @@ def send_templated_mail(template_name,
             msg.attach_file(filefield.path)
 
     return msg.send(fail_silently)
+
+
+def send_templated_sms(template_name, context, recipients, sender=None, fail_silently=False):
+    from sendsms import api
+    from django.template import engines
+    from_string = engines['django'].from_string
+
+    from helpdesk.settings import HELPDESK_SMS_FALLBACK_LOCALE
+
+    locale = context['queue'].get('locale') or HELPDESK_SMS_FALLBACK_LOCALE
+
+    try:
+        t = SMSTemplate.objects.get(template_name__iexact=template_name, locale=locale)
+    except SMSTemplate.DoesNotExist:
+        try:
+            t = SMSTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
+        except SMSTemplate.DoesNotExist:
+            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            return  # just ignore if template doesn't exist
+
+    body = from_string(t.text).render(context)
+    from_ = sender or settings.SMS_DEFAULT_FROM_PHONE
+
+    if isinstance(recipients, str):
+        recipients = [recipients]
+
+    return api.send_sms(body=body, from_phone=from_, to=recipients, fail_silently=fail_silently)
 
 
 def query_to_dict(results, descriptions):

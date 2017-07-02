@@ -137,3 +137,6 @@ QUEUE_EMAIL_BOX_PASSWORD = getattr(settings, 'QUEUE_EMAIL_BOX_PASSWORD', None)
 # only allow users to access queues that they are members of?
 HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION = getattr(
     settings, 'HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION', False)
+
+SMS_DEFAULT_FROM_PHONE = getattr(settings, 'SMS_DEFAULT_FROM_PHONE', None)
+HELPDESK_SMS_FALLBACK_LOCALE = getattr(settings, 'HELPDESK_SMS_FALLBACK_LOCALE', 'en')

@@ -6,7 +6,7 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
-
+import traceback
 
 from django.core.exceptions import ObjectDoesNotExist
 from django.utils.six import StringIO
@@ -159,7 +159,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=Ticket.PRIORITY_CHOICES,
         required=True,
-        initial='3',
+        initial=3,
         label=_('Priority'),
         help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
     )
@@ -349,6 +349,11 @@ class TicketForm(AbstractTicketForm):
                             followup=followup,
                             files=files,
                             user=user)
+        try:
+            ticket.send_notifications()
+        except Exception:
+            traceback.print_exc()
+
         return ticket
 
 
@@ -389,6 +394,11 @@ class PublicTicketForm(AbstractTicketForm):
                             queue=queue,
                             followup=followup,
                             files=files)
+        try:
+            ticket.send_notifications()
+        except Exception:
+            traceback.print_exc()
+
         return ticket
 
 

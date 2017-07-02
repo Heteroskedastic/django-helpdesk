@@ -8,11 +8,16 @@ models.py - Model (and hence database) definitions. This is the core of the
 """
 
 from __future__ import unicode_literals
+
+import re
+
 from django.contrib.auth.models import Permission
 from django.contrib.contenttypes.models import ContentType
 from django.core.exceptions import ObjectDoesNotExist
+from django.core.validators import validate_comma_separated_integer_list, _lazy_re_compile, RegexValidator
 from django.db import models
 from django.conf import settings
+from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
@@ -565,6 +570,19 @@ class Ticket(models.Model):
             depends_on__status__in=OPEN_STATUSES).count() == 0
     can_be_resolved = property(_can_be_resolved)
 
+    def _get_notifications(self):
+        priorities_filter = Q(priorities__isnull=True) | Q(priorities='') | Q(
+            priorities__contains='{},'.format(self.priority))
+        statuses_filter = Q(statuses__isnull=True) | Q(statuses='') | Q(statuses__contains='{},'.format(self.priority))
+        queues_filter = Q(queues=self.queue) | Q(queues__isnull=True)
+        return TicketNotification.objects.filter(priorities_filter, statuses_filter, queues_filter)
+
+    notifications = property(_get_notifications)
+
+    def send_notifications(self, fail_silently=True):
+        for n in self.notifications:
+            n.notify(self, fail_silently=fail_silently)
+
     class Meta:
         get_latest_by = "created"
         ordering = ('id',)
@@ -955,6 +973,35 @@ class EmailTemplate(models.Model):
         ordering = ('template_name', 'locale')
         verbose_name = _('e-mail template')
         verbose_name_plural = _('e-mail templates')
+
+
+@python_2_unicode_compatible
+class SMSTemplate(models.Model):
+    """
+    Since these are more likely to be changed than other templates, we store
+    them in the database.
+
+    This means that an admin can change sms templates without having to have
+    access to the filesystem.
+    """
+
+    template_name = models.CharField(_('Template Name'), max_length=100)
+    text = models.TextField(
+        _('Plain Text'),
+        help_text=_('The context available to you includes {{ ticket }}, '
+                    '{{ queue }}, and depending on the time of the call: '
+                    '{{ resolution }} or {{ comment }}.'),
+    )
+    locale = models.CharField(_('Locale'), max_length=10, blank=True, null=True,
+                              help_text=_('Locale of this template.'))
+
+    def __str__(self):
+        return '%s' % self.template_name
+
+    class Meta:
+        ordering = ('template_name', 'locale')
+        verbose_name = _('sms template')
+        verbose_name_plural = _('sms templates')
 
 
 @python_2_unicode_compatible
@@ -1534,6 +1581,85 @@ class TicketMoneyTrack(models.Model):
             ('delete_others_ticketmoneytrack', 'Can delete ticket money track of others'),
         )
 
-
     def __str__(self):
         return str(self.money)
+
+
+def int_list_validator2(sep=',', message=None, code='invalid', allow_negative=False):
+    regexp = _lazy_re_compile('^(?:%(neg)s\d+%(sep)s)*\Z' % {
+        'neg': '(-)?' if allow_negative else '',
+        'sep': re.escape(sep),
+    })
+    return RegexValidator(regexp, message=message, code=code)
+
+
+validate_comma_separated_integer_list2 = int_list_validator2(
+    message=_('Enter only digits separated by commas.'),
+)
+
+
+@python_2_unicode_compatible
+class TicketNotification(models.Model):
+    """
+    This model lets us to send an sms/email notification to a person when a ticket created/updated.
+    """
+    class Meta:
+        verbose_name = _('Ticket notification')
+        verbose_name_plural = _('Ticket notification')
+
+    NOTIFY_TYPE_EMAIL = 'email'
+    NOTIFY_TYPE_SMS = 'sms'
+    NOTIFY_TYPE_CHOICES = (
+        (NOTIFY_TYPE_EMAIL, _('Email')),
+        (NOTIFY_TYPE_SMS, _('SMS')),
+    )
+    notify_type = models.CharField('Notify Type', max_length=16, default=NOTIFY_TYPE_SMS, choices=NOTIFY_TYPE_CHOICES)
+    to = models.CharField(_('E-Mail Address or SMS Number'), max_length=150,
+                          help_text=_('Enter a full e-mail address, or sms number'),)
+    statuses = models.CharField(
+        max_length=32, validators=[validate_comma_separated_integer_list2], blank=True, null=True,
+        help_text=_('Leave blank to be ignored on all statuses, or select those statuses wish to be notified.'))
+    priorities = models.CharField(
+        max_length=32, validators=[validate_comma_separated_integer_list2], blank=True, null=True,
+        help_text=_('Leave blank to be ignored on all priorities, or select those priorities wish to be notified.'))
+    queues = models.ManyToManyField(
+        Queue, blank=True,
+        help_text=_('Leave blank to be ignored on all queues, or select those queues you wish to be notified.'))
+
+    @property
+    def priorities_display(self):
+        if not self.priorities:
+            return _('*(Any)')
+
+        priority_choices = dict(Ticket.PRIORITY_CHOICES)
+        return ' | '.join(
+            [str(priority_choices.get(int(i))) for i in self.priorities.split(',') if i and int(i) in priority_choices])
+
+    @property
+    def statuses_display(self):
+        if not self.statuses:
+            return _('*(Any)')
+
+        status_choices = dict(Ticket.STATUS_CHOICES)
+        return ' | '.join(
+            [str(status_choices.get(int(i))) for i in self.statuses.split(',') if i and int(i) in status_choices])
+
+    @property
+    def queues_display(self):
+        queues = self.queues.all()
+        if not queues:
+            return _('*(Any)')
+
+        return ' | '.join([q.title for q in queues])
+
+    def notify(self, ticket, fail_silently=True):
+        from .lib import send_templated_sms, send_templated_mail, safe_template_context
+        context = safe_template_context(ticket)
+        if self.notify_type == self.NOTIFY_TYPE_SMS:
+            return send_templated_sms('ticket_notification', context, recipients=[self.to], fail_silently=fail_silently)
+        if self.notify_type == self.NOTIFY_TYPE_EMAIL:
+            return send_templated_mail('ticket_notification', context, recipients=[self.to],
+                                       sender=ticket.queue.from_address, fail_silently=fail_silently)
+
+    def __str__(self):
+        return '%s' % self.to

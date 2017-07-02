@@ -1,0 +1,14 @@
+[
+    {
+        "pk": 97,
+        "model": "helpdesk.emailtemplate",
+        "fields": {
+            "template_name": "ticket_notification",
+            "html": "<p style=\"font-family: sans-serif; font-size: 1em;\">Hello,</p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">{% if ticket.status == 1 %}Ticket Opened: {% else %}Ticket {{ticket.get_status}}: {% endif %} <b>{{ ticket.title }}</b></p>\r\n\r\n<p style=\"font-family: sans-serif; font-size: 1em;\">\r\n<b>Ticket ID</b>: {{ ticket.ticket }}<br>\r\n<b>Queue</b>: {{ queue.title }}<br>\r\n<b>Title</b>: {{ ticket.title }}<br>\r\n<b>Opened</b>: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}<br>\r\n<b>Submitter</b>: {{ ticket.submitter_email|default:\"-\" }}<br>\r\n<b>Priority</b>: {{ ticket.get_priority_display }}<br>\r\n<b>Status</b>: {{ ticket.get_status }}<br>\r\n<b>Assigned to</b>: {{ ticket.get_assigned_to|default:\"-\" }}<br>\r\n<b><a href='{{ ticket.staff_url }}'>View Online</a></b> to update this ticket (login required)</p>",
+            "plain_text": "Hello,\r\n\r\n{% if ticket.status == 1 %}Ticket Opened: {% else %}Ticket {{ticket.get_status}}: {% endif %}{{ ticket.ticket }}\r\n\r\nTicket ID: {{ ticket.ticket }}\r\nQueue: {{ queue.title }}\r\nTitle: {{ ticket.title }}\r\nOpened: {{ ticket.created|date:\"l N jS Y, \\a\\t P\" }}\r\nSubmitter: {{ ticket.submitter_email|default:\"-\" }}\r\nPriority: {{ ticket.get_priority_display }}\r\nStatus: {{ ticket.get_status }}\r\nAssigned to: {{ ticket.get_assigned_to|default:\"-\" }}\r\nView Online: {{ ticket.staff_url }} (login required)",
+            "heading": "Ticket Notification",
+            "subject": "(Updated)",
+            "locale": "en"
+        }
+    }
+]
