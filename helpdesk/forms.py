@@ -6,9 +6,11 @@ django-helpdesk - A Django powered ticket tracker for small enterprise.
 forms.py - Definitions of newforms-based forms for creating and maintaining
            tickets.
 """
+import re
 import traceback
 
-from django.core.exceptions import ObjectDoesNotExist
+from django.core.exceptions import ObjectDoesNotExist, ValidationError
+from django.core.validators import validate_email
 from django.utils.six import StringIO
 from django import forms
 from django.forms import extras
@@ -19,7 +21,8 @@ from django.utils import timezone
 
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
-                             CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack, TicketMoneyTrack)
+                             CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack, TicketMoneyTrack,
+                             TicketNotification)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -510,3 +513,44 @@ class TicketMoneyTrackForm(forms.ModelForm):
     class Meta:
         model = TicketMoneyTrack
         exclude = ('ticket', 'tracked_by',)
+
+
+class AdminTicketNotificationForm(forms.ModelForm):
+    statuses = forms.MultipleChoiceField(
+        label='When status changed to', choices=Ticket.STATUS_CHOICES, required=False,
+        help_text=_('Leave blank to be ignored on all statuses, or select those statuses wish to be notified.'))
+    priorities = forms.MultipleChoiceField(
+        label='When priorities are', choices=Ticket.PRIORITY_CHOICES, required=False,
+        help_text=_('Leave blank to be ignored on all priorities, or select those priorities wish to be notified.'))
+    def clean_statuses(self):
+        statuses = self.cleaned_data['statuses']
+        statuses = ','.join(statuses)
+        return '{},'.format(statuses) if statuses else statuses
+
+    def clean_priorities(self):
+        priorities = self.cleaned_data['priorities']
+        priorities = ','.join(priorities)
+        return '{},'.format(priorities) if priorities else priorities
+
+    def clean_to(self):
+        notify_type = self.cleaned_data['notify_type']
+        to = self.cleaned_data['to']
+        if not to:
+            return to
+        if notify_type == TicketNotification.NOTIFY_TYPE_SMS:
+            regex = r'^\+?1?\d{9,15}$'
+            if not re.match(regex, to):
+                raise ValidationError('Enter a valid phone number')
+
+        if notify_type == TicketNotification.NOTIFY_TYPE_EMAIL:
+            validate_email(to)
+
+        return to
+
+    class Meta:
+        model = TicketNotification
+        exclude = []
+        labels = {
+            'queues': _('When Queues are'),
+            'to': _('To E-Mail Address or SMS Number')
+        }

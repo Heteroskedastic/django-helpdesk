@@ -1,6 +1,7 @@
-from django import forms
 from django.contrib import admin
 from django.utils.translation import ugettext_lazy as _
+
+from helpdesk.forms import AdminTicketNotificationForm
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketTimeTrack, TicketMoneyTrack, \
     SMSTemplate, TicketNotification
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
@@ -88,37 +89,11 @@ class EmailTemplateAdmin(admin.ModelAdmin):
     list_filter = ('locale', )
 
 
-class TicketNotificationForm(forms.ModelForm):
-    statuses = forms.MultipleChoiceField(
-        label='When status changed to', choices=Ticket.STATUS_CHOICES, required=False,
-        help_text=_('Leave blank to be ignored on all statuses, or select those statuses wish to be notified.'))
-    priorities = forms.MultipleChoiceField(
-        label='When priorities are', choices=Ticket.PRIORITY_CHOICES, required=False,
-        help_text=_('Leave blank to be ignored on all priorities, or select those priorities wish to be notified.'))
-    def clean_statuses(self):
-        statuses = self.cleaned_data['statuses']
-        statuses = ','.join(statuses)
-        return '{},'.format(statuses) if statuses else statuses
-
-    def clean_priorities(self):
-        priorities = self.cleaned_data['priorities']
-        priorities = ','.join(priorities)
-        return '{},'.format(priorities) if priorities else priorities
-
-    class Meta:
-        model = TicketNotification
-        exclude = []
-        labels = {
-            'queues': _('When Queues are'),
-            'to': _('To E-Mail Address or SMS Number')
-        }
-
-
 @admin.register(TicketNotification)
 class TicketNotificationAdmin(admin.ModelAdmin):
     list_display = ('notify_type', 'to', 'priorities_display', 'statuses_display', 'queues_display')
     list_filter = ('notify_type', )
-    form = TicketNotificationForm
+    form = AdminTicketNotificationForm
 
     def priorities_display(self, obj):
         return obj.priorities_display
