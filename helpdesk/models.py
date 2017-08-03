@@ -573,7 +573,7 @@ class Ticket(models.Model):
     def _get_notifications(self):
         priorities_filter = Q(priorities__isnull=True) | Q(priorities='') | Q(
             priorities__contains='{},'.format(self.priority))
-        statuses_filter = Q(statuses__isnull=True) | Q(statuses='') | Q(statuses__contains='{},'.format(self.priority))
+        statuses_filter = Q(statuses__isnull=True) | Q(statuses='') | Q(statuses__contains='{},'.format(self.status))
         queues_filter = Q(queues=self.queue) | Q(queues__isnull=True)
         return TicketNotification.objects.filter(priorities_filter, statuses_filter, queues_filter)
 
