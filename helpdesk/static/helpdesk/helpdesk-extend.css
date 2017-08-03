@@ -94,3 +94,12 @@ img.brand {padding-right: 30px;}
   position: fixed;
   text-align: center;
 }
+
+#ticketTable_filter {
+    float: right;
+}
+
+#ticketTable_length {
+    float: right;
+    margin-left: 5px;
+}
