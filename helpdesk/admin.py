@@ -91,7 +91,7 @@ class EmailTemplateAdmin(admin.ModelAdmin):
 
 @admin.register(TicketNotification)
 class TicketNotificationAdmin(admin.ModelAdmin):
-    list_display = ('notify_type', 'to', 'priorities_display', 'statuses_display', 'queues_display')
+    list_display = ('name', 'notify_type', 'to', 'priorities_display', 'statuses_display', 'queues_display')
     list_filter = ('notify_type', )
     form = AdminTicketNotificationForm
 

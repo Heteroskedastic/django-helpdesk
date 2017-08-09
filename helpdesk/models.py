@@ -1613,6 +1613,7 @@ class TicketNotification(models.Model):
         (NOTIFY_TYPE_EMAIL, _('Email')),
         (NOTIFY_TYPE_SMS, _('SMS')),
     )
+    name = models.CharField('Display Name', max_length=128, null=True, blank=True)
     notify_type = models.CharField('Notify Type', max_length=16, default=NOTIFY_TYPE_SMS, choices=NOTIFY_TYPE_CHOICES)
     to = models.CharField(_('E-Mail Address or SMS Number'), max_length=150,
                           help_text=_('Enter a full e-mail address, or sms number'),)
