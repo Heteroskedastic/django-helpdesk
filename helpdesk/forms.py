@@ -138,11 +138,11 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     Contain all the common code and fields between "TicketForm" and
     "PublicTicketForm". This Form is not intended to be used directly.
     """
-    queue = forms.ChoiceField(
+    queue = forms.ModelChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
+        queryset=Queue.objects.all(),
         label=_('Queue'),
-        required=True,
-        choices=()
+        required=True
     )
 
     title = forms.CharField(
@@ -196,7 +196,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
             self.customfield_to_field(field, instanceargs)
 
     def _create_ticket(self):
-        queue = Queue.objects.get(id=int(self.cleaned_data['queue']))
+        queue = self.cleaned_data['queue']
 
         ticket = Ticket(title=self.cleaned_data['title'],
                         submitter_email=self.cleaned_data['submitter_email'],
@@ -306,9 +306,9 @@ class TicketForm(AbstractTicketForm):
                     'updates to this ticket.'),
     )
 
-    assigned_to = forms.ChoiceField(
+    assigned_to = forms.ModelChoiceField(
+        queryset= User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD),
         widget=forms.Select(attrs={'class': 'form-control'}),
-        choices=(),
         required=False,
         label=_('Case owner'),
         help_text=_('If you select an owner other than yourself, they\'ll be '
@@ -328,12 +328,7 @@ class TicketForm(AbstractTicketForm):
         """
 
         ticket, queue = self._create_ticket()
-        if self.cleaned_data['assigned_to']:
-            try:
-                u = User.objects.get(id=self.cleaned_data['assigned_to'])
-                ticket.assigned_to = u
-            except User.DoesNotExist:
-                ticket.assigned_to = None
+        ticket.assigned_to = self.cleaned_data['assigned_to']
         ticket.save()
 
         self._create_custom_fields(ticket)
@@ -365,6 +360,13 @@ class PublicTicketForm(AbstractTicketForm):
     """
     Ticket Form creation for all users (public-facing).
     """
+    queue = forms.ModelChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        queryset=Queue.objects.filter(allow_public_submission=True),
+        label=_('Queue'),
+        required=True
+    )
+
     submitter_email = forms.EmailField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=True,
