@@ -6,3 +6,4 @@ django-markdown-deux
 simplejson
 six
 django-sendsms==0.2.3
+django_recaptcha==1.2.1

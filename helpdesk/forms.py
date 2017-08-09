@@ -9,6 +9,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 import re
 import traceback
 
+from captcha.fields import ReCaptchaField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.utils.six import StringIO
@@ -370,6 +371,8 @@ class PublicTicketForm(AbstractTicketForm):
         label=_('Your E-Mail Address'),
         help_text=_('We will e-mail you when your ticket is updated.'),
     )
+
+    captcha = ReCaptchaField()
 
     def __init__(self, *args, **kwargs):
         """

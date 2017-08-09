@@ -36,6 +36,8 @@ def homepage(request):
 
     if request.method == 'POST':
         form = PublicTicketForm(request.POST, request.FILES)
+        if request.user.is_authenticated():
+            form.fields.pop('captcha', None)
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
         if form.is_valid():
@@ -62,6 +64,8 @@ def homepage(request):
             initial_data['submitter_email'] = request.user.email
 
         form = PublicTicketForm(initial=initial_data)
+        if request.user.is_authenticated():
+            form.fields.pop('captcha', None)
         form.fields['queue'].choices = [('', '--------')] + [
             (q.id, q.title) for q in Queue.objects.filter(allow_public_submission=True)]
 
