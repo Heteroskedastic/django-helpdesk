@@ -137,7 +137,7 @@ def send_templated_sms(template_name, context, recipients, sender=None, fail_sil
         try:
             t = SMSTemplate.objects.get(template_name__iexact=template_name, locale__isnull=True)
         except SMSTemplate.DoesNotExist:
-            logger.warning('template "%s" does not exist, no mail sent', template_name)
+            logger.warning('template "%s" does not exist, no sms sent', template_name)
             return  # just ignore if template doesn't exist
 
     body = from_string(t.text).render(context)
