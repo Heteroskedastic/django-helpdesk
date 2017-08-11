@@ -10,6 +10,8 @@ import logging
 import mimetypes
 import os
 
+from django.template import Template, Context
+
 try:
     from base64 import urlsafe_b64encode as b64encode
 except ImportError:
@@ -139,8 +141,7 @@ def send_templated_sms(template_name, context, recipients, sender=None, fail_sil
         except SMSTemplate.DoesNotExist:
             logger.warning('template "%s" does not exist, no sms sent', template_name)
             return  # just ignore if template doesn't exist
-
-    body = from_string(t.text).render(context)
+    body = Template(t.text).render(Context(context, autoescape=False))
     from_ = sender or settings.SMS_DEFAULT_FROM_PHONE
 
     if isinstance(recipients, str):
