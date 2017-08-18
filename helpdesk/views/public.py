@@ -28,7 +28,7 @@ def homepage(request):
              helpdesk_settings.HELPDESK_ALLOW_NON_STAFF_TICKET_UPDATE):
         try:
             if request.user.usersettings_helpdesk.settings.get('login_view_ticketlist', False):
-                return HttpResponseRedirect(reverse('helpdesk:list'))
+                return HttpResponseRedirect(reverse('helpdesk:ticket-list'))
             else:
                 return HttpResponseRedirect(reverse('helpdesk:dashboard'))
         except UserSettings.DoesNotExist:
