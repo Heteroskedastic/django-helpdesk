@@ -1321,13 +1321,16 @@ delete_saved_query = staff_member_required(delete_saved_query)
 
 def user_settings(request):
     s = request.user.usersettings_helpdesk
+    user_saved_query = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
     if request.POST:
         form = UserSettingsForm(request.POST)
+        form.fields['default_ticket_saved_query'].queryset = user_saved_query
         if form.is_valid():
             s.settings = form.cleaned_data
             s.save()
     else:
         form = UserSettingsForm(s.settings)
+        form.fields['default_ticket_saved_query'].queryset = user_saved_query
 
     return render(request, 'helpdesk/user_settings.html', {'form': form})
 user_settings = staff_member_required(user_settings)

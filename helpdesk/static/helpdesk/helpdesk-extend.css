@@ -2,6 +2,93 @@
 Bootstrap overrides
 */
 
+/* ---- margin --- */
+.mar-left0 { margin-left: 5 !important; }
+.mar-left5 { margin-left: 5px !important; }
+.mar-left10 { margin-left: 10px !important; }
+.mar-left15 { margin-left: 15px !important; }
+.mar-left20 { margin-left: 20px !important; }
+.mar-left25 { margin-left: 25px !important; }
+.mar-left30 { margin-left: 30px !important; }
+
+.mar-right5 { margin-right: 5px !important; }
+.mar-right10 { margin-right: 10px !important; }
+.mar-right15 { margin-right: 15px !important; }
+.mar-right20 { margin-right: 20px !important; }
+.mar-right25 { margin-right: 25px !important; }
+.mar-right30 { margin-right: 30px !important; }
+
+/* top */
+.mar-top0 { margin-top: 0 !important; }
+.mar-top5 { margin-top: 5px !important; }
+
+.mar-top10 { margin-top: 10px !important; }
+
+.mar-top15 { margin-top: 15px !important; }
+.mar-top20 { margin-top: 20px !important; }
+.mar-top25 { margin-top: 25px !important; }
+.mar-top30 { margin-top: 30px !important; }
+.mar-top35 { margin-top: 35px !important; }
+.mar-top40 { margin-top: 40px !important; }
+
+
+/* bottom */
+.mar-bot0 { margin-bottom: 0 !important; }
+.mar-bot5 { margin-bottom: 5px !important; }
+
+.mar-bot10 { margin-bottom: 10px !important; }
+
+.mar-bot15 { margin-bottom: 15px !important; }
+.mar-bot20 { margin-bottom: 20px !important; }
+.mar-bot25 { margin-bottom: 25px !important; }
+.mar-bot30 { margin-bottom: 30px !important; }
+.mar-bot35 { margin-bottom: 35px !important; }
+.mar-bot40 { margin-bottom: 40px !important; }
+
+/* ---- padding --- */
+.pad-left0 { padding-left: 0 !important; }
+.pad-left5 { padding-left: 5px !important; }
+.pad-left10 { padding-left: 10px !important; }
+.pad-left15 { padding-left: 15px !important; }
+.pad-left20 { padding-left: 20px !important; }
+.pad-left25 { padding-left: 25px !important; }
+.pad-left30 { padding-left: 30px !important; }
+
+.pad-right0 { padding-right: 0 !important; }
+.pad-right5 { padding-right: 5px !important; }
+.pad-right10 { padding-right: 10px !important; }
+.pad-right15 { padding-right: 15px !important; }
+.pad-right20 { padding-right: 20px !important; }
+.pad-right25 { padding-right: 25px !important; }
+.pad-right30 { padding-right: 30px !important; }
+
+/* top */
+.pad-top0 { padding-top: 0 !important; }
+.pad-top5 { padding-top: 5px !important; }
+
+.pad-top10 { padding-top: 10px !important; }
+
+.pad-top15 { padding-top: 15px !important; }
+.pad-top20 { padding-top: 20px !important; }
+.pad-top25 { padding-top: 25px !important; }
+.pad-top30 { padding-top: 30px !important; }
+.pad-top35 { padding-top: 35px !important; }
+.pad-top40 { padding-top: 40px !important; }
+
+
+/* bottom */
+.pad-bot0 { padding-bottom: 0 !important; }
+.pad-bot5 { padding-bottom: 5px !important; }
+
+.pad-bot10 { padding-bottom: 10px !important; }
+
+.pad-bot15 { padding-bottom: 15px !important; }
+.pad-bot20 { padding-bottom: 20px !important; }
+.pad-bot25 { padding-bottom: 25px !important; }
+.pad-bot30 { padding-bottom: 30px !important; }
+.pad-bot35 { padding-bottom: 35px !important; }
+.pad-bot40 { padding-bottom: 40px !important; }
+
 .btn-file {
     position: relative;
     overflow: hidden;
@@ -107,4 +194,128 @@ img.brand {padding-right: 30px;}
 #ticketTable_length {
     float: right;
     margin-left: 5px;
+}
+
+.subtitle {
+  text-transform: uppercase;
+  font-size: 11px;
+  color: #999;
+  margin-bottom: 5px;
+}
+
+.filters {
+  margin-bottom: 5px;
+}
+
+.ticket-priority-5-label {
+    background-color: #b5e8b5 !important;
+}
+.ticket-priority-4-label {
+    background-color: #7dc57d !important;
+}
+.ticket-priority-3-label {
+    background-color: #73ab07 !important;
+}
+.ticket-priority-2-label {
+    background-color: #ff7600 !important;
+}
+.ticket-priority-1-label {
+    background-color: red !important;
+}
+
+.page-size {
+  width: 65px;
+}
+
+#filterForm .chosen-container-single .chosen-single,
+#filterForm .chosen-container-multi .chosen-choices,
+#assignTicketForm .chosen-container-single .chosen-single {
+  height: 32px !important;
+  margin-top: 1px;
+  margin-bottom: 1px;
+}
+
+#filterForm .chosen-container-single .chosen-single,
+#filterForm .chosen-container-single .chosen-single div,
+#assignTicketForm .chosen-container-single .chosen-single,
+#assignTicketForm .chosen-container-single .chosen-single div {
+    padding-top: 4px;
+}
+
+#filterForm div.form-group {
+    padding-left: 0 !important;
+}
+
+#tickets-filters input {
+    width: 100%;
+    height: 32px !important;
+    margin-bottom: 1px;
+    margin-top: 1px;
+}
+
+.pagination {
+    margin-bottom: 0 !important;
+    margin-top: 5px !important;
+}
+
+#tickets-list .collapse-link {
+    text-decoration: none;
+
+}
+
+#tickets-list .collapse-link:after {
+    /* symbol for "opening" panels */
+    font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+    content: "\f107";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    margin-left: 2px;
+}
+#tickets-list .collapse-link.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\f105";    /* adjust as needed, taken from bootstrap.css */
+}
+.me-assigned-to {
+    font-weight: bold;
+    color: black;
+}
+
+.ticket-list-table-action-col {
+    width: 105px;
+}
+
+.page-title {
+  color: #6495ED;
+  padding-bottom: 5px;
+}
+
+.current-saved-query-label {
+    font-size: 14px;
+}
+
+.popover-title {
+    font-weight: bold;
+}
+
+.saved-query-list-table-action-col {
+    width: 310px;
+}
+
+.saved-search-actions button[name=share],
+.saved-search-actions button[name=unshare] {
+    width: 85px;
+}
+
+.saved-search-actions button[name=set_default],
+.saved-search-actions button[name=remove_default] {
+    width: 123px;
+}
+
+.saved-query-dropdown>.active>a,
+.saved-query-dropdown>.active>a:focus,
+.saved-query-dropdown>.active>a:hover {
+    background-color: #acb3b9 !important;
+}
+
+.not-assigned-item {
+    font-weight: bold;
 }

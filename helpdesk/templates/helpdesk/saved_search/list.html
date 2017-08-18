@@ -1,0 +1,71 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "Saved Query List" %}{% endblock %}
+{% load helpdesk_util_tags %}
+
+{% block h1_title %}
+{% endblock h1_title %}
+{% block helpdesk_body %}
+<h2 class="page-title">Saved Query Management</h2>
+
+<div class="panel panel-default" id="tickets-list">
+<table class="table table-striped table-hover table-advance sortable">
+    <tr>
+        <th>Title</th>
+        <th>Shared</th>
+        <th class="saved-query-list-table-action-col">Actions</th>
+    </tr>
+    {% for q in saved_queries %}
+    <tr data-id="{{ q.id }}">
+        <td>
+            {{q.title}}
+            {% if q.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}<span class="label label-warning"><span class="fa fa-star"></span> DEFAULT</span>{% endif %}
+        </td>
+        <td>{{ q.shared|active_icon }}
+            {% if q.shared %}
+            <span class="label label-default">
+                {% if user.pk == q.user_id %} You {% else %} {{ q.user.get_username }}{% endif %}
+            </span>
+            {% endif %}</td>
+        <td class="saved-search-actions">
+            {% if q.shared %}
+            <button type="button" name="unshare" class="btn btn-sm btn-warning" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Share with other users"{% endif %}><span class="fa fa-share-alt"></span> Un-share</button>
+            {% else %}
+            <button type="button" name="share" class="btn btn-sm btn-primary" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Un-share with other users"{% endif %}><span class="fa fa-share-alt"></span> Share</button>
+            {% endif %}
+            {% if q.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
+            <button type="button" name="remove_default" class="btn btn-sm btn-warning" href="#"><span class="fa fa-star-o"></span> Remove Default</button>
+            {% else %}
+            <button type="button" name="set_default" class="btn btn-sm btn-success" href="#"><span class="fa fa-star"></span> Set as Default</button>
+            {% endif %}
+            <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" {% if not user.is_superuser and q.user_id != user.id %}title="No Permission" disabled{% endif %} title="Delete Ticket"><span class="fa fa-trash"></span> Delete</button>
+        </td>
+    </tr>
+    {% empty %}
+    <tr>
+        <td class="text-center text-muted" colspan="3"><em>[NO RECORD!]</em></td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+{% include "helpdesk/partials/action_modal.html" with prefix_id='delete' message_class='text-danger' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='setDefault' message_class='text-info' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='switchShare' message_class='text-info' %}
+
+{% endblock helpdesk_body %}
+
+{% block helpdesk_head %}
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
+
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function () {
+    bindModalAction('deleteModal', 'delete', 'Delete Query', 'Are you sure to delete?', '{% url "helpdesk:saved_search-delete" 0 %}');
+    bindModalAction('setDefaultModal', 'set_default', 'Set as Default', 'Are you sure to set this as default?', '{% url "helpdesk:saved_search-set-default" 0 %}');
+    bindModalAction('setDefaultModal', 'remove_default', 'Remove from Default', 'Are you sure to remove this from default?', '{% url "helpdesk:saved_search-set-default" 0 %}', false);
+    bindModalAction('switchShareModal', 'share', 'Share with other users', 'Are you sure to share this with query other users?', '{% url "helpdesk:saved_search-switch-shared" 0 %}');
+    bindModalAction('switchShareModal', 'unshare', 'Un-share with other users', 'Are you sure to un-share this query with other users?', '{% url "helpdesk:saved_search-switch-shared" 0 %}');
+});
+</script>
+
+{% endblock helpdesk_head %}

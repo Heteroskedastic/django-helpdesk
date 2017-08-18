@@ -14,6 +14,7 @@ from django.views.generic import TemplateView
 
 from helpdesk import settings as helpdesk_settings
 from helpdesk.views import feeds, staff, public, kb
+from helpdesk.views import staff2
 
 
 class DirectTemplateView(TemplateView):
@@ -167,6 +168,24 @@ urlpatterns = [
     url(r'^ignore/delete/(?P<id>[0-9]+)/$',
         staff.email_ignore_del,
         name='email_ignore_del'),
+]
+
+urlpatterns += [
+    url(r'^ticket/list/$', staff2.TicketListView.as_view(), name='ticket-list'),
+    url(r'^ticket/delete/(?P<pk>\d+)/$', staff2.TicketDeleteView.as_view(), name='ticket-delete'),
+    url(r'^ticket/hold/(?P<pk>\d+)/$', staff2.TicketHoldView.as_view(), name='ticket-hold'),
+    url(r'^ticket/delete/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkDeleteView.as_view(),
+        name='tickets-bulk-delete'),
+    url(r'^ticket/close/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkCloseView.as_view(), name='tickets-bulk-close'),
+    url(r'^ticket/assign/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkAssignView.as_view(),
+        name='tickets-bulk-assign'),
+    url(r'^saved_search/list/$', staff2.SavedSearchListView.as_view(), name='saved_search-list'),
+    url(r'^saved_search/add/$', staff2.SavedSearchAddView.as_view(), name='saved_search-add'),
+    url(r'^saved_search/delete/(?P<pk>\d+)/$', staff2.SavedSearchDeleteView.as_view(), name='saved_search-delete'),
+    url(r'^saved_search/switch-shared/(?P<pk>\d+)/$', staff2.SavedSearchSwitchSharedView.as_view(),
+        name='saved_search-switch-shared'),
+    url(r'^saved_search/default/(?P<pk>\d+)/$', staff2.SavedSearchSetDefaultView.as_view(),
+        name='saved_search-set-default'),
 ]
 
 urlpatterns += [

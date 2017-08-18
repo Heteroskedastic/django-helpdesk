@@ -1,0 +1,247 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "Tickets" %}{% endblock %}
+{% load pagination_tags %}
+{% load helpdesk_util_tags %}
+
+{% block h1_title %}
+{% endblock h1_title %}
+{% block helpdesk_body %}
+<h2 class="page-title">Tickets
+    {% if user_saved_queries %}
+    <span class="dropdown pull-right">
+        <button class="btn btn-sm btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-filter"></span> Switch Query
+            <span class="caret"></span></button>
+        <ul class="dropdown-menu saved-query-dropdown">
+            {% for sq in user_saved_queries %}
+            <li {% if sq.pk == saved_query.pk %}class="active"{% endif %}>
+                <a href="{% url 'helpdesk:ticket-list' %}?saved_query={{sq.pk}}">
+                    {{sq.title}}
+                    {% if sq.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
+                    <span title="Default Saved Query" class="fa fa-star text-success"></span>
+                    {% endif %}
+                    {% if sq.shared %}
+                    <span class="label label-warning" title="Shared by {% if user.pk == sq.user_id %} You {% else %} {{ sq.user.get_username }}{% endif %}">
+                        <span class="fa fa-share-alt"></span> {% if user.pk == sq.user_id %} You {% else %} {{ sq.user.get_username }}{% endif %}
+                    </span>
+                    {% endif%}
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    </span>
+    {% endif %}
+    {% if saved_query %}
+    <span class="label label-info current-saved-query-label">
+        {{ saved_query.title }}
+        {% if saved_query.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
+        <span class="fa fa-star"></span>
+        {% endif %}
+    </span>
+    {% else %}
+        <button type="button" name="save-query" data-toggle="popover" class="btn btn-success btn-xs save-filter" title="Save current Query">
+            <span class="fa fa-save"></span> Save Current Query <span class="caret"></span>
+        </button>
+    {% endif %}
+</h2>
+
+<div class="panel panel-default" id="tickets-list">
+    <div class="panel-heading">
+        <button type="button" class="btn btn-xs btn-link collapse-link" data-toggle="collapse" data-target="#tickets-filters"><span class="subtitle">Filters</span></button>
+
+        <div class="pull-right">
+            <button class="btn btn-danger btn-xs clear-filter" title="Clear All Filters"><span class="fa fa-close"></span> Clear Filters</button>
+        </div>
+    </div>
+    <div class="panel-body">
+        <div id="tickets-filters" class="filters collapse in">
+            <form id="filterForm" class="form-inline" role="form" action="">
+                {% if request.GET.order_by %}
+                <input type="hidden" name="order_by" value="{{ request.GET.order_by }}">
+                {% endif %}
+                <input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+                {{tickets.form.no_assigned.as_hidden}}
+                <div class="form-group col-sm-6">{{tickets.form.assigned_to}}</div>
+                <div class="form-group col-sm-6">{{tickets.form.queue}}</div>
+                <div class="form-group col-sm-6">{{tickets.form.status}}</div>
+                <div class="form-group col-sm-6">{{tickets.form.priority}}</div>
+                <div class="form-group col-sm-3">{{tickets.form.created_min}}</div>
+                <div class="form-group col-sm-3">{{tickets.form.created_max}}</div>
+                <div class="form-group col-sm-6">{{tickets.form.keywords}}</div>
+            </form>
+        </div>
+    </div>
+
+    {% with tickets.qs as qs %}
+    <table class="table table-striped table-hover table-advance sortable">
+        <tr>
+            <th style="width:20px;" title="Select/Deselect All"><input type="checkbox"></th>
+            <th>{% sorting_link 'ID#' 'id' %}</th>
+            <th>{% sorting_link 'Title' 'title' %}</th>
+            <th>{% sorting_link 'Queue' 'queue' %}</th>
+            <th>{% sorting_link 'Priority' 'priority' %}</th>
+            <th>{% sorting_link 'Status' 'status' %}</th>
+            <th>{% sorting_link 'Created' 'created' %}</th>
+            <th>{% sorting_link 'Due' 'due_date' %}</th>
+            <th>{% sorting_link 'Owner' 'assigned_to' %}</th>
+            <th class="ticket-list-table-action-col">
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-primary dropdown-toggle bulk-action-dropdown" type="button"
+                            data-toggle="dropdown" disabled><span class="badge">0</span> Bulk
+                        <span class="caret"></span></button>
+                    <ul class="dropdown-menu dropdown-menu-right">
+                        <li><a href="#" id="bulk-assign-to"><span class="fa fa-check text-success"></span> <span
+                                class="text-success">Assign/Unassign Selected</span></a></li>
+                        <li><a href="#" id="bulk-close"><span class="fa fa-close text-warning"></span> <span
+                                class="text-warning">Close Selected</span></a></li>
+                        <li><a href="#" id="bulk-delete"><span class="fa fa-trash text-danger"></span> <span
+                                class="text-danger">Delete Selected</span></a></li>
+                    </ul>
+                </div>
+            </th>
+        </tr>
+        {% autopaginate qs page_size %}
+        {% for ticket in qs %}
+        <tr data-id="{{ ticket.id }}">
+            <td><input type="checkbox"></td>
+            <td title="{{ticket.ticket}}"><a href='{{ ticket.get_absolute_url }}'>#{{ ticket.id }}</a></td>
+            <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
+            <td>{{ ticket.queue }}</td>
+            <td>{{ ticket.priority|ticket_priority_label_class }}</td>
+            <td>{{ ticket.status|ticket_status_label_class }}</td>
+            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span>
+            </td>
+            <td><span class="{{ ticket|ticket_due_date_css }}"
+                                                                  title='{{ ticket.due_date|date:"r" }}'>{{ ticket|ticket_due_date_humanize|default:'-' }}</span>
+            </td>
+            <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
+
+            <td>
+                <button type="button" name="hold" class="btn btn-sm btn-primary" href="#" {% if user.pk == ticket.assigned_to.pk %}disabled title="Already Assigned to you!" {% else %} title="Hold Ticket(Assign to you)" {% endif %}><span class="fa fa-hand-pointer-o"></span></button>
+                <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" title="Delete Ticket"><span class="fa fa-trash"></span></button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="text-center text-muted" colspan="10"><em>[NO RECORD!]</em></td>
+        </tr>
+        {% endfor %}
+    </table>
+    <div class="panel-footer">
+        {% paginate %}
+        <div class="pull-right">{% page_size_combo %}</div>
+    </div>
+    {% endwith %}
+
+</div>
+<div id="save-query-popover" class="hidden">
+    <form name="save-query-form" method="post" action="{% url 'helpdesk:saved_search-add' %}">
+        {% csrf_token %}
+        <input type="hidden" name="query" value="{{urlsafe_query}}">
+        <div class="form-group">
+            <input type="text" name="title" class="form-control input-sm" placeholder="Query Title" required>
+        </div>
+        <div class="form-group">
+            <div class="checkbox">
+                <label><input type="checkbox" name="shared"> Share this query with other users?</label></div>
+        </div>
+        <div class="form-group">
+            <button type="submit" name="save-query-ok" class="btn btn-sm btn-success">
+                <span class="fa fa-check"></span>
+            </button>
+            <button type="button" name="close-popover" class="btn btn-sm btn-default"><span class="fa fa-close"></span></button>
+        </div>
+    </form>
+</div>
+
+{% include "helpdesk/partials/action_modal.html" with prefix_id='deleteTicket' message_class='text-danger' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='closeTicket' message_class='text-danger' form_fields='<div class="checkbox"><label><input type="checkbox" name="send_mail" id="id_send_mail"> Send email after closed?</label></div>' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='assignTicket' message_class='text-danger' form_fields=bulk_assign_form %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='holdTicket' message_class='text-danger' %}
+
+{% endblock helpdesk_body %}
+
+{% block helpdesk_head %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+<link href="{% static 'helpdesk/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+
+<script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/jquery.tablecheckbox.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
+
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+        $('body').on('click', 'a[disabled], a.disabled, li.disabled a', function(event) {
+          event.preventDefault();
+        });
+
+        $('button[name=save-query]').popover({html: true, placement: 'bottom', content: function () {
+            return $('#save-query-popover').html();
+        }});
+        $('[data-toggle="tooltip"]').tooltip();
+        var assignedToSelect = $("select[name=assigned_to]");
+        assignedToSelect.each(function(idx, item) {
+            var meAssignedItem = $(item).find('option[value="{{request.user.pk}}"]');
+            meAssignedItem.addClass('me-assigned-to').text('{0} (You)'.format(meAssignedItem.text()));
+            meAssignedItem.insertBefore($(item).find('option:eq(1)'));
+        });
+        $('<option class="not-assigned-item" value="null" {% if tickets.form.no_assigned.data %}selected{% endif %}>[Unassigned]</option>').insertAfter($("select#id_assigned_to option:eq(0)"));
+        $('#id_queue').chosen({allow_single_deselect: true, width: '100%'});
+        $('#id_assigned_to').chosen({allow_single_deselect: true, width: '100%'});
+        $('#id_bulk_assigned_to').chosen({allow_single_deselect: true, width: '100%'});
+        $('#id_status').chosen({allow_single_deselect: true, disable_search: true, width: '100%'});
+        $('#id_priority').chosen({allow_single_deselect: true, disable_search: true, width: '100%'});
+        $('.datepicker-widget').datetimepicker({
+            format: 'YYYY-MM-DD',
+            showTodayButton: true,
+            useCurrent: false,
+            showClear: true
+        });
+        $('#filterForm [name][type!=hidden]').on('change dp.change', function () {
+            var form = $(this).parents('form'),
+                item = $(this);
+            if (item.attr('name') === 'assigned_to') {
+                if(item.val() === 'null') {
+                    $('[name=no_assigned]', form).val("True")
+                } else {
+                    $('[name=no_assigned]', form).val("")
+                }
+            }
+            if ($('[name=assigned_to]', form).val() === 'null') {
+                $('[name=assigned_to]', form).val('');
+            }
+            form.submit();
+        });
+        $('.page-size').chosen({disable_search: true, allow_single_deselect: true}).on('change', function () {
+            $('input[name=page_size]').val($(this).val());
+            $('#filterForm').submit();
+        });
+        $('.clear-filter').click(function () {
+            var form = $('#filterForm');
+            $('[name]', form).val('').attr('disabled', true).trigger("chosen:updated");
+            form.submit();
+        });
+        tableBulkInit($('table'), $('.bulk-action-dropdown'));
+        bindModalAction('deleteTicketModal', 'delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', '{% url "helpdesk:ticket-delete" 0 %}');
+        bindModalAction('holdTicketModal', 'hold', 'Hold Ticket', 'Are you sure to hold this ticket?', '{% url "helpdesk:ticket-hold" 0 %}');
+        bindModalBulkAction('deleteTicketModal', $('#bulk-delete'), $('table'), 'Delete Tickets', 'Are you sure to delete {0} selected ticket? this will remove the tickets permanently!', '{% url "helpdesk:tickets-bulk-delete" 0 %}');
+        bindModalBulkAction('closeTicketModal', $('#bulk-close'), $('table'), 'Close Tickets', 'Are you sure to close {0} selected ticket?', '{% url "helpdesk:tickets-bulk-close" 0 %}');
+        bindModalBulkAction('assignTicketModal', $('#bulk-assign-to'), $('table'), 'Assign Tickets', 'Are you sure to assign/unassign {0} selected ticket?', '{% url "helpdesk:tickets-bulk-assign" 0 %}');
+        $(document).on('click', 'button[name=close-popover]', function (e) {
+            (($(this).parents(".popover").popover('hide').data('bs.popover') || {}).inState || {}).click = false;
+        });
+        $(document).on('click', function (e) {
+            $('[data-toggle="popover"],[data-original-title]').each(function () {
+                if (!$(this).is(e.target) && $(this).has(e.target).length === 0 && $('.popover').has(e.target).length === 0) {
+                    (($(this).popover('hide').data('bs.popover') || {}).inState || {}).click = false;
+                }
+            });
+        });
+
+    });
+</script>
+
+{% endblock helpdesk_head %}

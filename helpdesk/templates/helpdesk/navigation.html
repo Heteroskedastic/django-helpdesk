@@ -20,7 +20,7 @@
                     <a href='{% url 'helpdesk:dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
                 </li>
                 <li>
-                    <a href='{% url 'helpdesk:list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
+                    <a href='{% url 'helpdesk:ticket-list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
                 </li>
                 <li>
                     <a href='{% url 'helpdesk:submit' %}'><i class="fa fa-plus-circle fa-fw"></i> <span class="nav-text">{% trans "New Ticket" %}</span></a>
@@ -37,28 +37,44 @@
                 {% if user_saved_queries_ %}
                 <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-filter fa-fw"></i> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                     <ul class="dropdown-menu">
+                        <li>
+                            <a href="{% url 'helpdesk:saved_search-list' %}"><span class="fa fa-th-large"></span> Manage Saved Query</a>
+                        </li>
+                        <li role="separator" class="divider"></li>
                         {% for q in user_saved_queries_ %}
-                            <li><a href="{% url 'helpdesk:list' %}?saved_query={{ q.id }}">{{ q.title }}
+                        <li>
+                            <a href="{% url 'helpdesk:ticket-list' %}?saved_query={{q.pk}}">
+                                {{q.title}}
+                                {% if q.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
+                                <span title="Default Saved Query" class="fa fa-star text-success"></span>
+                                {% endif %}
                                 {% if q.shared %}
-                                    (Shared{% ifnotequal user q.user %} by {{ q.user.get_username }}{% endifnotequal %})
-                                {% endif %}</a></li>
+                                <span class="label label-warning" title="Shared by {% if user.pk == q.user_id %} You {% else %} {{ q.user.get_username }}{% endif %}">
+                                    <span class="fa fa-share-alt"></span> {% if user.pk == q.user_id %} You {% else %} {{ q.user.get_username }}{% endif %}
+                                </span>
+                                {% endif%}
+                            </a>
+                        </li>
                         {% endfor %}
                     </ul>
                 </li>
                 {% endif %}
                 {% if not query %}
                 <li>
-                    <form class="navbar-form navbar-top" id='searchform' method='get' action="{% url 'helpdesk:list' %}">
+                    <form class="navbar-form navbar-top" id='searchform' method='get' action="{% url 'helpdesk:ticket-list' %}">
                         <div class="input-group custom-search-form">
-                            <input type='text' name='q' size='15' class='input form-control' placeholder='{% trans "Search..." %}' id='search_query' title='{% trans "Enter a keyword, or a ticket number to jump straight to that ticket." %}'/>
-                            <input type='hidden' name='status' value='1' /><input type='hidden' name='status' value='2' /><input type='hidden' name='status' value='3' /><input type='hidden' name='search_type' value='header' />
+                            <input type="text" name="keywords" size="15" class="input form-control" placeholder="{% trans 'Search...' %}" id="search_query" title="{% trans 'Enter a keyword, or a ticket number to jump straight to that ticket.' %}"/>
+                            <input type="hidden" name="status" value="1" />
+                            <input type="hidden" name="status" value="2" />
+                            <input type="hidden" name="status" value="3" />
+                            <input type="hidden" name="status" value="4" />
+                            <input type="hidden" name="status" value="5" />
                             <span class="input-group-btn">
                                 <button class="btn btn-default" type="submit">
                                     <i class="fa fa-search"></i> {% trans 'Go' %}
                                 </button>
                             </span>
                         </div>
-                    {% csrf_token %}
                     </form>
                     <!-- /input-group -->
                 </li>

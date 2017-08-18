@@ -23,7 +23,7 @@ from django.utils import timezone
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack, TicketMoneyTrack,
-                             TicketNotification)
+                             TicketNotification, SavedSearch)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -433,7 +433,8 @@ class UserSettingsForm(forms.Form):
         label=_('Number of tickets to show per page'),
         help_text=_('How many tickets do you want to see on the Ticket List page?'),
         required=False,
-        choices=((10, '10'), (25, '25'), (50, '50'), (100, '100')),
+        choices=((10, '10'), (25, '25'), (50, '50'), (100, '100'), (150, '150'), (200, '200'), (500, '500'),
+                 (1000, '1000')),
     )
 
     use_email_as_submitter = forms.BooleanField(
@@ -444,6 +445,20 @@ class UserSettingsForm(forms.Form):
                     'ticket if needed, this option only changes the default.'),
         required=False,
     )
+
+    default_ticket_saved_query = forms.ModelChoiceField(
+        empty_label='-',
+        label=_('Default Ticket Saved Query'),
+        help_text=_('which saved query you would like to show you as a default in tickets list page?'),
+        required=False,
+        queryset=SavedSearch.objects.all(),
+    )
+
+    def clean_default_ticket_saved_query(self):
+        default_ticket_saved_query = self.cleaned_data['default_ticket_saved_query']
+        if default_ticket_saved_query:
+            default_ticket_saved_query = default_ticket_saved_query.pk
+        return default_ticket_saved_query
 
 
 class EmailIgnoreForm(forms.ModelForm):
@@ -559,3 +574,23 @@ class AdminTicketNotificationForm(forms.ModelForm):
             'queues': _('When Queues are'),
             'to': _('To E-Mail Address or SMS Number')
         }
+
+
+class TicketsBulkAssignForm(forms.ModelForm):
+    ''' Adds a money tracking for a Ticket '''
+    assigned_to = forms.ModelChoiceField(
+        empty_label=_('-- Unassign --'),
+        widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_bulk_assigned_to'}),
+        queryset=User.objects.filter(is_staff=True),
+        label=_('Assign To'),
+        required=False
+    )
+    class Meta:
+        model = Ticket
+        fields = ('assigned_to',)
+
+
+class SavedSearchAddForm(forms.ModelForm):
+    class Meta:
+        model = SavedSearch
+        fields = ['title', 'shared', 'query']

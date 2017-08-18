@@ -5,7 +5,7 @@ from helpdesk.forms import AdminTicketNotificationForm
 from helpdesk.models import Queue, Ticket, FollowUp, PreSetReply, KBCategory, TicketTimeTrack, TicketMoneyTrack, \
     SMSTemplate, TicketNotification
 from helpdesk.models import EscalationExclusion, EmailTemplate, KBItem
-from helpdesk.models import TicketChange, Attachment, IgnoreEmail
+from helpdesk.models import TicketChange, Attachment, IgnoreEmail, SavedSearch
 from helpdesk.models import CustomField
 
 
@@ -111,3 +111,4 @@ class TicketNotificationAdmin(admin.ModelAdmin):
 admin.site.register(PreSetReply)
 admin.site.register(EscalationExclusion)
 admin.site.register(KBCategory)
+admin.site.register(SavedSearch)

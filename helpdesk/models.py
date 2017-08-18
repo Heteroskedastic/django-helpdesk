@@ -375,12 +375,18 @@ class Ticket(models.Model):
         (DUPLICATE_STATUS, _('Duplicate')),
     )
 
+    PRIORITY_CRITICAL = 1
+    PRIORITY_HIGH = 2
+    PRIORITY_NORMAL = 3
+    PRIORITY_LOW = 4
+    PRIORITY_VERY_LOW = 5
+
     PRIORITY_CHOICES = (
-        (1, _('1. Critical')),
-        (2, _('2. High')),
-        (3, _('3. Normal')),
-        (4, _('4. Low')),
-        (5, _('5. Very Low')),
+        (PRIORITY_CRITICAL, _('Critical')),
+        (PRIORITY_HIGH, _('High')),
+        (PRIORITY_NORMAL, _('Normal')),
+        (PRIORITY_LOW, _('Low')),
+        (PRIORITY_VERY_LOW, _('Very Low')),
     )
 
     title = models.CharField(
@@ -451,8 +457,8 @@ class Ticket(models.Model):
     priority = models.IntegerField(
         _('Priority'),
         choices=PRIORITY_CHOICES,
-        default=3,
-        blank=3,
+        default=PRIORITY_NORMAL,
+        blank=PRIORITY_NORMAL,
         help_text=_('1 = Highest Priority, 5 = Low Priority'),
     )
 
@@ -602,7 +608,7 @@ class Ticket(models.Model):
             self.created = timezone.now()
 
         if not self.priority:
-            self.priority = 3
+            self.priority = Ticket.PRIORITY_NORMAL
 
         self.modified = timezone.now()
 
@@ -1192,6 +1198,14 @@ class UserSettings(models.Model):
             return pickle.loads(b64decode(str(self.settings_pickled)))
         except pickle.UnpicklingError:
             return {}
+
+    def update_setting(self, data, commit=True):
+        settings = self.settings
+        settings.update(data)
+        self.settings = settings
+        if commit:
+            self.save()
+        return self
 
     settings = property(_get_settings, _set_settings)
 
