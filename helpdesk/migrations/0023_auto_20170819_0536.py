@@ -10,7 +10,6 @@ def forwards_func(apps, schema_editor):
     db_alias = schema_editor.connection.alias
     Ticket = apps.get_model("helpdesk", "Ticket")
     FollowUp = apps.get_model("helpdesk", "FollowUp")
-    import pdb; pdb.set_trace()
     for ticket in Ticket.objects.using(db_alias).all():
         follow_up = FollowUp.objects.filter(ticket=ticket).exclude(new_status=None).last()
         ticket.modified_status = follow_up and follow_up.date
