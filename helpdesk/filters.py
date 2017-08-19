@@ -53,6 +53,7 @@ class TicketsFilter(FilterSet):
         ordering_map={
             'queue': 'queue__title',
             'assigned_to': ('assigned_to__first_name', 'assigned_to__last_name'),
+            'status': ('status', 'modified_status')
         }
 
     )

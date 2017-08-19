@@ -452,9 +452,9 @@ def update_ticket(request, ticket_id, public=False):
     old_status = ticket.status
     if new_status != ticket.status:
         ticket.status = new_status
+        ticket.modified_status = f.date
         ticket.save()
         f.new_status = new_status
-        ticket_status_changed = True
         if f.title:
             f.title += ' and %s' % ticket.get_status_display()
         else:
@@ -663,12 +663,12 @@ def mass_update(request):
     for t in Ticket.objects.filter(id__in=tickets):
         if not _has_access_to_queue(request.user, t.queue):
             continue
-
+        now = timezone.now()
         if action == 'assign' and t.assigned_to != user:
             t.assigned_to = user
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Assigned to %(username)s in bulk update' % {
                              'username': user.get_username()
                          }),
@@ -679,16 +679,17 @@ def mass_update(request):
             t.assigned_to = None
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Unassigned in bulk update'),
                          public=True,
                          user=request.user)
             f.save()
         elif action == 'close' and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
+            t.modified_status = now
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Closed in bulk update'),
                          public=False,
                          user=request.user,
@@ -696,9 +697,10 @@ def mass_update(request):
             f.save()
         elif action == 'close_public' and t.status != Ticket.CLOSED_STATUS:
             t.status = Ticket.CLOSED_STATUS
+            t.modified_status = now
             t.save()
             f = FollowUp(ticket=t,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Closed in bulk update'),
                          public=True,
                          user=request.user,

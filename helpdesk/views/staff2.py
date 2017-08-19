@@ -253,11 +253,13 @@ class TicketsBulkCloseView(StaffLoginRequiredMixin, BulkableActionMixin, View):
     def _close_ticket(self, request, ticket, send_mail=False):
         if ticket.status == Ticket.CLOSED_STATUS:
             return False
+        now = timezone.now()
         if not send_mail:
             ticket.status = Ticket.CLOSED_STATUS
+            ticket.modified_status = now
             ticket.save()
             f = FollowUp(ticket=ticket,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Closed in bulk update'),
                          public=False,
                          user=request.user,
@@ -265,9 +267,10 @@ class TicketsBulkCloseView(StaffLoginRequiredMixin, BulkableActionMixin, View):
             f.save()
         else:
             ticket.status = Ticket.CLOSED_STATUS
+            ticket.modified_status = now
             ticket.save()
             f = FollowUp(ticket=ticket,
-                         date=timezone.now(),
+                         date=now,
                          title=_('Closed in bulk update'),
                          public=True,
                          user=request.user,

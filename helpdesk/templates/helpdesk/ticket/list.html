@@ -109,7 +109,7 @@
             <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
             <td>{{ ticket.queue }}</td>
             <td>{{ ticket.priority|ticket_priority_label_class }}</td>
-            <td>{{ ticket.status|ticket_status_label_class }}</td>
+            <td title="{{ticket.modified_status|naturaltime}}">{{ ticket.status|ticket_status_label_class }}</td>
             <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span>
             </td>
             <td><span class="{{ ticket|ticket_due_date_css }}"

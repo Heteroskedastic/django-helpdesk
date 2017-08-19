@@ -410,6 +410,11 @@ class Ticket(models.Model):
         blank=True,
         help_text=_('Date this ticket was most recently changed.'),
     )
+    modified_status = models.DateTimeField(
+        _('Modified Status'),
+        auto_now_add=True,
+        help_text=_('Date this ticket status changed.'),
+    )
 
     submitter_email = models.EmailField(
         _('Submitter E-Mail'),
