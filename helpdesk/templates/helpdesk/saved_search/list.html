@@ -60,11 +60,23 @@
 
 <script type="text/javascript" charset="utf-8">
 $(document).ready(function () {
-    bindModalAction('deleteModal', 'delete', 'Delete Query', 'Are you sure to delete?', '{% url "helpdesk:saved_search-delete" 0 %}');
-    bindModalAction('setDefaultModal', 'set_default', 'Set as Default', 'Are you sure to set this as default?', '{% url "helpdesk:saved_search-set-default" 0 %}');
-    bindModalAction('setDefaultModal', 'remove_default', 'Remove from Default', 'Are you sure to remove this from default?', '{% url "helpdesk:saved_search-set-default" 0 %}', false);
-    bindModalAction('switchShareModal', 'share', 'Share with other users', 'Are you sure to share this with query other users?', '{% url "helpdesk:saved_search-switch-shared" 0 %}');
-    bindModalAction('switchShareModal', 'unshare', 'Un-share with other users', 'Are you sure to un-share this query with other users?', '{% url "helpdesk:saved_search-switch-shared" 0 %}');
+    bindTableRowModalAction('deleteModal', 'delete', 'Delete Query', 'Are you sure to delete?', function (recordId) {
+        var baseAction = '{% url "helpdesk:saved_search-delete" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
+    bindTableRowModalAction('setDefaultModal', 'set_default', 'Set as Default', 'Are you sure to set this as default?', function (recordId) {
+        var baseAction = '{% url "helpdesk:saved_search-set-default" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
+    bindTableRowModalAction('setDefaultModal', 'remove_default', 'Remove from Default', 'Are you sure to remove this from default?', '{% url "helpdesk:saved_search-set-default" 0 %}');
+    bindTableRowModalAction('switchShareModal', 'share', 'Share with other users', 'Are you sure to share this query with other users?', function (recordId) {
+        var baseAction = '{% url "helpdesk:saved_search-switch-shared" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
+    bindTableRowModalAction('switchShareModal', 'unshare', 'Un-share with other users', 'Are you sure to un-share this query with other users?', function (recordId) {
+        var baseAction = '{% url "helpdesk:saved_search-switch-shared" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
 });
 </script>
 

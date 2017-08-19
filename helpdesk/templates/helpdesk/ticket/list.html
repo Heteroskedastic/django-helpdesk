@@ -157,7 +157,7 @@
 
 {% include "helpdesk/partials/action_modal.html" with prefix_id='deleteTicket' message_class='text-danger' %}
 {% include "helpdesk/partials/action_modal.html" with prefix_id='closeTicket' message_class='text-danger' form_fields='<div class="checkbox"><label><input type="checkbox" name="send_mail" id="id_send_mail"> Send email after closed?</label></div>' %}
-{% include "helpdesk/partials/action_modal.html" with prefix_id='assignTicket' message_class='text-danger' form_fields=bulk_assign_form %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='assignTicket' message_class='text-danger' form_fields=bulk_assign_form.as_p %}
 {% include "helpdesk/partials/action_modal.html" with prefix_id='holdTicket' message_class='text-danger' %}
 
 {% endblock helpdesk_body %}
@@ -225,11 +225,26 @@
             form.submit();
         });
         tableBulkInit($('table'), $('.bulk-action-dropdown'));
-        bindModalAction('deleteTicketModal', 'delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', '{% url "helpdesk:ticket-delete" 0 %}');
-        bindModalAction('holdTicketModal', 'hold', 'Hold Ticket', 'Are you sure to hold this ticket?', '{% url "helpdesk:ticket-hold" 0 %}');
-        bindModalBulkAction('deleteTicketModal', $('#bulk-delete'), $('table'), 'Delete Tickets', 'Are you sure to delete {0} selected ticket? this will remove the tickets permanently!', '{% url "helpdesk:tickets-bulk-delete" 0 %}');
-        bindModalBulkAction('closeTicketModal', $('#bulk-close'), $('table'), 'Close Tickets', 'Are you sure to close {0} selected ticket?', '{% url "helpdesk:tickets-bulk-close" 0 %}');
-        bindModalBulkAction('assignTicketModal', $('#bulk-assign-to'), $('table'), 'Assign Tickets', 'Are you sure to assign/unassign {0} selected ticket?', '{% url "helpdesk:tickets-bulk-assign" 0 %}');
+        bindTableRowModalAction('deleteTicketModal', 'delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', function (recordId) {
+            var baseAction = '{% url "helpdesk:ticket-delete" 0 %}';
+            return baseAction.slice(0, -2) + recordId + '/';
+        });
+        bindTableRowModalAction('holdTicketModal', 'hold', 'Hold Ticket', 'Are you sure to hold this ticket?', function (recordId) {
+            var baseAction = '{% url "helpdesk:ticket-hold" 0 %}';
+            return baseAction.slice(0, -2) + recordId + '/';
+        });
+        bindTableRowModalBulkAction('deleteTicketModal', $('#bulk-delete'), $('table'), 'Delete Tickets', 'Are you sure to delete {0} selected ticket? this will remove the tickets permanently!', function (recordsId) {
+            var baseAction = '{% url "helpdesk:tickets-bulk-delete" 0 %}';
+            return baseAction.slice(0, -2) + recordsId.join(',') + '/';
+        });
+        bindTableRowModalBulkAction('closeTicketModal', $('#bulk-close'), $('table'), 'Close Tickets', 'Are you sure to close {0} selected ticket?', function (recordsId) {
+            var baseAction = '{% url "helpdesk:tickets-bulk-close" 0 %}';
+            return baseAction.slice(0, -2) + recordsId.join(',') + '/';
+        });
+        bindTableRowModalBulkAction('assignTicketModal', $('#bulk-assign-to'), $('table'), 'Assign Tickets', 'Are you sure to assign/unassign {0} selected ticket?', function (recordsId) {
+            var baseAction = '{% url "helpdesk:tickets-bulk-assign" 0 %}';
+            return baseAction.slice(0, -2) + recordsId.join(',') + '/';
+        });
         $(document).on('click', 'button[name=close-popover]', function (e) {
             (($(this).parents(".popover").popover('hide').data('bs.popover') || {}).inState || {}).click = false;
         });

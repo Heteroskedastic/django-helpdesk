@@ -69,15 +69,16 @@ String.prototype.format = String.prototype.f = function() {
     return s;
 };
 
-function bindModalAction(modalId, actionName, title, message, action, updateAction) {
+function bindTableRowModalAction(modalId, actionName, title, message, action) {
     $('button[name={0}]'.f(actionName)).click(function(e) {
         e.preventDefault();
-        updateAction = updateAction===undefined? true:updateAction;
         var form = $('#{0} form'.f(modalId));
-        if (updateAction) {
+
+        if ((typeof action) === 'function') {
             var id = $(this).parents('tr').attr('data-id');
-            form[0].action = action.slice(0, -2) + id + '/';
-        } else {
+            action = action(id);
+        }
+        if (action !== undefined) {
             form[0].action = action;
         }
         $('#{0} .modal-title'.f(modalId)).text(title);
@@ -86,16 +87,16 @@ function bindModalAction(modalId, actionName, title, message, action, updateActi
     });
 }
 
-function bindModalBulkAction(modalId, actionEl, table, title, message, action, updateAction) {
+function bindTableRowModalBulkAction(modalId, actionEl, table, title, message, action) {
     $(actionEl).click(function(e) {
         e.preventDefault();
         var selectedIds = tableBulkGetSelectionsId($(table)),
             form = $('#{0} form'.f(modalId));
 
-        updateAction = updateAction===undefined? true:updateAction;
-        if (updateAction) {
-            form[0].action = action.slice(0, -2) + selectedIds.join(',') + '/';
-        } else {
+        if ((typeof action) === 'function') {
+            action = action(selectedIds);
+        }
+        if (action !== undefined) {
             form[0].action = action;
         }
         $('#{0} .modal-title'.f(modalId)).text(title);

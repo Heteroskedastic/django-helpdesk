@@ -135,8 +135,9 @@ class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
             error_message('No access to ticket [{}]'.format(ticket), request)
             return redirect(self.get_success_url())
 
+        ticket_id = ticket.id
         ticket.delete()
-        success_message('Ticket [{}] successfully!'.format(ticket), request)
+        success_message('Ticket [#{} - {}] deleted successfully!'.format(ticket_id, ticket.title), request)
         return redirect(self.get_success_url())
 
     # noinspection PyMethodMayBeStatic

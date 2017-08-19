@@ -601,7 +601,7 @@ class Ticket(models.Model):
         verbose_name_plural = _('Tickets')
 
     def __str__(self):
-        return '%s %s' % (self.id, self.title)
+        return '#%s - %s' % (self.id, self.title)
 
     def get_absolute_url(self):
         return 'helpdesk:view', (self.id,)
