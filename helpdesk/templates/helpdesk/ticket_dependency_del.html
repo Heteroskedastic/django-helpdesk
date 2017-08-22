@@ -1,14 +1,20 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket Dependency" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>Delete Ticket Dependency</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' dependency.ticket.id %}">{{dependency.ticket}}</a></li>
+<li>Delete Dependency</li>
+{% endblock %}
+
+{% block content %}{% blocktrans %}
+<h2 class="page-title">Delete Ticket Dependency</h2>
 
 <p>Are you sure you wish to remove the dependency on this ticket?</p>
 {% endblocktrans %}
 
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+<p><a href="{% url 'helpdesk:view' dependency.ticket_id %}"><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
 
 <form method='post' action='./'>
     <button class="btn btn-danger" type='submit'>{% trans "Yes, I Understand - Delete" %}</button>

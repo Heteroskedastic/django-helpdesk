@@ -1,32 +1,25 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 {% load static from staticfiles %}
+{% load saved_queries %}
+
+{% block extra_css%}
+<!-- Morris Charts CSS -->
+{% if helpdesk_settings.HELPDESK_USE_CDN %}
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css">
+{% else %}
+<link href="{% static 'helpdesk/vendor/morrisjs/morris.css' %}" rel="stylesheet">
+{% endif %}
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:report_index' %}">{% trans "Reports &amp; Statistics" %}</a></li>
+<li>{{title}}</li>
+{% endblock %}
 
 {% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
 
-{% block helpdesk_head %}
-
-    <!-- Flot Charts JavaScript -->
-    <script src="/static/helpdesk/vendor/flot/excanvas.min.js"></script>
-    <script src="/static/helpdesk/vendor/flot/jquery.flot.js"></script>
-    <script src="/static/helpdesk/vendor/flot/jquery.flot.categories.js"></script>
-    <script src="/static/helpdesk/vendor/flot/jquery.flot.pie.js"></script>
-    <script src="/static/helpdesk/vendor/flot/jquery.flot.resize.js"></script>
-    <script src="/static/helpdesk/vendor/flot/jquery.flot.time.js"></script>
-    <script src="/static/helpdesk/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
-
-    <!-- Morris Charts JavaScript -->
-    {% if helpdesk_settings.HELPDESK_USE_CDN %}
-    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
-    {% else %}
-    <script src="{% static 'helpdesk/vendor/raphael/raphael.min.js' %}"></script>
-    <script src="{% static 'helpdesk/vendor/morrisjs/morris.min.js' %}"></script>
-    {% endif %}
-
-{% endblock %}
-
-{% block helpdesk_body %}
-<h2>{% trans "Reports &amp; Statistics" %}</h2>
+{% block content %}
+<h2 class="page-title">{% trans "Reports &amp; Statistics" %}<span class="label subtitle">{{title}}</span></h2>
 
 <div class="row">
                 <div class="col-lg-12">
@@ -36,6 +29,7 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
+{% with user|saved_queries as user_saved_queries_ %}
 {% if user_saved_queries_ %}
     <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
     <form method='GET' action='./'>
@@ -49,6 +43,8 @@
 {% else %}
     <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
 {% endif %}
+{% endwith %}
+
                         </div>
                         <!-- /.panel-body -->
                     </div>
@@ -89,60 +85,52 @@
                 </div>
             </div>
 
-{% if charttype == "date" %}
-<script type='text/javascript'>
-
-Morris.Line({
-  element: 'chart-content',
-  data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
-  xkey: 'x',
-  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-  labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
-  xLabels: "month"
-});
-
-    /*$.jqplot.config.enablePlugins = true;
-    var dataset = [];
-
-    {% for d in data %}
-    dataset[{{ forloop.counter0 }}] = [{% for f in d %}{% if not forloop.first %}['{% for h in headings %}{% ifequal forloop.counter0 forloop.parentloop.counter0 %}{{ h }}{% endifequal %}{% endfor %}', {{ f }}]{% if not forloop.last %}, {% endif %}{% endif %}{% endfor %}];{% endfor %}
-
-    plot = $.jqplot('placeholder', dataset, {
-        legend: {show: true, location: 'nw', xoffset: 55},
-        title: "{{ title }}",
-        series: [{% for d in data %}
-            {
-                label:'{{ d.0 }}',
-                lineWidth: 4,
-                markerOptions: { style: 'square'}
-            }{% if not forloop.last %},{% endif %}{% endfor %}
-            ],
-        axes: {
-            xaxis: {
-                renderer: $.jqplot.DateAxisRenderer
-            },
-            yaxis: {
-                min: 0
-            }
-        }
-    });*/
-
-</script>
-{% endif %}
-{% if charttype == "bar" %}
-<script type='text/javascript'>
-
-Morris.Bar({
-  element: 'chart-content',
-  data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
-  xkey: 'x',
-  ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
-  labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
-});
-
-</script>
-{% endif %}
-
-
-
 {% endblock %}
+
+{% block extra_js %}
+
+    <!-- Flot Charts JavaScript -->
+    <script src="/static/helpdesk/vendor/flot/excanvas.min.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.categories.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.pie.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.resize.js"></script>
+    <script src="/static/helpdesk/vendor/flot/jquery.flot.time.js"></script>
+    <script src="/static/helpdesk/vendor/flot-tooltip/jquery.flot.tooltip.min.js"></script>
+
+    <!-- Morris Charts JavaScript -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <script src="//cdnjs.cloudflare.com/ajax/libs/raphael/2.1.0/raphael-min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.min.js"></script>
+    {% else %}
+    <script src="{% static 'helpdesk/vendor/raphael/raphael.min.js' %}"></script>
+    <script src="{% static 'helpdesk/vendor/morrisjs/morris.min.js' %}"></script>
+    {% endif %}
+
+    <script type='text/javascript'>
+    $(document).ready(function () {
+        var chartType = '{{charttype}}';
+        if (chartType === "bar") {
+            Morris.Bar({
+                element: 'chart-content',
+                data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
+                xkey: 'x',
+                ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+                labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}]
+            });
+         }
+
+        if (chartType === "date") {
+            Morris.Line({
+              element: 'chart-content',
+              data: {% autoescape on %}{{ morrisjs_data|safe }}{% endautoescape %},
+              xkey: 'x',
+              ykeys: [{% for d in data %}{{ forloop.counter0 }}{% if not forloop.last %}, {% endif %}{% endfor %}],
+              labels: [{% for n in series_names %}"{{ n }}"{% if not forloop.last %}, {% endif %}{% endfor %}],
+              xLabels: "month"
+            });
+        }
+
+    });
+    </script>
+{% endblock extra_js %}

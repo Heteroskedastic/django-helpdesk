@@ -1,9 +1,13 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}{% load user_admin_url %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}{% load user_admin_url %}
 
 {% block helpdesk_title %}{% trans "Change System Settings" %}{% endblock %}
 
-{% block helpdesk_body %}
-<h2>{% trans "System Settings" %}</h2>
+{% block breadcrumb_items %}
+<li>System Settings</li>
+{% endblock %}
+
+{% block content %}
+<h2 class="page-title">{% trans "System Settings" %}</h2>
 
 <p>{% blocktrans %}The following items can be maintained by you or other superusers:{% endblocktrans %}</p>
 

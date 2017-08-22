@@ -1,9 +1,13 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket CC" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans with cc.email_address as email_address %}
-<h2>Delete Ticket CC</h2>
+{% block breadcrumb_items %}
+<li>Delete Ticket CC</li>
+{% endblock %}
+
+{% block content %}{% blocktrans with cc.email_address as email_address %}
+<h2 class="page-title">Delete Ticket CC</h2>
 
 <p>Are you sure you wish to delete this email address (<em>{{ email_address }}</em>) from the CC list for this ticket? They will stop receiving updates.</p>
 {% endblocktrans %}

@@ -1,9 +1,16 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket Attachment" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>Delete Ticket Attachment</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' attachment.followup.ticket_id %}">{{attachment.followup.ticket}}</a></li>
+<li>{{attachment}}</li>
+<li>Delete</li>
+{% endblock %}
+
+{% block content %}{% blocktrans %}
+<h2 class="page-title">Delete Ticket Attachment</h2>
 
 <p>Are you sure you wish to delete the attachment <i>{{ filename }}</i> from this ticket? The attachment data will be permanently deleted from the database, but the attachment itself will still exist on the server.</p>
 {% endblocktrans %}

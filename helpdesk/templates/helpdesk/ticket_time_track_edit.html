@@ -4,8 +4,14 @@
 
 {% block helpdesk_title %}{% trans "Edit Ticket Time Track" %}{% endblock %}
 
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' object.ticket.id %}">{{object.ticket}}</a></li>
+<li>Edit Time Track</li>
+{% endblock %}
+
 {% block helpdesk_pagetitle %}
-{% blocktrans with ticket=object.ticket %}<h3>Edit Time Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
+{% blocktrans with ticket=object.ticket %}<h2 class="page-title">Edit Time Track "{{object}}" of "{{ticket}}"</h2>{% endblocktrans %}
 {% endblock %}
 
 {% block helpdesk_formbuttons %}

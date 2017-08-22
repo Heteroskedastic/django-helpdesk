@@ -1,0 +1,24 @@
+{% extends "helpdesk/base.html" %}
+{% load i18n %}
+{% load static from staticfiles %}
+{% block main_css %}
+    {{block.super}}
+    <link rel='stylesheet' href='{% static "helpdesk/css/staff.css" %}' type='text/css'>
+    <!-- RSS -->
+    {% if user.is_authenticated %}
+    <link rel='alternate' href='{% url 'helpdesk:rss_user' user.get_username %}' type='application/rss+xml' title='{% trans "My Open Tickets" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_activity' %}' type='application/rss+xml' title='{% trans "All Recent Activity" %}' />
+    <link rel='alternate' href='{% url 'helpdesk:rss_unassigned' %}' type='application/rss+xml' title='{% trans "Unassigned Tickets" %}' />
+    {% endif %}
+{% endblock main_css %}
+{% block breadcrumb %}
+<div class="row">
+    <div class="col-md-12">
+        <ul class="breadcrumb">
+            <li><a href="{% url 'helpdesk:dashboard' %}">Home</a></li>
+            {% block breadcrumb_items %}
+            {% endblock %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

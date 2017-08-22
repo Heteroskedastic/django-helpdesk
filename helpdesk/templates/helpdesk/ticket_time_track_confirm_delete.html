@@ -1,17 +1,19 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/staff_base.html" %}
 {% load i18n %}
 {% load static from staticfiles %}
 
 {% block helpdesk_title %}{% trans "Delete Ticket Time Track" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' object.ticket.id %}">{{object.ticket}}</a></li>
+<li>Delete Time Track</li>
+{% endblock %}
 
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        {% blocktrans with ticket=object.ticket %}<h3>Delete Time Track "{{object}}" of "{{ticket}}"</h3>{% endblocktrans %}
-    </div>
-    <!-- /.panel-heading -->
-    <div class="panel-body">
+{% block content %}
+{% blocktrans with ticket=object.ticket %}<h2 class="page-title">Delete Time Track "{{object}}" of "{{ticket}}"</h2>{% endblocktrans %}
+<div class="row">
+    <div class="col-md-12">
         <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
           {% csrf_token %}
             <div class="">

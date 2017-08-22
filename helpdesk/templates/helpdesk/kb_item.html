@@ -1,7 +1,12 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
 
-{% block helpdesk_body %}
-<h2>{% trans 'Knowledgebase' %}:{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:report_index' %}">{% trans "Knowledgebase" %}</a></li>
+<li>{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</li>
+{% endblock %}
+
+{% block content %}
+<h2 class="page-title">{% trans 'Knowledgebase' %}:{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</h2>
 
 <div class="col-lg-12">
     <div class="panel panel-primary">

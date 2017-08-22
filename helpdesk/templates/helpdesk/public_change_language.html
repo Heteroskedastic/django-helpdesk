@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block content %}
 <h3>{% trans "Change the display language" %}</h3>
 <form action="/i18n/setlang/" method="post">
     {% csrf_token %}

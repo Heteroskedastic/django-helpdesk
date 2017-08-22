@@ -175,6 +175,7 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
     )
 
     attachment = forms.FileField(
+        widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,
         label=_('Attach File'),
         help_text=_('You can attach a file such as a document or screenshot to this ticket.'),

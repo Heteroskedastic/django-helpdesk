@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n bootstrap %}
 {% block helpdesk_title %}{% trans "Helpdesk Login" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block content %}
 
 {% if request.user.is_authenticated %}
     <meta http-equiv="REFRESH" content="0;url={% url 'helpdesk:home' %}">

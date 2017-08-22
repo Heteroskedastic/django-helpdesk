@@ -1,9 +1,14 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Ignored E-Mail Addresses" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>Ignored E-Mail Addresses</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:system_settings' %}">System Settings</a></li>
+<li>Ignored E-Mail Addresses</li>
+{% endblock %}
+
+{% block content %}{% blocktrans %}
+<h2 class="page-title">Ignored E-Mail Addresses</h2>
 
 <p>The following e-mail addresses are currently being ignored by the incoming e-mail processor. You can add a new item or delete any of the items below as required.</p>{% endblocktrans %}
 

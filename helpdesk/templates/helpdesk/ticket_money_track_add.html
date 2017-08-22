@@ -1,36 +1,24 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/staff_base.html" %}
 {% load i18n %}
 {% load tz %}
 {% load bootstrap3 %}
 {% load static from staticfiles %}
 {% get_current_timezone as TIME_ZONE %}
 
-{% block helpdesk_head %}
-<link href="{% static 'helpdesk/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
-<script src="{% static 'helpdesk/moment.min.js' %}"></script>
-<script src="{% static 'helpdesk/moment-timezone.min.js' %}"></script>
-<script src="{% static 'helpdesk/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
-
-<script type='text/javascript' language='javascript'>
-$(document).ready(function() {
-    $('#id_tracked_at').datetimepicker({
-        format: 'YYYY-MM-DD HH:mm:ss',
-        timeZone: '{{TIME_ZONE}}',
-        sideBySide: true
-    });
-});
-</script>
-{% endblock %}
 {% block helpdesk_title %}{% trans "Add Ticket Money Track" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' ticket.id %}">{{ticket}}</a></li>
+<li>New Money Track</li>
+{% endblock %}
 
-<div class="panel panel-primary">
-    <div class="panel-heading">
-        {% block helpdesk_pagetitle %}
-        {% blocktrans %}<h3>New Money Track on: "{{ticket}}"</h3>{% endblocktrans %}
-        {% endblock %}
-    </div>
+{% block content %}
+{% block helpdesk_pagetitle %}
+{% blocktrans %}<h2 class="page-title">New Money Track on: "{{ticket}}"</h2>{% endblocktrans %}
+{% endblock %}
+
+<div class="panel panel-default">
     <!-- /.panel-heading -->
     <div class="panel-body">
         <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
@@ -52,3 +40,20 @@ $(document).ready(function() {
     </div>
 </div>
 {% endblock %}
+
+{% block extra_js %}
+<link href="{% static 'helpdesk/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+<script src="{% static 'helpdesk/moment.min.js' %}"></script>
+<script src="{% static 'helpdesk/moment-timezone.min.js' %}"></script>
+<script src="{% static 'helpdesk/vendor/bootstrap-datetimepicker/bootstrap-datetimepicker.min.js' %}"></script>
+
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $('#id_tracked_at').datetimepicker({
+        format: 'YYYY-MM-DD HH:mm:ss',
+        timeZone: '{{TIME_ZONE}}',
+        sideBySide: true
+    });
+});
+</script>
+{% endblock extra_js %}

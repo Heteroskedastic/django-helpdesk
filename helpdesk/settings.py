@@ -26,6 +26,8 @@ HAS_TAG_SUPPORT = False
 ##########################################
 # generic options - visible on all pages #
 ##########################################
+# enable query debug in end of page
+HELPDESK_QUERY_DEBUG = getattr(settings, 'HELPDESK_QUERY_DEBUG', getattr(settings, 'DEBUG', False))
 
 # redirect to login page instead of the default homepage when users visits "/"?
 HELPDESK_REDIRECT_TO_LOGIN_BY_DEFAULT = getattr(settings,

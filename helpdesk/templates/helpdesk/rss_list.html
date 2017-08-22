@@ -1,8 +1,13 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 {% load static from staticfiles %}
 {% block helpdesk_title %}{% trans "RSS Feeds" %}{% endblock %}
-{% block helpdesk_body %}
-<h2>{% trans "RSS Feeds" %}</h2>
+
+{% block breadcrumb_items %}
+<li>RSS Feeds</li>
+{% endblock %}
+
+{% block content %}
+<h2 class="page-title">{% trans "RSS Feeds" %}</h2>
 
 <p>{% trans "The following RSS feeds are available for you to monitor using your preferred RSS software. With the exception of the 'Latest Activity' feed, all feeds provide information only on Open and Reopened cases. This ensures your RSS reader isn't full of information about closed or historical tasks." %}</p>
 

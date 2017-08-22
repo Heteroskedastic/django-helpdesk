@@ -1,9 +1,13 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Ticket CC Settings" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans with ticket.title as ticket_title and ticket.id as ticket_id %}
-<h2>Ticket CC Settings</h2>
+{% block breadcrumb_items %}
+<li>Ticket CC List</li>
+{% endblock %}
+
+{% block content %}{% blocktrans with ticket.title as ticket_title and ticket.id as ticket_id %}
+<h2 class="page-title">Ticket CC Settings</h2>
 
 <p>The following people will receive an e-mail whenever <em><a href='../'>{{ ticket_title }}</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>
 

@@ -5,8 +5,14 @@
 
 {% block helpdesk_title %}{% trans "Edit Ticket Money Track" %}{% endblock %}
 
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' object.ticket.id %}">{{object.ticket}}</a></li>
+<li>Edit Money Track</li>
+{% endblock %}
+
 {% block helpdesk_pagetitle %}
-{% blocktrans with ticket=object.ticket money=object.money|intcomma %}<h3>Edit Money Track "${{money}}" of "{{ticket}}"</h3>{% endblocktrans %}
+{% blocktrans with ticket=object.ticket money=object.money|intcomma %}<h2 class="page-title">Edit Money Track "${{money}}" of "{{ticket}}"</h2>{% endblocktrans %}
 {% endblock %}
 
 {% block helpdesk_formbuttons %}

@@ -1,16 +1,16 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
 
-{% block helpdesk_body %}
+{% block breadcrumb_items %}
+<li>Dashboard</li>
+{% endblock %}
+
+{% block content %}
+<h2 class="page-title">Dashboard</h2>
 
 <div class="row">
-    <div class="col-lg-8">
+    <div class="col-md-12">
     {% include 'helpdesk/include/stats.html' %}
-    </div>
-    <div class="col-lg-4">
-        <div class="alert alert-warning">
-            <p>{% trans "Welcome to your Helpdesk Dashboard! From here you can quickly see tickets submitted by you, tickets you are working on, and those tickets that have no owner." %}</p>
-        </div>
     </div>
 </div>
 

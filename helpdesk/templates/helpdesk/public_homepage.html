@@ -1,64 +1,52 @@
 {% extends "helpdesk/public_base.html" %}
 {% load i18n bootstrap %}
+{% load static from staticfiles %}
 
-{% block helpdesk_body %}
-
-{% if kb_categories %}
-<h2>{% trans "Knowledgebase Articles" %}</h2>
-
-<table class="table table-hover table-bordered table-striped">
-<caption>{% trans "Knowledgebase Categories" %}</caption>
-<thead>
-<tr><th>{% trans "Category" %}</th></tr>
-</thead>
-<tbody>
-{% for category in kb_categories %}
-<tr><th><a href='{{ category.get_absolute_url }}'>{{ category.title }}</a></th></tr>
-<tr><td>{{ category.description }}</td></tr>
-{% endfor %}
-</tbody>
-</table>
-{% endif %}
+{% block content %}
+<h2 class="page-title">{% trans "Submit a Ticket" %}</h2>
 
 {% if helpdesk_settings.HELPDESK_SUBMIT_A_TICKET_PUBLIC %}
-<div class="col-md-8">
-<div class="panel panel-default">
+<div class="row">
+    <div class="col-md-12">
+        <div class="panel panel-default">
+            <div class="panel-heading">{% trans 'New Ticket' %}</div>
 
-<div class="panel-body">
-    <h2 name='submit'>{% trans "Submit a Ticket" %}</h2>
-<p>{% trans "All fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
+            <div class="panel-body">
 
-<form role="form" method='post' action='./#submit' enctype='multipart/form-data'>
-<fieldset>
-        {{ form|bootstrap }}
-        {% comment %}
-        {% for field in form %}
+            <p class="text-warning">{% trans "All fields are required." %} {% trans "Please provide as descriptive a title and description as possible." %}</p>
 
-            {% if field.is_hidden %}
-                {{ field }}
-            {% else %}
+            <form role="form" method='post' action='./#submit' enctype='multipart/form-data'>
+            <fieldset>
+                    {{ form|bootstrap }}
+                    {% comment %}
+                    {% for field in form %}
+
+                        {% if field.is_hidden %}
+                            {{ field }}
+                        {% else %}
 
 
-            <div class="form-group {% if field.errors %}has-error{% endif %}">
-                <label class="control-label" for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
-                <div class="input-group">{{ field }}</div>
-                {% if field.errors %}<div class="help-block">{{ field.errors }}</div>{% endif %}
-                {% if field.help_text %}<span class='fhelp-block'>{{ field.help_text }}</span>{% endif %}
+                        <div class="form-group {% if field.errors %}has-error{% endif %}">
+                            <label class="control-label" for='id_{{ field.name }}'>{{ field.label }}</label>{% if not field.field.required %} <span class='form_optional'>{% trans "(Optional)" %}</span>{% endif %}</dt>
+                            <div class="input-group">{{ field }}</div>
+                            {% if field.errors %}<div class="help-block">{{ field.errors }}</div>{% endif %}
+                            {% if field.help_text %}<span class='fhelp-block'>{{ field.help_text }}</span>{% endif %}
+                        </div>
+
+                    {% endif %}
+
+                    {% endfor %}
+                    {% endcomment %}
+
+                <div class='buttons form-group'>
+                    <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+                </div>
+            </fieldset>
+
+            {% csrf_token %}</form>
             </div>
-
-        {% endif %}
-
-        {% endfor %}
-        {% endcomment %}
-
-    <div class='buttons form-group'>
-        <input type='submit' class="btn btn-primary" value='{% trans "Submit Ticket" %}' />
+        </div>
     </div>
-</fieldset>
-
-{% csrf_token %}</form>
-</div>
-</div>
 </div>
 {% endif %}
 
@@ -90,4 +78,16 @@
 </div></div></div>
 {% endif %}
 
+{% endblock %}
+
+{% block extra_js %}
+<!-- jQuery UI DatePicker -->
+<script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}' type='text/javascript' language='javascript'></script>
+<link href="{% static 'helpdesk/vendor/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
+
+<script type='text/javascript' language='javascript'>
+$(document).ready(function() {
+    $("#id_due_date").datepicker({dateFormat: 'yy-mm-dd'});
+});
+</script>
 {% endblock %}

@@ -1,9 +1,15 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Ignore E-Mail Address" %}{% endblock %}
 
-{% block helpdesk_body %}
-<h2>{% trans "Ignore E-Mail Address" %}</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:system_settings' %}">System Settings</a></li>
+<li><a href="{% url 'helpdesk:email_ignore' %}">Ignored E-Mail Addresses</a></li>
+<li>New Ignored E-Mail Address</li>
+{% endblock %}
+
+{% block content %}
+<h2 class="page-title">{% trans "Ignore E-Mail Address" %}</h2>
 
 <p>{% blocktrans %}To ignore an e-mail address and prevent any emails from that address creating tickets automatically, enter the e-mail address below.{% endblocktrans %}</p>
 

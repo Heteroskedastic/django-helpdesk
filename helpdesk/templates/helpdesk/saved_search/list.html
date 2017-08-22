@@ -1,12 +1,14 @@
-{% extends "helpdesk/base.html" %}
+{% extends "helpdesk/staff_base.html" %}
 {% load i18n humanize %}
 {% load static from staticfiles %}
 {% block helpdesk_title %}{% trans "Saved Query List" %}{% endblock %}
 {% load helpdesk_util_tags %}
 
-{% block h1_title %}
-{% endblock h1_title %}
-{% block helpdesk_body %}
+{% block breadcrumb_items %}
+<li>Saved Query List</li>
+{% endblock %}
+
+{% block content %}
 <h2 class="page-title">Saved Query Management</h2>
 
 <div class="panel panel-default" id="tickets-list">
@@ -53,9 +55,9 @@
 {% include "helpdesk/partials/action_modal.html" with prefix_id='setDefault' message_class='text-info' %}
 {% include "helpdesk/partials/action_modal.html" with prefix_id='switchShare' message_class='text-info' %}
 
-{% endblock helpdesk_body %}
+{% endblock content %}
 
-{% block helpdesk_head %}
+{% block extra_js %}
 <script src="{% static 'helpdesk/js/util.js' %}"></script>
 
 <script type="text/javascript" charset="utf-8">
@@ -80,4 +82,4 @@ $(document).ready(function () {
 });
 </script>
 
-{% endblock helpdesk_head %}
+{% endblock extra_js %}

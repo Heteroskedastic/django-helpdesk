@@ -1,15 +1,7 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 {% block helpdesk_title %}{% trans "Edit followup" %}{% endblock %}
 
-{% block helpdesk_head %}
-<script type="text/javascript">
-    $(document).ready(function() {
-        $("[data-toggle=tooltip]").tooltip();
-    });
-</script>
-{% endblock helpdesk_head %}
-
-{% block helpdesk_body %}
+{% block content %}
 
 {% include "helpdesk/ticket_desc_table.html" %}
 
@@ -34,4 +26,13 @@
         </fieldset>
         <p><input class="btn btn-primary" type="submit" value="Submit"></p>{% csrf_token %}
     </form>
-{% endblock helpdesk_body %}
+{% endblock content %}
+
+{% block extra_js %}
+<script type="text/javascript">
+    $(document).ready(function() {
+        $("[data-toggle=tooltip]").tooltip();
+    });
+</script>
+{% endblock extra_js %}
+

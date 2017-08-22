@@ -1,9 +1,15 @@
-{% extends "helpdesk/base.html" %}{% load i18n %}
+{% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
 {% block helpdesk_title %}{% trans "Add Ticket Dependency" %}{% endblock %}
 
-{% block helpdesk_body %}{% blocktrans %}
-<h2>Add Ticket Dependency</h2>
+{% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{% url 'helpdesk:view' ticket.id %}">{{ticket}}</a></li>
+<li>Add Dependency</li>
+{% endblock %}
+
+{% block content %}{% blocktrans %}
+<h2 class="page-title">Add Ticket Dependency</h2>
 
 <p>Adding a dependency will stop you resolving this ticket until the dependent ticket has been resolved or closed.</p>{% endblocktrans %}
 
