@@ -15,12 +15,26 @@
 {% endblock %}
 
 {% block content %}
-<h2 class="page-title">Tickets
+<h2 class="row page-title ticket-list-title">
+    <span>Tickets
+    {% if saved_query %}
+    <span class="label label-info current-saved-query-label">
+        {{ saved_query.title }}
+        {% if saved_query.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
+        <span class="fa fa-star"></span>
+        {% endif %}
+    </span>
+    {% else %}
+        <button type="button" name="save-query" data-toggle="popover" class="btn btn-info btn-xs save-filter" title="Save current Query">
+            <span class="fa fa-save"></span> <span class="hidden-xs">Save Current Query</span> <span class="caret"></span>
+        </button>
+    {% endif %}
+    </span>
     <span class="pull-right">
-        <a href="{% url 'helpdesk:submit' %}" class="btn btn-success"><span class="fa fa-plus"></span> New Ticket</a>
+        <a href="{% url 'helpdesk:submit' %}" class="btn btn-success" title="Submit New Ticket"><span class="fa fa-plus"></span> <span class="hidden-xs">New Ticket</span></a>
         {% if user_saved_queries %}
         <span class="dropdown">
-            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-filter"></span> Switch Query
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-filter"></span> <span class="hidden-xs">Switch Query</span>
                 <span class="caret"></span></button>
             <ul class="dropdown-menu saved-query-dropdown dropdown-menu-right">
                 {% for sq in user_saved_queries %}
@@ -43,18 +57,6 @@
         {% endif %}
 
     </span>
-    {% if saved_query %}
-    <span class="label label-info current-saved-query-label">
-        {{ saved_query.title }}
-        {% if saved_query.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
-        <span class="fa fa-star"></span>
-        {% endif %}
-    </span>
-    {% else %}
-        <button type="button" name="save-query" data-toggle="popover" class="btn btn-info btn-xs save-filter" title="Save current Query">
-            <span class="fa fa-save"></span> Save Current Query <span class="caret"></span>
-        </button>
-    {% endif %}
 </h2>
 
 <div class="panel panel-default" id="tickets-list">
@@ -73,13 +75,34 @@
                 {% endif %}
                 <input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
                 {{tickets.form.no_assigned.as_hidden}}
-                <div class="form-group col-sm-6">{{tickets.form.assigned_to}}</div>
-                <div class="form-group col-sm-6">{{tickets.form.queue}}</div>
-                <div class="form-group col-sm-6">{{tickets.form.status}}</div>
-                <div class="form-group col-sm-6">{{tickets.form.priority}}</div>
-                <div class="form-group col-sm-3">{{tickets.form.created_min}}</div>
-                <div class="form-group col-sm-3">{{tickets.form.created_max}}</div>
-                <div class="form-group col-sm-6">{{tickets.form.keywords}}</div>
+                <div class="form-group col-xs-6 col-md-6 col-sm-6 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">Filter By Owner</label>
+                    {{tickets.form.assigned_to}}
+                </div>
+                <div class="form-group col-xs-6 col-md-6 col-sm-6 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">Filter By Queue</label>
+                    {{tickets.form.queue}}
+                </div>
+                <div class="form-group col-xs-6 col-md-6 col-sm-6 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">Filter By Status</label>
+                    {{tickets.form.status}}
+                </div>
+                <div class="form-group col-xs-6 col-md-6 col-sm-6 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">Filter By Priority</label>
+                    {{tickets.form.priority}}
+                </div>
+                <div class="form-group col-xs-6 col-md-3 col-sm-3 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">From Date</label>
+                    {{tickets.form.created_min}}
+                </div>
+                <div class="form-group col-xs-6 col-md-3 col-sm-3 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">To Date</label>
+                    {{tickets.form.created_max}}
+                </div>
+                <div class="form-group col-md-6 col-sm-6 col-xs-12 form-group-packed">
+                    <label class="label-xs hidden-lg hidden-md hidden-sm">Search By Keywords</label>
+                    {{tickets.form.keywords}}
+                </div>
             </form>
         </div>
     </div>

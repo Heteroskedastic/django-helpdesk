@@ -17,36 +17,36 @@ class TicketsFilter(FilterSet):
         empty_label='', required=False, queryset=User.objects.filter(is_staff=True, is_active=True).all(),
         widget=forms.Select(attrs={
             'data-placeholder': 'Filter by Owner',
-            'class': 'chosen-select-deselect'}))
+            'class': 'form-control chosen-select-deselect'}))
 
     queue = filters.ModelMultipleChoiceFilter(
         required=False, queryset=Queue.objects.all(),
         widget=forms.SelectMultiple(attrs={
             'data-placeholder': 'Filter by Queue',
-            'class': 'chosen-select'}))
+            'class': 'form-control chosen-select'}))
 
     status = filters.MultipleChoiceFilter(
         required=False, choices=Ticket.STATUS_CHOICES,
         widget=forms.SelectMultiple(attrs={
             'data-placeholder': 'Filter by Status',
-            'class': 'chosen-select'}))
+            'class': 'form-control chosen-select'}))
     priority = filters.MultipleChoiceFilter(
         required=False, choices=Ticket.PRIORITY_CHOICES,
         widget=forms.SelectMultiple(attrs={
             'data-placeholder': 'Filter by Priority',
-            'class': 'chosen-select'}))
+            'class': 'form-control chosen-select'}))
     created_min = filters.DateFilter(name='created', lookup_expr='gte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'From Date',
-                                         'class': 'datepicker-widget'}))
+                                         'class': 'form-control datepicker-widget'}))
     created_max = filters.DateFilter(name='created', lookup_expr='lte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'To Date',
-                                         'class': 'datepicker-widget'}))
+                                         'class': 'form-control datepicker-widget'}))
     keywords = filters.CharFilter(method='keywords_filter',
                                   widget=forms.TextInput(attrs={
                                       'placeholder': 'Search by Keywords',
-                                      'class': ''}))
+                                      'class': 'form-control'}))
 
     order_by = ExtendedOrderingFilter(
         fields=['id', 'queue', 'priority', 'assigned_to', 'status', 'title', 'description', 'created', 'due_date',],

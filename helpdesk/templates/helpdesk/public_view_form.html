@@ -1,24 +1,30 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}
 
 {% block content %}
-<h2 class="page-title">{% trans "View a Ticket" %}</h2>
+<h2 class="page-title" xmlns:helpdesk="http://www.w3.org/1999/xhtml">{% trans "View a Ticket" %}</h2>
 
-<form method='get' action='{% url 'helpdesk:public_view' %}'>
+<div class="row">
+    <div class="col-md-6">
+        <form method='get' action='{% url 'helpdesk:public_view' %}'>
 
-{% if error_message %}<p><strong>{% trans "Error:" %}</strong> {{ error_message }}</p>{% endif %}
+            {% if error_message %}
+            <p class="error-message"><strong>{% trans "Error:" %}</strong> {{ error_message }}</p>
+            {% endif %}
 
-<fieldset>
-    <dl>
-        <dt><label for='id_ticket'>{% trans "Ticket" %}</label></dt>
-        <dd><input type='text' name='ticket' /></dd>
+            <div class="form-group">
+                <label for='id_ticket'>{% trans "Ticket" %}</label>
+                <input type='text' name='ticket' class="form-control" />
+            </div>
+            <div class="form-group">
+                <label for='id_email'>{% trans "Your E-mail Address" %}</label>
+                <input type='text' name='email' class="form-control" />
+            </div>
 
-        <dt><label for='id_email'>{% trans "Your E-mail Address" %}</label></dt>
-        <dd><input type='text' name='email' /></dd>
-    </dl>
-
-    <input class="btn btn-primary" type='submit' value='{% trans "View Ticket" %}' />
-</fieldset>
-{% csrf_token %}</form>
+            <input class="btn btn-primary" type='submit' value='{% trans "View Ticket" %}' />
+            {% csrf_token %}
+        </form>
+    </div>
+</div>
 
 
 {% endblock %}

@@ -32,16 +32,16 @@
             {% endif %}</td>
         <td class="saved-search-actions">
             {% if q.shared %}
-            <button type="button" name="unshare" class="btn btn-sm btn-warning" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Share with other users"{% endif %}><span class="fa fa-share-alt"></span> Un-share</button>
+            <button type="button" name="unshare" class="btn btn-sm btn-warning" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Share with other users"{% endif %}><span class="fa fa-share-alt"></span><span class="hidden-xs"> Un-share</span></button>
             {% else %}
-            <button type="button" name="share" class="btn btn-sm btn-primary" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Un-share with other users"{% endif %}><span class="fa fa-share-alt"></span> Share</button>
+            <button type="button" name="share" class="btn btn-sm btn-primary" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Un-share with other users"{% endif %}><span class="fa fa-share-alt"></span><span class="hidden-xs"> Share</span></button>
             {% endif %}
             {% if q.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}
-            <button type="button" name="remove_default" class="btn btn-sm btn-warning" href="#"><span class="fa fa-star-o"></span> Remove Default</button>
+            <button type="button" name="remove_default" class="btn btn-sm btn-warning" href="#"><span class="fa fa-star-o"></span><span class="hidden-xs"> Remove Default</span></button>
             {% else %}
-            <button type="button" name="set_default" class="btn btn-sm btn-success" href="#"><span class="fa fa-star"></span> Set as Default</button>
+            <button type="button" name="set_default" class="btn btn-sm btn-success" href="#"><span class="fa fa-star"></span><span class="hidden-xs"> Set as Default</span></button>
             {% endif %}
-            <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" {% if not user.is_superuser and q.user_id != user.id %}title="No Permission" disabled{% endif %} title="Delete Ticket"><span class="fa fa-trash"></span> Delete</button>
+            <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" {% if not user.is_superuser and q.user_id != user.id %}title="No Permission" disabled{% endif %} title="Delete Ticket"><span class="fa fa-trash"></span><span class="hidden-xs"> Delete</span></button>
         </td>
     </tr>
     {% empty %}

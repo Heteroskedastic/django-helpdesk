@@ -29,7 +29,7 @@
         <h4><i class="fa fa-clock-o fa-fw fa-lg"></i>&nbsp;{% trans "Follow-Ups" %}</h4>
     </div>
     <!-- /.panel-heading -->
-    <div class="panel-body">
+    <div class="panel-body ticket-timeline-body">
         <ul class="timeline">
         {% for followup in ticket.followup_set.all %}
             <li{% if not followup.user %} class="timeline-inverted"{% endif %}>

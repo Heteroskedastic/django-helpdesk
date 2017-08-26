@@ -247,6 +247,10 @@ ul.errorlist {
 
 .has-error .input-group input, .has-error .input-group select, .has-error .input-group textarea {border-color: #b94a48}
 
+.error-message {
+    color: #a94442;
+}
+
 #helpdesk-nav-collapse #searchform {
     padding-top: 0;
 }
@@ -311,3 +315,14 @@ table.table caption {
     font-weight: bold;
 }
 
+.label-xs {
+    font-size: 10px;
+    color: gray;
+    margin-bottom: 0 !important;
+}
+
+@media (max-width: 767px) {
+    .form-group-packed {
+        margin-bottom: 0 !important;
+    }
+}

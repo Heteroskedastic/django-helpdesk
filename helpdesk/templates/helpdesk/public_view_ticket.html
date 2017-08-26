@@ -81,7 +81,7 @@
                 {% for followup in ticket.followup_set.public_followups %}
                 <div class='followup well'>
                 <div class='title'>{{ followup.title }} <span class='byline text-info'>{% if followup.user %}by {{ followup.user }}{% endif %} <span title='{{ followup.date|date:"r" }}'>{{ followup.date|naturaltime }}</span></span></div>
-                {{ followup.comment|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
+                {{ followup.comment|default:''|force_escape|urlizetrunc:50|num_to_link|linebreaksbr }}
                 {% if followup.ticketchange_set.all %}<div class='changes'><ul>
                 {% for change in followup.ticketchange_set.all %}
                 <li>{% blocktrans with change.field as field and change.old_value as old_value and change.new_value as new_value %}Changed {{ field }} from {{ old_value }} to {{ new_value }}.{% endblocktrans %}</li>

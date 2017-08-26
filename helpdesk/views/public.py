@@ -76,14 +76,14 @@ def homepage(request):
 
 
 def view_ticket(request):
-    ticket_req = request.GET.get('ticket', None)
+    ticket = request.GET.get('ticket', None)
     email = request.GET.get('email', None)
 
-    if ticket_req and email:
-        queue, ticket_id = Ticket.queue_and_id_from_query(ticket_req)
+    if ticket and email:
         try:
+            ticket_id = int(ticket)
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
-        except ObjectDoesNotExist:
+        except (ObjectDoesNotExist, ValueError):
             error_message = _('Invalid ticket ID or e-mail address. Please try again.')
         else:
             if request.user.is_staff:
@@ -118,7 +118,7 @@ def view_ticket(request):
                 'helpdesk_settings': helpdesk_settings,
                 'next': redirect_url,
             })
-    elif ticket_req is None and email is None:
+    elif ticket is None and email is None:
         error_message = None
     else:
         error_message = _('Missing ticket ID or e-mail address. Please try again.')
