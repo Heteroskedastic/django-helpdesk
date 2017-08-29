@@ -326,3 +326,19 @@ table.table caption {
         margin-bottom: 0 !important;
     }
 }
+
+.collapse-link {
+    text-decoration: none !important;
+}
+
+.collapse-link:after {
+    /* symbol for "opening" panels */
+    font-family: 'FontAwesome';  /* essential for enabling glyphicon */
+    content: "\f107";    /* adjust as needed, taken from bootstrap.css */
+    float: right;        /* adjust as needed */
+    margin-left: 2px;
+}
+.collapse-link.collapsed:after {
+    /* symbol for "collapsed" panels */
+    content: "\f105";    /* adjust as needed, taken from bootstrap.css */
+}

@@ -82,7 +82,10 @@ class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
     class Meta:
         model = Ticket
-        exclude = ('created', 'modified', 'status', 'on_hold', 'resolution', 'last_escalation', 'assigned_to')
+        exclude = ('created', 'modified', 'modified_status', 'status', 'on_hold', 'resolution', 'last_escalation')
+        labels = {
+            'assigned_to': _('Assigned To (Owner)')
+        }
 
     def __init__(self, *args, **kwargs):
         """

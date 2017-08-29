@@ -382,18 +382,11 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    due_date_year = int(request.POST.get('due_date_year', 0))
-    due_date_month = int(request.POST.get('due_date_month', 0))
-    due_date_day = int(request.POST.get('due_date_day', 0))
-
-    if not (due_date_year and due_date_month and due_date_day):
-        due_date = ticket.due_date
-    else:
-        if ticket.due_date:
-            due_date = ticket.due_date
-        else:
-            due_date = timezone.now()
-        due_date = due_date.replace(due_date_year, due_date_month, due_date_day)
+    old_due_date = ticket.due_date and ticket.due_date.date()
+    try:
+        due_date = datetime.strptime(request.POST.get('due_date', ''), '%Y-%m-%d').date()
+    except ValueError:
+        due_date = old_due_date
 
     no_changes = all([
         not request.FILES,
@@ -401,7 +394,7 @@ def update_ticket(request, ticket_id, public=False):
         new_status == ticket.status,
         title == ticket.title,
         priority == int(ticket.priority),
-        due_date == ticket.due_date,
+        due_date == old_due_date,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -508,11 +501,11 @@ def update_ticket(request, ticket_id, public=False):
         c.save()
         ticket.priority = priority
 
-    if due_date != ticket.due_date:
+    if due_date != old_due_date:
         c = TicketChange(
             followup=f,
             field=_('Due on'),
-            old_value=ticket.due_date,
+            old_value=old_due_date,
             new_value=due_date,
         )
         c.save()
