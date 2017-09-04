@@ -1,7 +1,7 @@
 from collections import OrderedDict
 from datetime import timedelta
 from django.utils import timezone
-from django.contrib.humanize.templatetags.humanize import naturaltime
+from django.contrib.humanize.templatetags.humanize import naturaltime, intcomma
 from helpdesk import settings
 from django import template
 
@@ -21,10 +21,10 @@ register = template.Library()
 # noinspection PyAugmentAssignment
 @register.filter
 def humanize_duration(seconds):
-    if seconds is None:
-        return
     if isinstance(seconds, timedelta):
         seconds = int(seconds.total_seconds())
+    if not seconds:
+        return None
     s = m = h = d = ''
     if seconds >= 86400:
         days = seconds // 86400
@@ -40,6 +40,31 @@ def humanize_duration(seconds):
         m = ngettext("%d minute", "%d minutes", minutes) % minutes
     res = ', '.join([i for i in (d, h, m, s) if i])
     return res or _('a few seconds')
+
+# noinspection PyAugmentAssignment
+@register.filter()
+def seconds_to_time(delta, format='short'):
+    def plural(n):
+        return n, abs(n) != 1 and "s" or ""
+
+    if isinstance(delta, str):
+        delta = int(delta)
+    if not isinstance(delta, timedelta):
+        delta = timedelta(seconds=delta)
+
+    days = ''
+    if delta.days:
+        days = "%d day%s" % plural(delta.days)
+        if format == 'short':
+            return days
+        days = days + ', '
+
+    mm, ss = divmod(delta.seconds, 60)
+    hh, mm = divmod(mm, 60)
+    s = "%d:%02d:%02d" % (hh, mm, ss)
+    if delta.days:
+        s = '{}{}'.format(days, s)
+    return s
 
 
 @register.filter_function
@@ -174,3 +199,11 @@ def disable_ifnot(*condition, attr='disabled', title='No Access!'):
     if not all(condition):
         html = '{} title="{}"'.format(attr, title) if title else attr
     return mark_safe(html)
+
+
+@register.filter
+def currency(dollars):
+    if dollars is None:
+        return
+    dollars = round(float(dollars), 2)
+    return "$%s%s" % (intcomma(int(dollars)), ("%0.2f" % dollars)[-3:])

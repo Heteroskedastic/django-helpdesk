@@ -2,7 +2,7 @@ import json
 from django.http import QueryDict
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum, F, Case, When, Value
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
@@ -15,7 +15,7 @@ from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
 from helpdesk.utils import StaffLoginRequiredMixin, get_current_page_size, success_message, BulkableActionMixin, \
     error_message, warning_message, to_bool, send_form_errors, to_query_dict
-from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch
+from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketTimeTrack
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import b64decode, b64encode
 
@@ -76,6 +76,16 @@ class TicketListView(StaffLoginRequiredMixin, View):
                 request.GET.setlist(p, data.getlist(p))
         request.GET._mutable = False
 
+    def get_queryset(self, **kwargs):
+        time_track_qs = 'SELECT coalesce(SUM("helpdesk_tickettimetrack"."time"), INTERVAL \'0 seconds\') as sum_time FROM "helpdesk_tickettimetrack"' \
+                        ' WHERE "helpdesk_tickettimetrack"."ticket_id"="helpdesk_ticket"."id"'
+        money_track_qs = 'SELECT coalesce(SUM("helpdesk_ticketmoneytrack"."money"), 0) as sum_money FROM "helpdesk_ticketmoneytrack"' \
+                         ' WHERE "helpdesk_ticketmoneytrack"."ticket_id"="helpdesk_ticket"."id"'
+        time_open_field = Case(When(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS), then=Value(timezone.now()) - F('created')),
+                               default=F('modified_status') - F('created'))
+        return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}).annotate(
+            time_open=time_open_field).filter(**kwargs).order_by('id')
+
     def get(self, request, *args, **kwargs):
         data = request.GET.copy()
         user_queues = _get_user_queues(request.user)
@@ -108,7 +118,7 @@ class TicketListView(StaffLoginRequiredMixin, View):
             if 'status' not in data:
                 data.setlist('status', [Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.CLOSED_STATUS])
             urlsafe_query = b64encode(json.dumps(dict(data)).encode('UTF-8'))
-        qs = Ticket.objects.filter(queue__in=user_queues).order_by('id')
+        qs = self.get_queryset(queue__in=user_queues)
         tickets = TicketsFilter(data, queryset=qs)
 
         tickets.filters['queue'].queryset = tickets.filters['queue'].queryset.filter(id__in=user_queues)

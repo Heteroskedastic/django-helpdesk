@@ -49,7 +49,8 @@ class TicketsFilter(FilterSet):
                                       'class': 'form-control'}))
 
     order_by = ExtendedOrderingFilter(
-        fields=['id', 'queue', 'priority', 'assigned_to', 'status', 'title', 'description', 'created', 'due_date',],
+        fields=['id', 'queue', 'priority', 'assigned_to', 'status', 'title', 'description', 'created', 'due_date',
+                'time_tracks', 'money_tracks', 'time_open'],
         ordering_map={
             'queue': 'queue__title',
             'assigned_to': ('assigned_to__first_name', 'assigned_to__last_name'),

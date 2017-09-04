@@ -117,6 +117,9 @@
                 <th>{% sorting_link 'Queue' 'queue' %}</th>
                 <th>{% sorting_link 'Priority' 'priority' %}</th>
                 <th>{% sorting_link 'Status' 'status' %}</th>
+                <th>{% sorting_link 'Time Open' 'time_open' %}</th>
+                <th>{% sorting_link 'Time Tracks' 'time_tracks' %}</th>
+                <th>{% sorting_link 'Money Tracks' 'money_tracks' %}</th>
                 <th>{% sorting_link 'Created' 'created' %}</th>
                 <th>{% sorting_link 'Due' 'due_date' %}</th>
                 <th>{% sorting_link 'Owner' 'assigned_to' %}</th>
@@ -145,6 +148,9 @@
                 <td>{{ ticket.queue }}</td>
                 <td>{{ ticket.priority|ticket_priority_label_class }}</td>
                 <td title="{{ticket.modified_status|naturaltime}}">{{ ticket.status|ticket_status_label_class }}</td>
+                <td title="{{ ticket.time_open|humanize_duration}}">{{ ticket.time_open|seconds_to_time:'short' }}</td>
+                <td title="{{ ticket.time_tracks|humanize_duration|default:'NO TIME' }}">{{ ticket.time_tracks|seconds_to_time }}</td>
+                <td>{{ ticket.money_tracks|currency }}</td>
                 <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span>
                 </td>
                 <td><span class="{{ ticket|ticket_due_date_css }}"
