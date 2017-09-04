@@ -84,7 +84,7 @@ class TicketListView(StaffLoginRequiredMixin, View):
         time_open_field = Case(When(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS), then=Value(timezone.now()) - F('created')),
                                default=F('modified_status') - F('created'))
         return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}).annotate(
-            time_open=time_open_field).filter(**kwargs).order_by('id')
+            time_open=time_open_field).filter(**kwargs).order_by('-id')
 
     def get(self, request, *args, **kwargs):
         data = request.GET.copy()
