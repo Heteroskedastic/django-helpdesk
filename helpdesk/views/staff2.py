@@ -159,7 +159,7 @@ class TicketListExportView(TicketListView):
 
     def __export_csv(self, queryset):
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=sales-report.csv'
+        response['Content-Disposition'] = 'attachment; filename=tickets.csv'
         columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Queue'), ('priority', 'Priority'), ('status', 'Status'),
                    ('time_open', 'Time Open'), ('time_tracks', 'Time Spent'), ('money_tracks', 'Cost'),
                    ('created', 'Created'), ('due_date', 'Due'), ('assigned_to', 'Owner')]
