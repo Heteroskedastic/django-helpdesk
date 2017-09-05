@@ -1,5 +1,6 @@
+import csv
 import json
-from django.http import QueryDict
+from django.http import QueryDict, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q, Sum, F, Case, When, Value
@@ -13,6 +14,7 @@ from django.views.generic.detail import SingleObjectMixin
 from helpdesk.filters import TicketsFilter
 from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
+from helpdesk.templatetags.helpdesk_util_tags import seconds_to_time
 from helpdesk.utils import StaffLoginRequiredMixin, get_current_page_size, success_message, BulkableActionMixin, \
     error_message, warning_message, to_bool, send_form_errors, to_query_dict
 from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketTimeTrack
@@ -130,7 +132,55 @@ class TicketListView(StaffLoginRequiredMixin, View):
             'saved_query': saved_query,
             'user_saved_queries': user_saved_queries,
         }
-        return render(request, 'helpdesk/ticket/list.html', ctx)
+        return self.render_result(request, ctx)
+
+    def render_result(self, request, context):
+        return render(request, 'helpdesk/ticket/list.html', context)
+
+
+class TicketListExportView(TicketListView):
+    EXPORT_TYPES = ['csv']
+    type_url_kwarg = 'type'
+
+    def serialize_ticket(self, ticket, columns):
+        d = {}
+        for c in columns:
+            field = c[0]
+            title = c[1]
+            value = getattr(ticket, field, None)
+            if field in ('time_open', 'time_tracks'):
+                value = seconds_to_time(value, format='clock')
+            elif field == 'priority':
+                value = ticket.get_priority_display()
+            elif field == 'status':
+                value = ticket.get_status_display()
+            d[title] = value
+        return d
+
+    def __export_csv(self, queryset):
+        response = HttpResponse(content_type='text/csv')
+        response['Content-Disposition'] = 'attachment; filename=sales-report.csv'
+        columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Queue'), ('priority', 'Priority'), ('status', 'Status'),
+                   ('time_open', 'Time Open'), ('time_tracks', 'Time Spent'), ('money_tracks', 'Cost'),
+                   ('created', 'Created'), ('due_date', 'Due'), ('assigned_to', 'Owner')]
+        writer = csv.DictWriter(response, fieldnames=[c[1] for c in columns])
+        writer.writeheader()
+        for ticket in queryset:
+            row = self.serialize_ticket(ticket, columns)
+            writer.writerow(row)
+        return response
+
+    def get(self, request, *args, **kwargs):
+        self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()
+        if self.export_type not in self.EXPORT_TYPES:
+            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
+        return super(TicketListExportView, self).get(request, *args, **kwargs)
+
+    def render_result(self, request, context):
+        if self.export_type == 'csv':
+            return self.__export_csv(context['tickets'].qs)
+        else:
+            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
 
 
 class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):

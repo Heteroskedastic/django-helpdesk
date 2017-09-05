@@ -51,6 +51,11 @@ def seconds_to_time(delta, format='short'):
         delta = int(delta)
     if not isinstance(delta, timedelta):
         delta = timedelta(seconds=delta)
+    if format == 'clock':
+        total_seconds = int(delta.total_seconds())
+        mm, ss = divmod(total_seconds, 60)
+        hh, mm = divmod(mm, 60)
+        return "%d:%02d:%02d" % (hh, mm, ss)
 
     days = ''
     if delta.days:

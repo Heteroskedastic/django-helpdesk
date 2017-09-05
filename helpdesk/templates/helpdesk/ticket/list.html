@@ -31,6 +31,7 @@
     {% endif %}
     </span>
     <span class="pull-right">
+        <a href="{% url 'helpdesk:tickets-export' type='csv' %}?{{request.GET.urlencode}}" class="btn btn-info" title="Export to CSV"><span class="fa fa-file-excel-o"></span> <span class="hidden-xs">CSV</span></a>
         <a href="{% url 'helpdesk:submit' %}" class="btn btn-success" title="Submit New Ticket"><span class="fa fa-plus"></span> <span class="hidden-xs">New Ticket</span></a>
         {% if user_saved_queries %}
         <span class="dropdown">
