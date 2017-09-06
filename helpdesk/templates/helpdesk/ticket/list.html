@@ -173,7 +173,10 @@
     </div>
     <div class="panel-footer">
         {% paginate %}
-        <div class="pull-right">{% page_size_combo %}</div>
+        <div class="pull-right mar-top10">
+            {% pagination_info %}
+            {% page_size_combo %}
+        </div>
     </div>
     {% endwith %}
 

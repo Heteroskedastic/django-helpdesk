@@ -148,6 +148,18 @@ def page_size_combo(context, *sizes, **kwargs):
     return mark_safe(html)
 
 
+@register.simple_tag(takes_context=True)
+def pagination_info(context, *args, **kwargs):
+    paginator = context.get('paginator')
+    page_obj = context.get('page_obj')
+
+    html = '<span class="pagination-info">Displaying <span class="pagination-info-start">{start_index}</span> - <span '\
+    'class="pagination-info-end">{end_index}</span> of <span class="pagination-info-count">{records_count}</span> ' \
+    'records</span>'.format(start_index=page_obj.start_index(), end_index=page_obj.end_index(),
+                            records_count=paginator.count)
+    return mark_safe(html)
+
+
 @register.filter
 def ticket_priority_label_class(value):
     from helpdesk.models import Ticket

@@ -278,6 +278,19 @@ img.brand {padding-right: 30px;}
   width: 65px !important;
 }
 
+.pagination-info {
+    margin-right: 10px;
+    color: gray;
+}
+
+.pagination-info-start, .pagination-info-end {
+    font-weight: bold;
+}
+
+.pagination-info-count {
+    font-weight: bold;
+}
+
 .pagination {
     margin-bottom: 0 !important;
     margin-top: 5px !important;
