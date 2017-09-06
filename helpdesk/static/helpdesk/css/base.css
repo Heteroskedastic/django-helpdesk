@@ -274,8 +274,8 @@ img.brand {padding-right: 30px;}
   margin-bottom: 5px;
 }
 
-.page-size {
-  width: 65px;
+.page-size, .page-size + .chosen-container {
+  width: 65px !important;
 }
 
 .pagination {
