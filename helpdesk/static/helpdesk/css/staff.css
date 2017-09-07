@@ -246,6 +246,7 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
 
 #filterForm .chosen-container-single .chosen-single,
 #filterForm .chosen-container-multi .chosen-choices,
+#reportSavedQueryForm .chosen-container-single .chosen-single,
 #assignTicketForm .chosen-container-single .chosen-single {
   height: 32px !important;
   margin-top: 1px;
@@ -255,8 +256,16 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
 #filterForm .chosen-container-single .chosen-single,
 #filterForm .chosen-container-single .chosen-single div,
 #assignTicketForm .chosen-container-single .chosen-single,
-#assignTicketForm .chosen-container-single .chosen-single div {
+#assignTicketForm .chosen-container-single .chosen-single div,
+#reportSavedQueryForm .chosen-container-single .chosen-single,
+#reportSavedQueryForm .chosen-container-single .chosen-single div{
     padding-top: 4px;
+}
+
+#reportSavedQueryForm .search-choice-close,
+#assignTicketForm .search-choice-close,
+#filterForm .search-choice-close {
+    margin-top: 4px;
 }
 
 #filterForm div.form-group {
@@ -330,6 +339,10 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
 .ticket-list-title {
     margin-left: 0 !important;
     margin-right: 0 !important;
+}
+
+#id_saved_query {
+    width: 150px;
 }
 
 

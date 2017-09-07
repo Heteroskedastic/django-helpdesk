@@ -1,10 +1,13 @@
 import csv
 import json
+
+from collections import defaultdict
 from django.http import QueryDict, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q, Sum, F, Case, When, Value
 from django.shortcuts import render, redirect, get_object_or_404
+from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
 from django.utils import timezone
@@ -498,3 +501,197 @@ class SavedSearchSwitchSharedView(StaffLoginRequiredMixin, SingleObjectMixin, Vi
         return self.request.META.get('HTTP_REFERER') or reverse('helpdesk:saved_search-list')
 
 
+class RunReportView(StaffLoginRequiredMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        report = kwargs.get('report')
+        if report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority',
+                          'userqueue', 'daysuntilticketclosedbymonth') or Ticket.objects.all().count() == 0:
+            return redirect(reverse("helpdesk:report_index"))
+
+        user_queues = _get_user_queues(request.user)
+        report_queryset = Ticket.objects.all().select_related().filter(queue__in=user_queues)
+
+        from_saved_query = False
+        saved_query = request.GET.get('saved_query', None)
+        user_saved_queries = SavedSearch.objects.filter(Q(user=request.user) | Q(shared__exact=True))
+
+        if saved_query:
+            try:
+                saved_query = user_saved_queries.get(pk=int(saved_query))
+            except (ValueError, SavedSearch.DoesNotExist):
+                warning_message('Saved query does not exists!', request)
+                return redirect(reverse('helpdesk:report_index'))
+
+            try:
+                query_params = json.loads(b64decode(str(saved_query.query)).decode())
+            except ValueError:
+                return redirect(reverse('helpdesk:report_index'))
+            else:
+                query_params = to_query_dict(query_params)
+
+            report_queryset = TicketsFilter(query_params, queryset=report_queryset).qs
+
+        summarytable = defaultdict(int)
+        # a second table for more complex queries
+        summarytable2 = defaultdict(int)
+
+        def month_name(m):
+            MONTHS_3[m].title()
+
+        first_ticket = Ticket.objects.all().order_by('created').first()
+        first_month = first_ticket.created.month
+        first_year = first_ticket.created.year
+
+        last_ticket = Ticket.objects.all().order_by('created').last()
+        last_month = last_ticket.created.month
+        last_year = last_ticket.created.year
+
+        periods = []
+        year, month = first_year, first_month
+        working = True
+        periods.append("%s-%s" % (year, month))
+
+        while working:
+            month += 1
+            if month > 12:
+                year += 1
+                month = 1
+            if (year > last_year) or (month > last_month and year >= last_year):
+                working = False
+            periods.append("%s-%s" % (year, month))
+
+        title = col1heading = possible_options = charttype = None
+        if report == 'userpriority':
+            title = _('User by Priority')
+            col1heading = _('User')
+            possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+            charttype = 'bar'
+
+        elif report == 'userqueue':
+            title = _('User by Queue')
+            col1heading = _('User')
+            possible_options = [q.title for q in user_queues]
+            charttype = 'bar'
+
+        elif report == 'userstatus':
+            title = _('User by Status')
+            col1heading = _('User')
+            possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+            charttype = 'bar'
+
+        elif report == 'usermonth':
+            title = _('User by Month')
+            col1heading = _('User')
+            possible_options = periods
+            charttype = 'date'
+
+        elif report == 'queuepriority':
+            title = _('Queue by Priority')
+            col1heading = _('Queue')
+            possible_options = [t[1].title() for t in Ticket.PRIORITY_CHOICES]
+            charttype = 'bar'
+
+        elif report == 'queuestatus':
+            title = _('Queue by Status')
+            col1heading = _('Queue')
+            possible_options = [s[1].title() for s in Ticket.STATUS_CHOICES]
+            charttype = 'bar'
+
+        elif report == 'queuemonth':
+            title = _('Queue by Month')
+            col1heading = _('Queue')
+            possible_options = periods
+            charttype = 'date'
+
+        elif report == 'daysuntilticketclosedbymonth':
+            title = _('Days until ticket closed by Month')
+            col1heading = _('Queue')
+            possible_options = periods
+            charttype = 'date'
+
+        metric3 = False
+        for ticket in report_queryset:
+            if report == 'userpriority':
+                metric1 = u'%s' % ticket.get_assigned_to
+                metric2 = u'%s' % ticket.get_priority_display()
+
+            elif report == 'userqueue':
+                metric1 = u'%s' % ticket.get_assigned_to
+                metric2 = u'%s' % ticket.queue.title
+
+            elif report == 'userstatus':
+                metric1 = u'%s' % ticket.get_assigned_to
+                metric2 = u'%s' % ticket.get_status_display()
+
+            elif report == 'usermonth':
+                metric1 = u'%s' % ticket.get_assigned_to
+                metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+            elif report == 'queuepriority':
+                metric1 = u'%s' % ticket.queue.title
+                metric2 = u'%s' % ticket.get_priority_display()
+
+            elif report == 'queuestatus':
+                metric1 = u'%s' % ticket.queue.title
+                metric2 = u'%s' % ticket.get_status_display()
+
+            elif report == 'queuemonth':
+                metric1 = u'%s' % ticket.queue.title
+                metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+
+            elif report == 'daysuntilticketclosedbymonth':
+                metric1 = u'%s' % ticket.queue.title
+                metric2 = u'%s-%s' % (ticket.created.year, ticket.created.month)
+                metric3 = ticket.modified - ticket.created
+                metric3 = metric3.days
+
+            summarytable[metric1, metric2] += 1
+            if metric3:
+                if report == 'daysuntilticketclosedbymonth':
+                    summarytable2[metric1, metric2] += metric3
+
+        table = []
+
+        if report == 'daysuntilticketclosedbymonth':
+            for key in summarytable2.keys():
+                summarytable[key] = summarytable2[key] / summarytable[key]
+
+        header1 = sorted(set(list(i for i, _ in summarytable.keys())))
+
+        column_headings = [col1heading] + possible_options
+
+        # Pivot the data so that 'header1' fields are always first column
+        # in the row, and 'possible_options' are always the 2nd - nth columns.
+        for item in header1:
+            data = []
+            for hdr in possible_options:
+                data.append(summarytable[item, hdr])
+            table.append([item] + data)
+
+        # Zip data and headers together in one list for Morris.js charts
+        # will get a list like [(Header1, Data1), (Header2, Data2)...]
+        seriesnum = 0
+        morrisjs_data = []
+        for label in column_headings[1:]:
+            seriesnum += 1
+            datadict = {"x": label}
+            for n in range(0, len(table)):
+                datadict[n] = table[n][seriesnum]
+            morrisjs_data.append(datadict)
+
+        series_names = []
+        for series in table:
+            series_names.append(series[0])
+
+        return render(request, 'helpdesk/report_output.html', {
+            'title': title,
+            'charttype': charttype,
+            'data': table,
+            'headings': column_headings,
+            'series_names': series_names,
+            'morrisjs_data': morrisjs_data,
+            'from_saved_query': from_saved_query,
+            'saved_query': saved_query,
+            'user_saved_queries': user_saved_queries,
+        })

@@ -142,7 +142,7 @@ urlpatterns = [
         name='report_index'),
 
     url(r'^reports/(?P<report>\w+)/$',
-        staff.run_report,
+        staff2.RunReportView.as_view(),
         name='run_report'),
 
     url(r'^save_query/$',

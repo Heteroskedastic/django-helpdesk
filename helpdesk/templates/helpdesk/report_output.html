@@ -9,6 +9,7 @@
 {% else %}
 <link href="{% static 'helpdesk/vendor/morrisjs/morris.css' %}" rel="stylesheet">
 {% endif %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
 {% endblock extra_css %}
 
 {% block breadcrumb_items %}
@@ -29,21 +30,20 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-{% with user|saved_queries as user_saved_queries_ %}
-{% if user_saved_queries_ %}
+{% if user_saved_queries %}
     <p>{% trans "You can run this query on filtered data by using one of your saved queries." %}</p>
-    <form method='GET' action='./'>
-        <label for='saved_query'>{% trans "Select Query:" %}</label>
-        <select name='saved_query'>
-            <option value="">--------</option>{% for q in user_saved_queries_ %}
-            <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>{% endfor %}
+    <form method="GET" class="form-inline" id="reportSavedQueryForm">
+        <label for="id_saved_query">{% trans "Select Query:" %}</label>
+        <select name="saved_query" id="id_saved_query" class="form-control" data-placeholder="No Query">
+            <option value></option>
+            {% for q in user_saved_queries %}
+            <option value="{{ q.id }}"{% ifequal saved_query q %} selected{% endifequal %}>{{ q.title }}</option>
+            {% endfor %}
         </select>
-        <input class="btn btn-primary" type='submit' value='{% trans "Filter Report" %}'>
     </form>
 {% else %}
     <p>{% trans "Want to filter this report to just show a subset of data? Go to the Ticket List, filter your query, and save your query." %}</p>
 {% endif %}
-{% endwith %}
 
                         </div>
                         <!-- /.panel-body -->
@@ -106,9 +106,13 @@
     <script src="{% static 'helpdesk/vendor/raphael/raphael.min.js' %}"></script>
     <script src="{% static 'helpdesk/vendor/morrisjs/morris.min.js' %}"></script>
     {% endif %}
+    <script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
 
     <script type='text/javascript'>
     $(document).ready(function () {
+        $('#id_saved_query').chosen({allow_single_deselect: true}).on('change', function () {
+            $('#reportSavedQueryForm').submit();
+        });
         var chartType = '{{charttype}}';
         if (chartType === "bar") {
             Morris.Bar({
