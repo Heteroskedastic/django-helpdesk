@@ -98,17 +98,13 @@ def dashboard(request):
     with options for them to 'Take' ownership of said tickets.
     """
 
-    # open & reopened tickets, assigned to current user
-    tickets = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-    ).exclude(
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS],
-    )
+    # open & reopened & resolved tickets, assigned to current user
+    tickets = Ticket.objects.select_related('queue').filter(assigned_to=request.user).filter(
+        status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS])
 
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user,
-        status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        assigned_to=request.user, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
 
     user_queues = _get_user_queues(request.user)
 
@@ -1475,8 +1471,9 @@ def calc_average_nbr_days_until_ticket_resolved(Tickets):
 
 
 def calc_basic_ticket_stats(Tickets):
-    # all not closed tickets (open, reopened, resolved,) - independent of user
-    all_open_tickets = Tickets.exclude(status=Ticket.CLOSED_STATUS)
+    # all not closed tickets (open, reopened, resolved) - independent of user
+    all_open_tickets = Tickets.filter(
+        status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS])
     today = datetime.today()
 
     date_30 = date_rel_to_today(today, 30)
@@ -1548,7 +1545,7 @@ def date_rel_to_today(today, offset):
 
 
 def sort_string(begin, end):
-    return 'sort=created&date_from=%s&date_to=%s&status=%s&status=%s&status=%s' % (
+    return 'order_by=created&created_min=%s&created_max=%s&status=%s&status=%s&status=%s' % (
         begin, end, Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS)
 
 

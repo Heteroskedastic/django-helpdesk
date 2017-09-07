@@ -262,9 +262,9 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
     padding-top: 4px;
 }
 
-#reportSavedQueryForm .search-choice-close,
-#assignTicketForm .search-choice-close,
-#filterForm .search-choice-close {
+#reportSavedQueryForm .chosen-single .search-choice-close,
+#assignTicketForm .chosen-single .search-choice-close,
+#filterForm .chosen-single .search-choice-close {
     margin-top: 4px;
 }
 
