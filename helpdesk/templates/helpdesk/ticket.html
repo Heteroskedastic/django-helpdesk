@@ -47,11 +47,11 @@
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
                         {% for attachment in followup.attachment_set.all %}{% if forloop.first %}<hr><div class='attachments'><ul>{% endif %}
-                            <li><a href='{{ attachment.file.url }}'>{{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
+                            <p><a target="_blank" href='{{ attachment.file.url }}'><span class="fa fa-download"></span> {{ attachment.filename }}</a> ({{ attachment.mime_type }}, {{ attachment.size|filesizeformat }})
                             {% if followup.user and request.user == followup.user %}
-                            <a href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans 'Delete' %}</button></a>
+                                <a title="{% trans 'Delete Attachment' %}" href='{% url 'helpdesk:attachment_del' ticket.id attachment.id %}'><button class="btn btn-danger btn-xs"><i class="fa fa-trash"></i><span class="hidden-xs"> {% trans 'Delete' %}</span></button></a>
                             {% endif %}
-                            </li>
+                            </p>
                             {% if forloop.last %}</ul></div>{% endif %}
                         {% endfor %}
                         <hr>

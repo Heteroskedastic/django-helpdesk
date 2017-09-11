@@ -236,9 +236,9 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         return followup
 
     def _attach_files_to_follow_up(self, followup):
-        files = self.cleaned_data['attachment']
+        files = self.files.getlist('attachment')
         if files:
-            files = process_attachments(followup, [files])
+            files = process_attachments(followup, files)
         return files
 
     @staticmethod
