@@ -3,6 +3,9 @@
 {% block helpdesk_title %}{% trans "Delete Ticket CC" %}{% endblock %}
 
 {% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{{ cc.ticket.get_absolute_url }}">{{cc.ticket}}</a></li>
+<li><a href="{% url 'helpdesk:ticket_cc' cc.ticket_id %}">Ticket CC List</a></li>
 <li>Delete Ticket CC</li>
 {% endblock %}
 
@@ -13,7 +16,7 @@
 {% endblocktrans %}
 
 
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+<p><a href="{% url 'helpdesk:ticket_cc' cc.ticket_id %}"><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
 
 <form method='post' action='./'>
     <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete" %}</button>

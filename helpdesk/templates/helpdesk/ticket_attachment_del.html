@@ -4,7 +4,7 @@
 
 {% block breadcrumb_items %}
 <li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
-<li><a href="{% url 'helpdesk:view' attachment.followup.ticket_id %}">{{attachment.followup.ticket}}</a></li>
+<li><a href="{{ attachment.followup.ticket.get_absolute_url }}">{{attachment.followup.ticket}}</a></li>
 <li>{{attachment}}</li>
 <li>Delete</li>
 {% endblock %}
@@ -15,9 +15,9 @@
 <p>Are you sure you wish to delete the attachment <i>{{ filename }}</i> from this ticket? The attachment data will be permanently deleted from the database, but the attachment itself will still exist on the server.</p>
 {% endblocktrans %}
 
-<p><a href='../../'><button class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</button></a></p>
+<p><a href="{{ attachment.followup.ticket.get_absolute_url }}" class="btn btn-primary btn-lg">{% trans "Don't Delete" %}</a></p>
 
-<form method='post' action='./'>
+<form method="post">
     <button class="btn btn-danger" type='submit'>{% trans "Yes, I Understand - Delete" %}&nbsp;{{ filename }}</button>
 {% csrf_token %}</form>
 {% endblock %}

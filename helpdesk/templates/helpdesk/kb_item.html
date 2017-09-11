@@ -22,10 +22,10 @@
                     <p>{% trans "Did you find this article useful?" %}</p>
                     <div class="row">
                         <div class="col-lg-6">
-                            <a href='vote/?vote=up'><button type="button" class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></button></a>
+                            <a href="{% url 'helpdesk:kb_vote' item.pk %}?vote=up" class="btn btn-success btn-circle btn-xl"><i class="fa fa-thumbs-up fa-lg"></i></a>
                         </div>
                         <div class="col-lg-6">
-                            <a href='vote/?vote=down'><button type="button" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></button></a>
+                            <a href="{% url 'helpdesk:kb_vote' item.pk %}?vote=down" class="btn btn-danger btn-circle btn-xl"><i class="fa fa-thumbs-down fa-lg"></i></a>
                         </div>
                     </div>
                 </div>
@@ -42,6 +42,6 @@
     </div>
 </div>
 
-<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href='../'>viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
+<p>{% blocktrans with item.category.title as category_title and item.category.get_absolute_url as category_url %}View <a href='{{ category_url }}'>other <em>{{ category_title }}</em> articles</a>, or continue <a href="{{item.category.get_absolute_url}}">viewing other knowledgebase articles</a>.{% endblocktrans %}</p>
 
 {% endblock %}

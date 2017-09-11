@@ -118,7 +118,7 @@
                                             <p>{% blocktrans with saved_query.title as query_name %}You are currently viewing saved query <strong>"{{ query_name }}"</strong>.{% endblocktrans %} <a href='{% url 'helpdesk:delete_query' saved_query.id %}'>{% trans "Delete Saved Query" %}</a></p>
                                             {% endif %}
                                             {% if from_saved_query %}
-                                            <p>{% blocktrans with saved_query.id as query_id %}<a href='../reports/?saved_query={{ query_id }}'>Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
+                                            <p>{% blocktrans with saved_query.id as query_id %}<a href="{% url 'helpdesk:report_index' %}?saved_query={{ query_id }}">Run a report</a> on this query to see stats and charts for the data listed below.{% endblocktrans %}</p>
                                             {% endif %}
                                             {% csrf_token %}</form>
                                         </div>

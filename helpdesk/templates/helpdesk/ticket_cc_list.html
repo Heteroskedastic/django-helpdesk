@@ -3,13 +3,15 @@
 {% block helpdesk_title %}{% trans "Ticket CC Settings" %}{% endblock %}
 
 {% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{{ ticket.get_absolute_url }}">{{ticket}}</a></li>
 <li>Ticket CC List</li>
 {% endblock %}
 
-{% block content %}{% blocktrans with ticket.title as ticket_title and ticket.id as ticket_id %}
+{% block content %}
 <h2 class="page-title">Ticket CC Settings</h2>
-
-<p>The following people will receive an e-mail whenever <em><a href='../'>{{ ticket_title }}</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>
+{% blocktrans %}
+<p>The following people will receive an e-mail whenever <em><a href="{{ ticket.get_absolute_url }}">{{ ticket }}</a></em> is updated. Some people can also view or edit the ticket via the public ticket views.</p>
 
 <p>You can add a new recipient to the list or delete any of the items below as required.</p>{% endblocktrans %}
 
@@ -21,7 +23,7 @@
                         </div>
                         <!-- /.panel-heading -->
                         <div class="panel-body">
-                            <div><a href='add/'><button class="btn btn-success btn-sm"><i class="fa fa-plus-circle"></i>{% trans "Add an Email or Helpdesk User" %}</button></a></div>
+                            <p><a href="{% url 'helpdesk:ticket_cc_add' ticket.id %}" class="btn btn-success btn-sm"><i class="fa fa-plus"></i> {% trans "Add an Email or Helpdesk User" %}</a></p>
                             <div class="table-responsive">
                                 <table class="table table-striped table-bordered table-hover">
                                     <thead>
@@ -54,6 +56,6 @@
             </div>
             <!-- /.row -->
 
-<p><a href='{% url 'helpdesk:view' ticket.id %}'><button class="btn btn-primary btn-lg">{% blocktrans with ticket.title as ticket_title %}Return to <em>{{ ticket_title }}</em>{% endblocktrans %}</button></a></p>
+<p><a href="{{ ticket.get_absolute_url }}"><button class="btn btn-primary"><span class="fa fa-reply"></span> {% blocktrans %}Back to <em>{{ ticket }}</em>{% endblocktrans %}</button></a></p>
 
 {% endblock %}

@@ -109,7 +109,7 @@ class TicketListView(StaffLoginRequiredMixin, View):
                 if use_default:
                     request.user.usersettings_helpdesk.update_setting({'default_ticket_saved_query': None})
                 warning_message('Saved query does not exists!', request)
-                return redirect('helpdesk:ticket-list')
+                return redirect(reverse('helpdesk:ticket-list'))
             try:
                 data = json.loads(b64decode(str(saved_query.query)).decode())
             except ValueError:

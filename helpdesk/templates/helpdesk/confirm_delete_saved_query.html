@@ -12,7 +12,7 @@
 {% endif %}
 
 
-<p><a href='../'><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
+<p><a href="{% url 'helpdesk:list' %}"><button class="btn btn-primary btn-lg">{% trans "No, Don't Delete It" %}</button></a></p>
 
 <form method='post' action='./'>
     <button class="btn btn-danger" type='submit'>{% trans "Yes I Understand - Delete It Anyway" %}</button>

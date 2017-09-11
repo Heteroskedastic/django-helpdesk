@@ -3,6 +3,9 @@
 {% block helpdesk_title %}{% trans "Add Ticket CC" %}{% endblock %}
 
 {% block breadcrumb_items %}
+<li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
+<li><a href="{{ ticket.get_absolute_url }}">{{ticket}}</a></li>
+<li><a href="{% url 'helpdesk:ticket_cc' ticket.id %}">Ticket CC List</a></li>
 <li>Add Ticket CC</li>
 {% endblock %}
 

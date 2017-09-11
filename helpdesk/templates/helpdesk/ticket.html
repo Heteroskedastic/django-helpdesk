@@ -84,7 +84,7 @@
 <div id='add-followup' class="well">
 <h3>{% trans "Respond to this ticket" %}</h3>
 
-<form method='post' action='update/' enctype='multipart/form-data'>
+<form method='post' action="{% url 'helpdesk:update' ticket.pk %}" enctype='multipart/form-data'>
 
 <fieldset>
     <dl>
@@ -96,7 +96,12 @@
 
         <dt><label for='commentBox'>{% trans "Comment / Resolution" %}</label></dt>
         <dd><textarea rows='8' cols='70' name='comment' id='commentBox'></textarea></dd>
-        <dd class='form_help_text'>{% trans "You can insert ticket and queue details in your message. For more information, see the <a href='../../help/context/'>context help page</a>." %}</dd>
+        <dd class='form_help_text'>
+            {% url 'helpdesk:help_context' as help_context_url %}
+            {% blocktrans %}
+            You can insert ticket and queue details in your message. For more information, see the <a href="{{ help_context_url }}">context help page</a>.
+            {% endblocktrans %}
+        </dd>
 
         <dt><label>{% trans "New Status" %}</label></dt>
         {% if not ticket.can_be_resolved %}<dd>{% trans "This ticket cannot be resolved or closed until the tickets it depends on are resolved." %}</dd>{% endif %}
