@@ -1,6 +1,11 @@
 {% extends "helpdesk/staff_base.html" %}{% load i18n bootstrap %}
+{% load static from staticfiles %}
 
 {% block helpdesk_title %}{% trans "Create Ticket" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
 
 {% block breadcrumb_items %}
 <li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
@@ -48,14 +53,20 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
 <script type='text/javascript' language='javascript'>
 // this function listens for changes on any file input, and
 // emits the appropriate event to update the input's text.
 // Needed to have properly styled file input buttons! (this really shouldn't be this hard...)
 $(document).ready(function () {
-    $( "#id_due_date" ).datepicker();
+    $( "#id_due_date" ).datetimepicker({
+        format: 'YYYY-MM-DD',
+        showTodayButton: true,
+        useCurrent: false,
+        showClear: true
+    });
     $(':file').on('change', function () {
-        $("#id_due_date").datepicker();
         var input = $(this),
             inputWidgetNum = $(this).attr('id').split("file")[1],
             numFiles = input.get(0).files ? input.get(0).files.length : 1,

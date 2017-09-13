@@ -1,6 +1,11 @@
 {% extends "helpdesk/staff_base.html" %}{% load i18n bootstrap %}
+{% load static from staticfiles %}
 
 {% block helpdesk_title %}{% trans "Edit Ticket" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
 
 {% block breadcrumb_items %}
 <li><a href="{% url 'helpdesk:ticket-list' %}">Ticket List</a></li>
@@ -51,12 +56,18 @@
 {% endblock %}
 
 {% block extra_js %}
+<script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
     var $du_date = $('#id_due_date');
-    $du_date.datepicker({dateFormat: 'yy-mm-dd'});
-    $du_date.val($du_date.val().split(' ')[0]);
+    $du_date.datetimepicker({
+        format: 'YYYY-MM-DD',
+        showTodayButton: true,
+        useCurrent: false,
+        showClear: true
+    });
 });
 </script>
 {% endblock %}

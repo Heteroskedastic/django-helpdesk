@@ -2,6 +2,10 @@
 {% load i18n bootstrap %}
 {% load static from staticfiles %}
 
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
 {% block content %}
 <h2 class="page-title">{% trans "Submit a Ticket" %}</h2>
 
@@ -81,13 +85,17 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- jQuery UI DatePicker -->
-<script src='{% static "helpdesk/vendor/jquery-ui/jquery-ui.min.js" %}' type='text/javascript' language='javascript'></script>
-<link href="{% static 'helpdesk/vendor/jquery-ui/jquery-ui.css' %}" rel="stylesheet">
+<script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-    $("#id_due_date").datepicker({dateFormat: 'yy-mm-dd'});
+    $("#id_due_date").datetimepicker({
+        format: 'YYYY-MM-DD',
+        showTodayButton: true,
+        useCurrent: false,
+        showClear: true
+    });
 });
 </script>
 {% endblock %}
