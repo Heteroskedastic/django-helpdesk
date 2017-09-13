@@ -228,22 +228,6 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
   margin-bottom: 5px;
 }
 
-.ticket-priority-5-label {
-    background-color: #b5e8b5 !important;
-}
-.ticket-priority-4-label {
-    background-color: #7dc57d !important;
-}
-.ticket-priority-3-label {
-    background-color: #73ab07 !important;
-}
-.ticket-priority-2-label {
-    background-color: #ff7600 !important;
-}
-.ticket-priority-1-label {
-    background-color: red !important;
-}
-
 #filterForm .chosen-container-single .chosen-single,
 #filterForm .chosen-container-multi .chosen-choices,
 #reportSavedQueryForm .chosen-container-single .chosen-single,

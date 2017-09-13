@@ -185,11 +185,11 @@ def ticket_status_label_class(value):
     statuses = dict(Ticket.STATUS_CHOICES)
 
     status_labels = {
-        Ticket.OPEN_STATUS: 'default',
-        Ticket.REOPENED_STATUS: 'default',
-        Ticket.DUPLICATE_STATUS: 'warning',
-        Ticket.RESOLVED_STATUS: 'success',
-        Ticket.CLOSED_STATUS: 'success',
+        Ticket.OPEN_STATUS: 'success',
+        Ticket.REOPENED_STATUS: 'success',
+        Ticket.DUPLICATE_STATUS: 'default',
+        Ticket.RESOLVED_STATUS: 'warning',
+        Ticket.CLOSED_STATUS: 'danger',
 
     }
     label = statuses.get(value) or ''

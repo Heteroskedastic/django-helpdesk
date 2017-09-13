@@ -355,3 +355,19 @@ table.table caption {
     /* symbol for "collapsed" panels */
     content: "\f105";    /* adjust as needed, taken from bootstrap.css */
 }
+
+.ticket-priority-5-label {
+    background-color: #b5e8b5 !important;
+}
+.ticket-priority-4-label {
+    background-color: #7dc57d !important;
+}
+.ticket-priority-3-label {
+    background-color: #73ab07 !important;
+}
+.ticket-priority-2-label {
+    background-color: #ff7600 !important;
+}
+.ticket-priority-1-label {
+    background-color: red !important;
+}

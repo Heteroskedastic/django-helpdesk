@@ -1,5 +1,6 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n humanize %}
 {% load static from staticfiles %}
+{% load helpdesk_util_tags %}
 {% block helpdesk_title %}{% trans "View a Ticket" %}{% endblock %}
 
 {% block content %}
@@ -15,7 +16,7 @@
 
                     <table class="table table-hover table-bordered table-striped">
                     <thead>
-                        <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} [{{ ticket.get_status }}]</h3>
+                        <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} {{ ticket.status|ticket_status_label_class }}</h3>
                             <span class='ticket_toolbar'></span></td></tr>
                     <tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
                     </thead>
@@ -32,7 +33,7 @@
 
                     <tr>
                         <th>{% trans "Priority" %}</th>
-                        <td>{{ ticket.get_priority_display }}</td>
+                        <td>{{ ticket.priority|ticket_priority_label_class }}</td>
                     </tr>
 
                     {% for customfield in ticket.ticketcustomfieldvalue_set.all %}

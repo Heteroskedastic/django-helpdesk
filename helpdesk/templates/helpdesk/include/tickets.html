@@ -1,4 +1,5 @@
 {% load i18n humanize %}
+{% load helpdesk_util_tags %}
 
             <div class="row">
                 <div class="col-lg-12">
@@ -22,12 +23,12 @@
                                     </thead>
                                     <tbody>
                                         {% for ticket in ticket_list %}
-                                        <tr class="{{ ticket.get_priority_css_class }}">
-                                            <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.ticket }}</a></td>
-                                            <td>{{ ticket.get_priority_display }}</td>
+                                        <tr>
+                                            <td><a href='{{ ticket.get_absolute_url }}'>#{{ ticket.pk }}</a></td>
+                                            <td>{{ ticket.priority|ticket_priority_label_class }}</td>
                                             <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
                                             <td>{{ ticket.queue }}</td>
-                                            <td>{{ ticket.get_status }}</td>
+                                            <td>{{ ticket.status|ticket_status_label_class }}</td>
                                             <td><span title='{{ ticket.modified|date:"r" }}'>{{ ticket.modified|naturaltime }}</span></td>
                                         </tr>
                                         {% empty %}
