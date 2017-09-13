@@ -72,14 +72,15 @@ String.prototype.format = String.prototype.f = function() {
 function bindTableRowModalAction(modalId, actionName, title, message, action) {
     $('button[name={0}]'.f(actionName)).click(function(e) {
         e.preventDefault();
-        var form = $('#{0} form'.f(modalId));
+        var form = $('#{0} form'.f(modalId)),
+            _action = action;
 
         if ((typeof action) === 'function') {
             var id = $(this).parents('tr').attr('data-id');
-            action = action(id);
+            _action = action(id);
         }
-        if (action !== undefined) {
-            form[0].action = action;
+        if (_action !== undefined) {
+            form[0].action = _action;
         }
         $('#{0} .modal-title'.f(modalId)).text(title);
         $('#{0} .modal-body .confirm-message'.f(modalId)).text(message);
@@ -91,13 +92,14 @@ function bindTableRowModalBulkAction(modalId, actionEl, table, title, message, a
     $(actionEl).click(function(e) {
         e.preventDefault();
         var selectedIds = tableBulkGetSelectionsId($(table)),
-            form = $('#{0} form'.f(modalId));
+            form = $('#{0} form'.f(modalId)),
+            _action = action;
 
         if ((typeof action) === 'function') {
-            action = action(selectedIds);
+            _action = action(selectedIds);
         }
-        if (action !== undefined) {
-            form[0].action = action;
+        if (_action !== undefined) {
+            form[0].action = _action;
         }
         $('#{0} .modal-title'.f(modalId)).text(title);
         $('#{0} .modal-body .confirm-message'.f(modalId)).text(message.f(selectedIds.length));

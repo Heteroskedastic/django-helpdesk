@@ -15,7 +15,7 @@
 <table class="table table-striped table-hover table-advance sortable">
     <tr>
         <th>Title</th>
-        <th>Shared</th>
+        <th>Shared By</th>
         <th class="saved-query-list-table-action-col">Actions</th>
     </tr>
     {% for q in saved_queries %}
@@ -24,12 +24,20 @@
             {{q.title}}
             {% if q.pk == user.usersettings_helpdesk.settings.default_ticket_saved_query %}<span class="label label-warning"><span class="fa fa-star"></span> DEFAULT</span>{% endif %}
         </td>
-        <td>{{ q.shared|active_icon }}
-            {% if q.shared %}
-            <span class="label label-default">
-                {% if user.pk == q.user_id %} You {% else %} {{ q.user.get_username }}{% endif %}
+        <td>
+        {% if q.shared %}
+            {% if user.pk == q.user_id %}
+            <span class="label label-primary">
+                {{ q.user.get_username }} (You)
             </span>
-            {% endif %}</td>
+            {% else %}
+            <span class="label label-default">
+                {{ q.user.get_username }}
+            </span>
+            {% endif %}
+        {% else %}
+            <span class="text-muted">Not Shared</span>
+        {% endif %}</td>
         <td class="saved-search-actions">
             {% if q.shared %}
             <button type="button" name="unshare" class="btn btn-sm btn-warning" href="#" {% if not user.is_superuser and q.user_id != user.pk %}title="No Permission" disabled {% else %} title="Share with other users"{% endif %}><span class="fa fa-share-alt"></span><span class="hidden-xs"> Un-share</span></button>
