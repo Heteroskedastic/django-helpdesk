@@ -69,8 +69,8 @@ String.prototype.format = String.prototype.f = function() {
     return s;
 };
 
-function bindTableRowModalAction(modalId, actionName, title, message, action) {
-    $('button[name={0}]'.f(actionName)).click(function(e) {
+function bindTableRowModalAction(modalId, actionEl, title, message, action) {
+    $(actionEl).click(function(e) {
         e.preventDefault();
         var form = $('#{0} form'.f(modalId)),
             _action = action;

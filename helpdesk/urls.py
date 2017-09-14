@@ -174,7 +174,7 @@ urlpatterns += [
     url(r'^ticket/list/$', staff2.TicketListView.as_view(), name='ticket-list'),
     url(r'^ticket/list/export/(?P<type>\w+)/$', staff2.TicketListExportView.as_view(), name='tickets-export'),
     url(r'^ticket/delete/(?P<pk>\d+)/$', staff2.TicketDeleteView.as_view(), name='ticket-delete'),
-    url(r'^ticket/hold/(?P<pk>\d+)/$', staff2.TicketHoldView.as_view(), name='ticket-hold'),
+    url(r'^ticket/take/(?P<pk>\d+)/$', staff2.TicketTakeView.as_view(), name='ticket-take'),
     url(r'^ticket/delete/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkDeleteView.as_view(),
         name='tickets-bulk-delete'),
     url(r'^ticket/close/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkCloseView.as_view(), name='tickets-bulk-close'),

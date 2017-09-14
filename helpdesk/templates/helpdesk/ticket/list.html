@@ -160,8 +160,8 @@
                 <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
 
                 <td>
-                    <button type="button" name="hold" class="btn btn-sm btn-primary" href="#" {% if user.pk == ticket.assigned_to.pk %}disabled title="Already Assigned to you!" {% else %} title="Hold Ticket(Assign to you)" {% endif %}><span class="fa fa-hand-pointer-o"></span></button>
-                    <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" title="Delete Ticket"><span class="fa fa-trash"></span></button>
+                    <button type="button" name="take" class="btn btn-sm btn-primary" {% if user.pk == ticket.assigned_to.pk %}disabled title="Already Assigned to you!" {% else %} title="Take Ticket(Assign to you)" {% endif %}><span class="fa fa-hand-paper-o"></span></button>
+                    <button type="button" name="delete" class="btn btn-sm btn-danger" title="Delete Ticket"><span class="fa fa-trash"></span></button>
                 </td>
             </tr>
             {% empty %}
@@ -204,7 +204,7 @@
 {% include "helpdesk/partials/action_modal.html" with prefix_id='deleteTicket' message_class='text-danger' %}
 {% include "helpdesk/partials/action_modal.html" with prefix_id='closeTicket' message_class='text-danger' form_fields='<div class="checkbox"><label><input type="checkbox" name="send_mail" id="id_send_mail"> Send email after closed?</label></div>' %}
 {% include "helpdesk/partials/action_modal.html" with prefix_id='assignTicket' message_class='text-danger' form_fields=bulk_assign_form.as_p %}
-{% include "helpdesk/partials/action_modal.html" with prefix_id='holdTicket' message_class='text-danger' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='takeTicket' message_class='text-danger' %}
 
 {% endblock content %}
 
@@ -217,10 +217,6 @@
 
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function () {
-        $('body').on('click', 'a[disabled], a.disabled, li.disabled a', function(event) {
-          event.preventDefault();
-        });
-
         $('button[name=save-query]').popover({html: true, placement: 'bottom', content: function () {
             return $('#save-query-popover').html();
         }});
@@ -268,12 +264,12 @@
             form.submit();
         });
         tableBulkInit($('table'), $('.bulk-action-dropdown'));
-        bindTableRowModalAction('deleteTicketModal', 'delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', function (recordId) {
+        bindTableRowModalAction('deleteTicketModal', 'button[name=delete]', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', function (recordId) {
             var baseAction = '{% url "helpdesk:ticket-delete" 0 %}';
             return baseAction.slice(0, -2) + recordId + '/';
         });
-        bindTableRowModalAction('holdTicketModal', 'hold', 'Hold Ticket', 'Are you sure to hold this ticket?', function (recordId) {
-            var baseAction = '{% url "helpdesk:ticket-hold" 0 %}';
+        bindTableRowModalAction('takeTicketModal', 'button[name=take]', 'Take Ticket', 'Are you sure to take this ticket?', function (recordId) {
+            var baseAction = '{% url "helpdesk:ticket-take" 0 %}';
             return baseAction.slice(0, -2) + recordId + '/';
         });
         bindTableRowModalBulkAction('deleteTicketModal', $('#bulk-delete'), $('table'), 'Delete Tickets', 'Are you sure to delete {0} selected ticket? this will remove the tickets permanently!', function (recordsId) {

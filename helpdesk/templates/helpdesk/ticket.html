@@ -216,26 +216,29 @@
 
 </div>
 
+{% include "helpdesk/partials/action_modal.html" with prefix_id='deleteTicket' message_class='text-danger' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='takeTicket' message_class='text-danger' %}
 {% endblock %}
 
 {% block extra_js %}
 <script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
 <script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-    var $du_date = $('#id_due_date');
-    $du_date.datetimepicker({
+    bindTableRowModalAction('deleteTicketModal', 'button.ticket-delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', '{% url "helpdesk:ticket-delete" ticket.pk %}');
+    bindTableRowModalAction('takeTicketModal', 'button.ticket-take', 'Delete Ticket', 'Are you sure to take this ticket!', '{% url "helpdesk:ticket-take" ticket.pk %}');
+    $('#id_due_date').datetimepicker({
         format: 'YYYY-MM-DD',
         showTodayButton: true,
         useCurrent: false,
         showClear: true
     });
-//    $du_date.val($du_date.val().split(' ')[0]);
     $('#id_preset').change(function() {
         preset = $('#id_preset').val();
-        if (preset != '') {
-            $.get("{% url 'helpdesk:raw' "preset" %}?id=" + preset, function(data) {
-                $("#commentBox").val(data)
+        if (preset !== '') {
+            $.get("{% url 'helpdesk:raw' 'preset' %}?id=" + preset, function(data) {
+                $("#commentBox").val(data);
             });
         }
     });

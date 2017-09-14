@@ -10,15 +10,21 @@
                 {% trans "Ticket Summary" %}
             </div>
             <!-- /.panel-heading -->
-            <div class="panel-body">
+            <div class="panel-body no-padding">
                 <div class="table-responsive">
                     <table class="table table-striped table-bordered table-hover">
                         <thead>
-                            <tr class='row_tablehead'><td colspan='2'><h3>{{ ticket.id }}. {{ ticket.title }} {{ ticket.status|ticket_status_label_class }}</h3> <span class='ticket_toolbar'>
-                                <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit"><button class="btn btn-warning btn-xs"><i class="fa fa-pencil"></i> {% trans "Edit" %}</button></a>
-                            | <a href="{% url 'helpdesk:delete' ticket.id %}" class="ticket-delete"><button class="btn btn-danger btn-xs"><i class="fa fa-trash-o"></i> {% trans "Delete" %}</button></a>
-                            {% if ticket.on_hold %} | <a href="{% url 'helpdesk:unhold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-xs"><i class="fa fa-play"></i> {% trans "Unhold" %}</button></a>{% else %} | <a href="{% url 'helpdesk:hold' ticket.id %}" class="ticket-hold"><button class="btn btn-warning btn-xs"><i class="fa fa-pause"></i> {% trans "Hold" %}</button></a>{% endif %}
-                            </span></td></tr>
+                            <tr class='row_tablehead'>
+                                <th colspan='2'>
+                                    <h3>{{ ticket.id }}. {{ ticket.title }} {{ ticket.status|ticket_status_label_class }}
+                                        <span class='ticket_toolbar'>
+                                            <a href="{% url 'helpdesk:edit' ticket.id %}" class="ticket-edit btn btn-warning btn-sm"><i class="fa fa-pencil"></i> {% trans "Edit" %}</a>
+                                            <button type="button" class="ticket-delete btn btn-danger btn-sm"><i class="fa fa-trash-o"></i> {% trans "Delete" %}</button>
+                                            <button type="button" class="ticket-take btn btn-sm btn-primary" {% if user.pk == ticket.assigned_to.pk %}disabled title="{% trans 'Already Assigned to you!' %}" {% else %} title="{% trans 'Take Ticket(Assign to you)' %}" {% endif %}><span class="fa fa-hand-paper-o"></span>  {% trans "Take" %}</button>
+                                        </span>
+                                    </h3>
+                                </th>
+                            </tr>
                         <tr><th colspan='2'>{% blocktrans with ticket.queue as queue %}Queue: {{ queue }}{% endblocktrans %}</th></tr>
                         </thead>
                         <tbody>

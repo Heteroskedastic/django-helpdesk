@@ -371,3 +371,30 @@ table.table caption {
 .ticket-priority-1-label {
     background-color: red !important;
 }
+
+.row_tablehead {
+    background-color: #c1cedc;
+    font-weight: bold;
+    border-bottom: solid white 1px;
+}
+
+.row_tablehead span.ticket_toolbar {
+    float: right;
+    text-align: right;
+}
+
+.row_tablehead td {
+    padding-left: 12px;
+    line-height: 16pt;
+    font-size: 12pt;
+}
+
+.row_columnheads {
+    background-color: #94C0E8;
+    font-size: 10pt;
+    line-height: 12pt;
+}
+
+.no-padding {
+    padding: 0 !important;
+}

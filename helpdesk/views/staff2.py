@@ -193,22 +193,26 @@ class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
     # noinspection PyUnusedLocal
     @transaction.atomic
     def post(self, request, *args, **kwargs):
-        ticket = self.get_object()
+        self.object = ticket = self.get_object()
         if not _has_access_to_queue(request.user, ticket.queue):
             error_message('No access to ticket [{}]'.format(ticket), request)
             return redirect(self.get_success_url())
 
-        ticket_id = ticket.id
+        self.deleted_id = ticket.id
+
         ticket.delete()
-        success_message('Ticket [#{} - {}] deleted successfully!'.format(ticket_id, ticket.title), request)
+        success_message('Ticket [#{} - {}] deleted successfully!'.format(self.deleted_id, ticket.title), request)
         return redirect(self.get_success_url())
 
     # noinspection PyMethodMayBeStatic
     def get_success_url(self):
-        return self.request.META.get('HTTP_REFERER') or reverse('helpdesk:ticket-list')
+        referer = self.request.META.get('HTTP_REFERER')
+        if (not referer) or referer.endswith(reverse('helpdesk:view', args=(self.deleted_id,))):
+            return reverse('helpdesk:ticket-list')
+        return referer
 
 
-class TicketHoldView(StaffLoginRequiredMixin, SingleObjectMixin, View):
+class TicketTakeView(StaffLoginRequiredMixin, SingleObjectMixin, View):
     model = Ticket
     pk_url_kwarg = 'pk'
 

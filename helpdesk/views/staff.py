@@ -100,20 +100,17 @@ def dashboard(request):
 
     # open & reopened & resolved tickets, assigned to current user
     tickets = Ticket.objects.select_related('queue').filter(assigned_to=request.user).filter(
-        status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS])
+        status__in=[Ticket.OPEN_STATUS, Ticket.REOPENED_STATUS, Ticket.RESOLVED_STATUS]).order_by('priority', '-id')
 
     # closed & resolved tickets, assigned to current user
     tickets_closed_resolved = Ticket.objects.select_related('queue').filter(
-        assigned_to=request.user, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS])
+        assigned_to=request.user, status__in=[Ticket.CLOSED_STATUS, Ticket.RESOLVED_STATUS]).order_by('-id')
 
     user_queues = _get_user_queues(request.user)
 
     unassigned_tickets = Ticket.objects.select_related('queue').filter(
-        assigned_to__isnull=True,
-        queue__in=user_queues
-    ).exclude(
-        status=Ticket.CLOSED_STATUS,
-    )
+        assigned_to__isnull=True, queue__in=user_queues
+    ).exclude(status=Ticket.CLOSED_STATUS).order_by('priority', '-id')
 
     # all tickets, reported by current user
     all_tickets_reported_by_current_user = ''
@@ -121,7 +118,7 @@ def dashboard(request):
     if email_current_user:
         all_tickets_reported_by_current_user = Ticket.objects.select_related('queue').filter(
             submitter_email=email_current_user,
-        ).order_by('status')
+        ).order_by('status', 'priority', '-id')
 
     tickets_in_queues = Ticket.objects.filter(
         queue__in=user_queues,
@@ -156,8 +153,6 @@ def dashboard(request):
             GROUP BY queue, name
             ORDER BY q.id;
     """ % (from_clause, where_clause))
-
-    dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
     return render(request, 'helpdesk/dashboard.html', {
         'user_tickets': tickets,

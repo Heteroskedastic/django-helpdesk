@@ -1,5 +1,13 @@
 {% extends "helpdesk/staff_base.html" %}{% load i18n %}
+{% load static from staticfiles %}
+{% load helpdesk_util_tags %}
+
 {% block helpdesk_title %}{% trans "Helpdesk Dashboard" %}{% endblock %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+<link href="{% static 'helpdesk/css/bootstrap-datetimepicker.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
 
 {% block breadcrumb_items %}
 <li>Dashboard</li>
@@ -30,4 +38,25 @@
 {% include 'helpdesk/include/tickets.html' with ticket_list=user_tickets_closed_resolved ticket_list_empty_message="" %}
 {% endif %}
 
-{% endblock %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='deleteTicket' message_class='text-danger' %}
+{% include "helpdesk/partials/action_modal.html" with prefix_id='takeTicket' message_class='text-danger' %}
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
+
+<script type="text/javascript" charset="utf-8">
+    $(document).ready(function () {
+        bindTableRowModalAction('deleteTicketModal', 'button[name=delete]', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', function (recordId) {
+            var baseAction = '{% url "helpdesk:ticket-delete" 0 %}';
+            return baseAction.slice(0, -2) + recordId + '/';
+        });
+        bindTableRowModalAction('takeTicketModal', 'button[name=take]', 'Take Ticket', 'Are you sure to take this ticket?', function (recordId) {
+            var baseAction = '{% url "helpdesk:ticket-take" 0 %}';
+            return baseAction.slice(0, -2) + recordId + '/';
+        });
+    });
+</script>
+
+{% endblock extra_js %}

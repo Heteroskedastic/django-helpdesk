@@ -357,3 +357,7 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
     }
 
 }
+
+.unassigned-actions {
+    width: 135px;
+}

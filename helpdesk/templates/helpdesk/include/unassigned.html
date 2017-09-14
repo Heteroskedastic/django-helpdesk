@@ -10,7 +10,7 @@
                         <!-- /.panel-heading -->
                         <div class="panel-body">
                             <div class="table-responsive">
-                                <table class="table table-striped table-bordered table-hover">
+                                <table class="table table-striped table-hover table-advance">
                                     <thead>
                                         <tr>
                                             <th>#</th>
@@ -18,20 +18,20 @@
                                             <th>{% trans "Title" %}</th>
                                             <th>{% trans "Queue" %}</th>
                                             <th>{% trans "Created" %}</th>
-                                            <th>&nbsp;</th>
+                                            <th class="unassigned-actions"></th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for ticket in unassigned_tickets %}
-                                        <tr>
+                                        <tr data-id="{{ ticket.id }}">
                                             <td><a href='{{ ticket.get_absolute_url }}'>#{{ ticket.pk }}</a></td>
                                             <td>{{ ticket.priority|ticket_priority_label_class }}</td>
                                             <td><a href='{{ ticket.get_absolute_url }}'>{{ ticket.title }}</a></td>
                                             <td>{{ ticket.queue }}</td>
                                             <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|naturaltime }}</span></td>
                                             <td>
-                                                <a href='{{ ticket.get_absolute_url }}?take'><button class='btn btn-primary btn-xs'><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a> |
-                                                <a href='{% url 'helpdesk:delete' ticket.id %}'><button class='btn btn-danger btn-xs'><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
+                                                <button type="button" name="take" class="btn btn-primary btn-xs"><i class="fa fa-hand-paper-o"></i> {% trans "Take" %}</button>
+                                                <button type="button" name="delete" class="btn btn-danger btn-xs"><i class="fa fa-trash"></i> {% trans "Delete" %}</button>
                                             </td>
                                         </tr>
                                         {% empty %}
