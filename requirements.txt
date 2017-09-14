@@ -1,11 +1,11 @@
-Django>=1.8
+Django>=1.9,<2
 django-bootstrap-form>=3.1,<4
 django-bootstrap3>=7.0.1
 email-reply-parser
 django-markdown-deux
 simplejson
 six
-django-sendsms==0.2.3
-django_recaptcha==1.2.1
+django-sendsms>=0.2.3
+django_recaptcha>=1.2.1
 django-filter>=1.0.1
 django-pagination-bootstrap>=1.1
