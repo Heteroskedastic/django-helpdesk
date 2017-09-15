@@ -41,10 +41,13 @@ INSTALLED_APPS = [
     'django.contrib.humanize',
     'markdown_deux',
     'bootstrapform',
+    'pagination_bootstrap',
+    'django_filters',
+    'captcha',
     'helpdesk'
 ]
 
-MIDDLEWARE = [
+MIDDLEWARE_CLASSES = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -52,6 +55,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'pagination_bootstrap.middleware.PaginationMiddleware',
 ]
 
 ROOT_URLCONF = 'demodesk.config.urls'
@@ -207,3 +211,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 # - This is only necessary to make the demo project work, not needed for
 # your own projects unless you make your own fixtures
 FIXTURE_DIRS = [os.path.join(BASE_DIR, 'fixtures')]
+
+RECAPTCHA_PUBLIC_KEY = '<RECAPTCHA_PUBLIC_KEY>'
+RECAPTCHA_PRIVATE_KEY = '<RECAPTCHA_PRIVATE_KEY>'
+NOCAPTCHA = True

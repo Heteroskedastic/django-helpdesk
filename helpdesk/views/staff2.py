@@ -2,6 +2,9 @@ import csv
 import json
 
 from collections import defaultdict
+from datetime import timedelta
+
+from django.db.models.functions import Coalesce
 from django.http import QueryDict, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth import get_user_model
 from django.db import transaction
@@ -19,8 +22,8 @@ from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
 from helpdesk.templatetags.helpdesk_util_tags import seconds_to_time
 from helpdesk.utils import StaffLoginRequiredMixin, get_current_page_size, success_message, BulkableActionMixin, \
-    error_message, warning_message, to_bool, send_form_errors, to_query_dict
-from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketTimeTrack
+    error_message, warning_message, to_bool, send_form_errors, to_query_dict, OuterRef, Subquery
+from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketTimeTrack, TicketMoneyTrack
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import b64decode, b64encode
 
@@ -88,6 +91,13 @@ class TicketListView(StaffLoginRequiredMixin, View):
                          ' WHERE "helpdesk_ticketmoneytrack"."ticket_id"="helpdesk_ticket"."id"'
         time_open_field = Case(When(Q(status=Ticket.OPEN_STATUS) | Q(status=Ticket.REOPENED_STATUS), then=Value(timezone.now()) - F('created')),
                                default=F('modified_status') - F('created'))
+        # time_track_sq = TicketTimeTrack.objects.annotate(total_time=Coalesce(Sum('time'), timedelta(0))).values_list(
+        #     'total_time').filter(ticket_id=OuterRef('pk')).values('total_time')[:1]
+        # money_track_sq = TicketMoneyTrack.objects.annotate(total_price=Coalesce(Sum('money'), 0)).values_list(
+        #     'total_price').filter(ticket_id=OuterRef('pk')).values('total_price')[:1]
+        # return Ticket.objects.annotate(
+        #     time_tracks=Subquery(time_track_sq), money_tracks=Subquery(money_track_sq),
+        #     time_open=time_open_field).filter(**kwargs).order_by('-id')
         return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}).annotate(
             time_open=time_open_field).filter(**kwargs).order_by('-id')
 

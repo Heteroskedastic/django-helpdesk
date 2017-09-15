@@ -47,6 +47,8 @@ def seconds_to_time(delta, format='short'):
     def plural(n):
         return n, abs(n) != 1 and "s" or ""
 
+    if delta is None:
+        return
     if isinstance(delta, str):
         delta = int(delta)
     if not isinstance(delta, timedelta):
