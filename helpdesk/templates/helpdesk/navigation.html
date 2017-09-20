@@ -1,4 +1,5 @@
 {% load i18n %}
+{% load util_tags %}
 {% load saved_queries %}
 {% with user|saved_queries as user_saved_queries_ %}
 
@@ -19,25 +20,25 @@
                 <div class="collapse navbar-collapse" id="helpdesk-nav-collapse">
                 {% if helpdesk_settings.HELPDESK_NAVIGATION_ENABLED and user.is_authenticated or user.is_staff %}
                 <ul class="nav navbar-nav">
-                    <li>
+                    <li class="{% active_if 'helpdesk:dashboard' %}">
                         <a href='{% url 'helpdesk:dashboard' %}'><i class="fa fa-dashboard fa-fw"></i> <span class="nav-text">{% trans "Dashboard" %}</span></a>
                     </li>
-                    <li>
+                    <li class="{% active_if 'helpdesk:ticket-list' 'helpdesk:view' %}">
                         <a href='{% url 'helpdesk:ticket-list' %}'><i class="fa fa-tasks fa-fw"></i> <span class="nav-text">{% trans "Tickets" %}</span></a>
                     </li>
-                    <li>
+                    <li class="{% active_if 'helpdesk:submit' %}">
                         <a href='{% url 'helpdesk:submit' %}'><i class="fa fa-plus-circle fa-fw"></i> <span class="nav-text">{% trans "New Ticket" %}</span></a>
                     </li>
-                    <li>
+                    <li class="{% active_if 'helpdesk:report_index' 'helpdesk:run_report' %}">
                         <a href='{% url 'helpdesk:report_index' %}'><i class="fa fa-bar-chart-o fa-fw"></i> <span class="nav-text"> {% trans "Stats" %}</span></a>
                     </li>
                     {% if helpdesk_settings.HELPDESK_KB_ENABLED %}
-                    <li>
+                    <li class="{% active_if 'helpdesk:kb_index' 'helpdesk:kb_item' 'helpdesk:kb_vote' 'helpdesk:kb_category' %}">
                         <a href='{% url 'helpdesk:kb_index' %}'><i class="fa fa-database fa-fw"></i> <span class="nav-text">{% trans "Knowledgebase" %}</span></a>
                     </li>
 
                     {% endif %}
-                    <li class="headerlink dropdown"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-filter fa-fw"></i> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
+                    <li class="headerlink dropdown {% active_if 'helpdesk:saved_search-list' %}" ><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="fa fa-filter fa-fw"></i> <span class="nav-text">{% trans "Saved Query" %} <b class="caret"></b></span></a>
                         <ul class="dropdown-menu">
                             <li>
                                 <a href="{% url 'helpdesk:saved_search-list' %}"><span class="fa fa-th-large"></span> Manage Saved Query</a>

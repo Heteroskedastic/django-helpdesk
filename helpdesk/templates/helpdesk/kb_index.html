@@ -10,8 +10,6 @@
 <p>{% trans "We have listed a number of Knowledgebase articles for your perusal in the following categories. Please check to see if any of these articles address your problem prior to opening a support ticket." %}</p>
 
 {% for category in kb_categories %}
-{% cycle 'one' 'two' 'three' as catnumperrow silent %}
-{% if catnumperrow == 'one' %}<div class="row">{% endif %}
     <div class="col-lg-4">
         <div class="panel panel-primary">
             <div class="panel-heading">
@@ -25,7 +23,5 @@
             </div>
         </div>
     </div>
-{% if catnumperrow == 'three' %}</div>{% endif %}
 {% endfor %}
-
 {% endblock %}

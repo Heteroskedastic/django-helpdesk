@@ -18,6 +18,14 @@ from django.utils.safestring import mark_safe
 
 register = template.Library()
 
+
+@register.simple_tag(takes_context=True)
+def active_if(context, *view_name):
+    if context.request.resolver_match.view_name in view_name:
+        return 'active'
+    return ''
+
+
 # noinspection PyAugmentAssignment
 @register.filter
 def humanize_duration(seconds):
