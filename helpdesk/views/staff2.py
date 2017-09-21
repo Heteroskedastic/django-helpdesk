@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q, Sum, F, Case, When, Value
 from django.shortcuts import render, redirect, get_object_or_404
+from django.template.loader import render_to_string
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
@@ -196,10 +197,14 @@ class TicketListExportView(TicketListView):
         return render(self.request, "helpdesk/ticket/export/html.html", ctx)
 
     def __export_pdf(self, queryset, filename=None):
-        from easy_pdf.rendering import render_to_pdf_response
+        import weasyprint
         ctx = {'tickets': queryset, 'datetime': timezone.now()}
         filename = '{}.pdf'.format(filename)
-        return render_to_pdf_response(self.request, "helpdesk/ticket/export/pdf.html", ctx, filename=filename)
+        html = render_to_string("helpdesk/ticket/export/pdf.html", ctx)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+        weasyprint.HTML(string=html).write_pdf(response)
+        return response
 
     def get(self, request, *args, **kwargs):
         self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()

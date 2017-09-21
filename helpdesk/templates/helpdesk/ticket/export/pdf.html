@@ -14,6 +14,13 @@
     <title>{{title|default:'Tickets List'}}</title>
 
     <style>
+        @page {
+            size: A3;
+            margin: 1cm;
+        }
+        body {
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        }
         .text-center {
             text-align: center !important;
         }
@@ -28,17 +35,18 @@
             border-collapse: collapse;
             border: 1px solid gray;
             border-spacing: 0;
+            font-size: 0.9em;
+            table-layout: fixed;
         }
         .table td {
-            padding: 3px;
         }
         .table th, .table td {
             border-collapse: collapse;
             border: 1px solid black;
+            padding: 5px;
         }
         .table th {
             text-align: center;
-            padding-top: 3px;
         }
     </style>
 
