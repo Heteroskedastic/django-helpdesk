@@ -16,7 +16,6 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views.generic import View, CreateView
 from django.views.generic.detail import SingleObjectMixin
-from easy_pdf.rendering import render_to_pdf_response
 
 from helpdesk.filters import TicketsFilter
 from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
@@ -197,6 +196,7 @@ class TicketListExportView(TicketListView):
         return render(self.request, "helpdesk/ticket/export/html.html", ctx)
 
     def __export_pdf(self, queryset, filename=None):
+        from easy_pdf.rendering import render_to_pdf_response
         ctx = {'tickets': queryset, 'datetime': timezone.now()}
         filename = '{}.pdf'.format(filename)
         return render_to_pdf_response(self.request, "helpdesk/ticket/export/pdf.html", ctx, filename=filename)
