@@ -11,3 +11,4 @@ django-filter>=1.0.1
 django-pagination-bootstrap>=1.1
 django-easy-pdf==0.1.1
 WeasyPrint>=0.34
+cffi==1.11.0
