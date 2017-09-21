@@ -16,6 +16,7 @@ from django.core.urlresolvers import reverse
 from django.utils import timezone
 from django.views.generic import View, CreateView
 from django.views.generic.detail import SingleObjectMixin
+from easy_pdf.rendering import render_to_pdf_response
 
 from helpdesk.filters import TicketsFilter
 from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
@@ -152,7 +153,6 @@ class TicketListView(StaffLoginRequiredMixin, View):
 
 
 class TicketListExportView(TicketListView):
-    EXPORT_TYPES = ['csv']
     type_url_kwarg = 'type'
 
     def serialize_ticket(self, ticket, columns):
@@ -170,9 +170,18 @@ class TicketListExportView(TicketListView):
             d[title] = value
         return d
 
-    def __export_csv(self, queryset):
+    @property
+    def export_types(self):
+        return dict(
+            csv=self.__export_csv,
+            pdf=self.__export_pdf,
+            html=self.__export_html,
+        )
+
+    def __export_csv(self, queryset, filename=None):
         response = HttpResponse(content_type='text/csv')
-        response['Content-Disposition'] = 'attachment; filename=tickets.csv'
+        filename = '{}.csv'.format(filename or 'tickets')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
         columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Queue'), ('priority', 'Priority'), ('status', 'Status'),
                    ('time_open', 'Time Open'), ('time_tracks', 'Time Spent'), ('money_tracks', 'Cost'),
                    ('created', 'Created'), ('due_date', 'Due'), ('assigned_to', 'Owner')]
@@ -183,17 +192,25 @@ class TicketListExportView(TicketListView):
             writer.writerow(row)
         return response
 
+    def __export_html(self, queryset, filename=None):
+        ctx = {'tickets': queryset, 'datetime': timezone.now()}
+        return render(self.request, "helpdesk/ticket/export/html.html", ctx)
+
+    def __export_pdf(self, queryset, filename=None):
+        ctx = {'tickets': queryset, 'datetime': timezone.now()}
+        filename = '{}.pdf'.format(filename)
+        return render_to_pdf_response(self.request, "helpdesk/ticket/export/pdf.html", ctx, filename=filename)
+
     def get(self, request, *args, **kwargs):
         self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()
-        if self.export_type not in self.EXPORT_TYPES:
+        if self.export_type not in self.export_types:
             return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
         return super(TicketListExportView, self).get(request, *args, **kwargs)
 
     def render_result(self, request, context):
-        if self.export_type == 'csv':
-            return self.__export_csv(context['tickets'].qs)
-        else:
-            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
+        func = self.export_types[self.export_type]
+        filename = 'tickets-{}'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
+        return func(context['tickets'].qs, filename=filename)
 
 
 class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):

@@ -9,3 +9,5 @@ django-sendsms>=0.2.3
 django_recaptcha>=1.2.1
 django-filter>=1.0.1
 django-pagination-bootstrap>=1.1
+django-easy-pdf==0.1.1
+WeasyPrint>=0.34

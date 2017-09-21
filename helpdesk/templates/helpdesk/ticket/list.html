@@ -31,7 +31,15 @@
     {% endif %}
     </span>
     <span class="pull-right">
-        <a href="{% url 'helpdesk:tickets-export' type='csv' %}?{{request.GET.urlencode}}" class="btn btn-info" title="Export to CSV"><span class="fa fa-file-excel-o"></span> <span class="hidden-xs">CSV</span></a>
+        <span class="dropdown">
+            <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-download"></span><span class="hidden-xs"> Export
+            </span> <span class="caret"></span></button>
+            <ul class="dropdown-menu">
+                <li><a href="{% url 'helpdesk:tickets-export' type='csv' %}?{{request.GET.urlencode}}" title="Export to CSV"><span class="fa fa-file-excel-o"></span> CSV</a></li>
+                <li><a href="{% url 'helpdesk:tickets-export' type='pdf' %}?{{request.GET.urlencode}}" title="Export to PDF"><span class="fa fa-file-pdf-o"></span> PDF</a></li>
+                <li><a target="_blank" href="{% url 'helpdesk:tickets-export' type='html' %}?{{request.GET.urlencode}}" title="Export to HTML(Print)"><span class="fa fa-print"></span> Print</a></li>
+            </ul>
+        </span>
         <a href="{% url 'helpdesk:submit' %}" class="btn btn-success" title="Submit New Ticket"><span class="fa fa-plus"></span> <span class="hidden-xs">New Ticket</span></a>
         {% if user_saved_queries %}
         <span class="dropdown">
@@ -166,7 +174,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td class="text-center text-muted" colspan="10"><em>[NO RECORD!]</em></td>
+                <td class="text-center text-muted" colspan="13"><em>[NO RECORD!]</em></td>
             </tr>
             {% endfor %}
         </table>
