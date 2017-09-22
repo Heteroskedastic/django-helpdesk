@@ -56,17 +56,17 @@
     <h3 class="text-center">Tickets List ({{datetime}})</h3>
     <table class="full-width table">
         <tr>
-            <th>ID#</th>
+            <th style="width: 35px;">ID#</th>
             <th>Title</th>
-            <th>Queue</th>
-            <th>Priority</th>
-            <th>Status</th>
-            <th>Time Open</th>
-            <th>Time Spent</th>
-            <th>Cost</th>
-            <th>Created</th>
-            <th>Due</th>
-            <th>Owner</th>
+            <th style="width: 110px;">Queue</th>
+            <th style="width: 50px;">Priority</th>
+            <th style="width: 60px;">Status</th>
+            <th style="width: 55px;">Time Open</th>
+            <th style="width: 55px;">Time Spent</th>
+            <th style="width: 55px;">Cost</th>
+            <th style="width: 80px;">Created</th>
+            <th style="width: 80px;">Due</th>
+            <th style="width: 80px;">Owner</th>
         </tr>
         {% for ticket in tickets %}
         <tr data-id="{{ ticket.id }}">
@@ -74,15 +74,13 @@
             <td>{{ ticket.title }}</td>
             <td>{{ ticket.queue }}</td>
             <td>{{ ticket.get_priority_display }}</td>
-            <td title="{{ticket.modified_status|naturaltime}}">{{ ticket.get_status_display }}</td>
-            <td title="{{ ticket.time_open|humanize_duration}}">{{ ticket.time_open|seconds_to_time:'short' }}</td>
-            <td title="{{ ticket.time_tracks|humanize_duration|default:'NO TIME' }}">{{ ticket.time_tracks|seconds_to_time }}</td>
-            <td>{{ ticket.money_tracks|currency }}</td>
-            <td><span title='{{ ticket.created|date:"r" }}'>{{ ticket.created|date:"Y-m-d H:i" }}</span>
-            </td>
-            <td><span class="{{ ticket|ticket_due_date_css }}" title='{{ ticket.due_date|date:"r" }}'>{{ ticket.due_date|date:"Y-m-d"|default:'-' }}</span>
-            </td>
-            <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
+            <td>{{ ticket.get_status_display }}</td>
+            <td>{{ ticket.time_open|seconds_to_time:'short' }}</td>
+            <td>{{ ticket.time_tracks|seconds_to_time }}</td>
+            <td>${{ ticket.money_tracks|floatformat:'-2' }}</td>
+            <td>{{ ticket.created|date:"Y-m-d H:i" }}</td>
+            <td>{{ ticket.due_date|date:"Y-m-d"|default:'-' }}</td>
+            <td>{{ ticket.assigned_to|default:'-' }}</td>
         </tr>
         {% empty %}
         <tr>
