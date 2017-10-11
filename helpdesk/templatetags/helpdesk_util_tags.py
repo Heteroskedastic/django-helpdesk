@@ -69,7 +69,7 @@ def seconds_to_time(delta, format='short'):
 
     if format == 'hour':
         total_seconds = int(delta.total_seconds())
-        return "{0:.3g}".format(total_seconds/3600.0)
+        return ("%.2f" % (total_seconds/3600.0)).rstrip('0').rstrip('.')
 
     days = ''
     if delta.days:
