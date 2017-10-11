@@ -253,6 +253,12 @@ ul.errorlist {
 
 #helpdesk-nav-collapse #searchform {
     padding-top: 0;
+    margin-right: 5px;
+    margin-left: 5px;
+}
+
+#helpdesk-nav-collapse #searchform input[name=keywords] {
+    width: 200px;
 }
 
 img.brand {padding-right: 30px;}

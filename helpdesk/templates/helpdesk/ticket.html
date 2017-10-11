@@ -165,7 +165,7 @@
 
         <div class="form-group">
             <label for="id_title">{% trans "Title" %}</label>
-            <input id="id_title" type='text' name='title' value='{{ ticket.title|escape }}' class="form-control" />
+            {{ form.title }}
         </div>
         <div class="form-group">
             <label for='id_owner'>{% trans "Owner" %}</label>
@@ -179,6 +179,10 @@
         <div class="form-group">
             <label for="id_due_date">{% trans "Due on" %}</label>
             {{ form.due_date }}
+        </div>
+        <div class="form-group">
+            <label for="id_completed">{% trans "Repair Completed At" %}</label>
+            {{ form.completed }}
         </div>
 
     </div>
@@ -228,7 +232,7 @@
 $(document).ready(function() {
     bindTableRowModalAction('deleteTicketModal', 'button.ticket-delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', '{% url "helpdesk:ticket-delete" ticket.pk %}');
     bindTableRowModalAction('takeTicketModal', 'button.ticket-take', 'Delete Ticket', 'Are you sure to take this ticket!', '{% url "helpdesk:ticket-take" ticket.pk %}');
-    $('#id_due_date').datetimepicker({
+    $('#id_due_date, #id_completed').datetimepicker({
         format: 'YYYY-MM-DD',
         showTodayButton: true,
         useCurrent: false,

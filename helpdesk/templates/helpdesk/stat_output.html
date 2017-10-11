@@ -13,14 +13,14 @@
 {% endblock extra_css %}
 
 {% block breadcrumb_items %}
-<li><a href="{% url 'helpdesk:report_index' %}">{% trans "Reports &amp; Statistics" %}</a></li>
+<li><a href="{% url 'helpdesk:stat_index' %}">{% trans "Statistics" %}</a></li>
 <li>{{title}}</li>
 {% endblock %}
 
-{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Statistics" %}{% endblock %}
 
 {% block content %}
-<h2 class="page-title">{% trans "Reports &amp; Statistics" %}<span class="label subtitle">{{title}}</span></h2>
+<h2 class="page-title">{% trans "Statistics" %}<span class="label subtitle">{{title}}</span></h2>
 
 <div class="row">
                 <div class="col-lg-12">

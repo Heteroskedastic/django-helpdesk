@@ -1,13 +1,13 @@
 {% extends "helpdesk/staff_base.html" %}{% load i18n %}
 
-{% block helpdesk_title %}{% trans "Reports &amp; Statistics" %}{% endblock %}
+{% block helpdesk_title %}{% trans "Statistics" %}{% endblock %}
 
 {% block breadcrumb_items %}
-<li>{% trans "Reports &amp; Statistics" %}</li>
+<li>{% trans "Statistics" %}</li>
 {% endblock %}
 
 {% block content %}
-<h2 class="page-title">{% trans "Reports &amp; Statistics" %}</h2>
+<h2 class="page-title">{% trans "Statistics" %}</h2>
 
 {% if number_tickets == 0 %}
 <p>{% trans "You haven't created any tickets yet, so you cannot run any reports." %}</p>
@@ -30,7 +30,7 @@
                                         </tr>
                                         <tr>
                                             <td>{% trans "Average number of days until ticket is closed (tickets opened in last 60 days): " %}</td>
-                                            <td><strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days|floatformat:"-2" }}</strong>. {% trans "Click" %} <strong><a href="{% url 'helpdesk:report_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td>
+                                            <td><strong style="color: red;">{{ basic_ticket_stats.average_nbr_days_until_ticket_closed_last_60_days|floatformat:"-2" }}</strong>. {% trans "Click" %} <strong><a href="{% url 'helpdesk:stat_index' %}daysuntilticketclosedbymonth">here</a></strong> {% trans "for detailed average by month." %} </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -79,18 +79,18 @@
                             <ul>
                                 <li>{% trans "Reports By User" %}
                                     <ul>
-                                        <li><a href="{% url 'helpdesk:run_report' 'userpriority' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Priority" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'userqueue' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Queue" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'userstatus' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Status" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'usermonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Month" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'userpriority' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Priority" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'userqueue' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Queue" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'userstatus' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Status" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'usermonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Month" %}</a></li>
                                     </ul>
                                 </li>
                                 <li>{% trans "Reports By Queue" %}
                                     <ul>
-                                        <li><a href="{% url 'helpdesk:run_report' 'queuepriority' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Priority" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'queuestatus' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Status" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'queuemonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Month" %}</a></li>
-                                        <li><a href="{% url 'helpdesk:run_report' 'daysuntilticketclosedbymonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "Days until ticket closed by Month" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'queuepriority' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Priority" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'queuestatus' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Status" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'queuemonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "by Month" %}</a></li>
+                                        <li><a href="{% url 'helpdesk:run_stat' 'daysuntilticketclosedbymonth' %}{% if saved_query %}?saved_query={{ saved_query }}{% endif %}">{% trans "Days until ticket closed by Month" %}</a></li>
                                     </ul>
                                 </li>
                             </ul>

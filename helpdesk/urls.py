@@ -137,13 +137,13 @@ urlpatterns = [
         staff.rss_list,
         name='rss_index'),
 
-    url(r'^reports/$',
-        staff.report_index,
-        name='report_index'),
+    url(r'^stats/$',
+        staff.stat_index,
+        name='stat_index'),
 
     url(r'^reports/(?P<report>\w+)/$',
-        staff2.RunReportView.as_view(),
-        name='run_report'),
+        staff2.RunStatView.as_view(),
+        name='run_stat'),
 
     url(r'^save_query/$',
         staff.save_query,
@@ -187,6 +187,9 @@ urlpatterns += [
         name='saved_search-switch-shared'),
     url(r'^saved_search/default/(?P<pk>\d+)/$', staff2.SavedSearchSetDefaultView.as_view(),
         name='saved_search-set-default'),
+    url(r'^report/custom-date/$', staff2.CustomDateReportView.as_view(), name='report-custom-date'),
+    url(r'^report/custom-date/export/(?P<type>\w+)/$', staff2.CustomDateReportExportView.as_view(),
+        name='report-custom-date-export'),
 ]
 
 urlpatterns += [

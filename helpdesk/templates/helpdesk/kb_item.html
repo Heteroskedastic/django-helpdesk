@@ -1,7 +1,7 @@
 {% extends "helpdesk/public_base.html" %}{% load i18n %}{% load markdown_deux_tags %}
 
 {% block breadcrumb_items %}
-<li><a href="{% url 'helpdesk:report_index' %}">{% trans "Knowledgebase" %}</a></li>
+<li><a href="{% url 'helpdesk:stat_index' %}">{% trans "Knowledgebase" %}</a></li>
 <li>{% blocktrans with item.title as item %}{{ item }}{% endblocktrans %}</li>
 {% endblock %}
 

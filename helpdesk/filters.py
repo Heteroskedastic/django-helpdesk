@@ -1,8 +1,11 @@
+from datetime import timedelta
+
 from django.conf import settings
 from django import forms
 from django.contrib.auth import get_user_model
 from django.db.models import Q
 from django.forms import ModelChoiceField
+from django.utils import timezone
 from django_filters import FilterSet, filters, OrderingFilter
 
 from helpdesk.models import Ticket, Queue
@@ -76,3 +79,72 @@ class TicketsFilter(FilterSet):
         ]
 
 
+class CustomDateReportFilter(FilterSet):
+    DATE_RANGE_CHOICES = (
+        ('today', 'Today'),
+        ('yesterday', 'Yesterday'),
+        ('this_week', 'This Week'),
+        ('this_month', 'This Month'),
+        ('this_year', 'This Year')
+    )
+    created_min = filters.DateFilter(name='created', lookup_expr='gte', required=False,
+                                     widget=forms.DateInput(attrs={
+                                         'placeholder': 'From Date',
+                                         'class': 'form-control datepicker-widget'}))
+    created_max = filters.DateFilter(name='created', lookup_expr='lte', required=False,
+                                     widget=forms.DateInput(attrs={
+                                         'placeholder': 'To Date',
+                                         'class': 'form-control datepicker-widget'}))
+    date_range = filters.ChoiceFilter(method='date_range_filter', choices=(DATE_RANGE_CHOICES))
+    order_by = ExtendedOrderingFilter(
+        fields=['id', 'queue', 'priority', 'assigned_to', 'title', 'created', 'due_date', 'time_tracks', 'money_tracks',
+                'completed'],
+        ordering_map={
+            'queue': 'queue__title',
+            'assigned_to': ('assigned_to__first_name', 'assigned_to__last_name'),
+            'status': ('status', 'modified_status')
+        }
+
+    )
+
+    @classmethod
+    def get_range_by_name(cls, value):
+        today = timezone.now().date()
+        start_date = end_date = None
+        if value not in dict(cls.DATE_RANGE_CHOICES).keys():
+            value = 'this_month'
+        if value == 'today':
+            start_date = end_date = today
+        elif value == 'yesterday':
+            start_date = end_date = today - timedelta(days=1)
+        elif value == 'this_week':
+            start_date = today - timedelta(days=today.weekday())
+            end_date = start_date + timedelta(days=6)
+        elif value == 'this_month':
+            start_date = today.replace(day=1)
+            end_date = (start_date.replace(day=27) + timedelta(days=5)).replace(day=1) - timedelta(days=1)
+        elif value == 'this_year':
+            start_date = today.replace(day=1, month=1)
+            end_date = start_date.replace(year=start_date.year + 1) - timedelta(days=1)
+        return (start_date, end_date)
+
+    def date_range_filter(self, queryset, name, value):
+        start_date, end_date = self.get_range_by_name(value)
+        if start_date:
+            queryset = queryset.filter(created__date__gte=start_date)
+        if end_date:
+            queryset = queryset.filter(created__date__lte=end_date)
+        return queryset
+
+    def get_range_display(self):
+        self.form.is_valid()
+        filter_data = self.form.cleaned_data
+
+        if filter_data.get('date_range'):
+            date_range = self.get_range_by_name(filter_data['date_range'])
+            return (dict(self.DATE_RANGE_CHOICES).get(filter_data['date_range']), date_range)
+        return ('Custom', (filter_data['created_min'], filter_data['created_max']))
+
+    class Meta:
+        model = Ticket
+        fields = ['created_min', 'created_max',]

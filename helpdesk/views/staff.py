@@ -292,7 +292,8 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date': ticket.due_date})
+    form = TicketForm(initial={'due_date': ticket.due_date, 'completed': ticket.completed, 'title': ticket.title,
+                               'assigned_to': ticket.assigned_to})
 
     ticketcc_string, show_subscribe = \
         return_ticketccstring_and_show_subscribe(request.user, ticket)
@@ -379,6 +380,12 @@ def update_ticket(request, ticket_id, public=False):
     except ValueError:
         due_date = old_due_date
 
+    old_completed = ticket.completed and ticket.completed.date()
+    try:
+        completed = datetime.strptime(request.POST.get('completed', ''), '%Y-%m-%d').date()
+    except ValueError:
+        completed = old_completed
+
     no_changes = all([
         not request.FILES,
         not comment,
@@ -386,6 +393,7 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == old_due_date,
+        completed == old_completed,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -501,6 +509,16 @@ def update_ticket(request, ticket_id, public=False):
         )
         c.save()
         ticket.due_date = due_date
+
+    if completed != old_completed:
+        c = TicketChange(
+            followup=f,
+            field=_('Repair Completed At'),
+            old_value=old_completed,
+            new_value=completed,
+        )
+        c.save()
+        ticket.completed = completed
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
@@ -953,6 +971,7 @@ def create_ticket(request):
 
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
+        form.fields.pop('completed', None)
         form.fields['assigned_to'].queryset = assignable_users
         if form.is_valid():
             ticket = form.save(user=request.user)
@@ -969,6 +988,7 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['assigned_to'].queryset = assignable_users
+        form.fields.pop('completed', None)
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 
@@ -1032,7 +1052,7 @@ def rss_list(request):
 rss_list = staff_member_required(rss_list)
 
 
-def report_index(request):
+def stat_index(request):
     number_tickets = Ticket.objects.all().count()
     saved_query = request.GET.get('saved_query', None)
 
@@ -1071,20 +1091,20 @@ def report_index(request):
 
     dash_tickets = query_to_dict(cursor.fetchall(), cursor.description)
 
-    return render(request, 'helpdesk/report_index.html', {
+    return render(request, 'helpdesk/stat_index.html', {
         'number_tickets': number_tickets,
         'saved_query': saved_query,
         'basic_ticket_stats': basic_ticket_stats,
         'dash_tickets': dash_tickets,
     })
-report_index = staff_member_required(report_index)
+stat_index = staff_member_required(stat_index)
 
 
-def run_report(request, report):
+def run_stat(request, report):
     if Ticket.objects.all().count() == 0 or report not in (
             'queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus',
             'userpriority', 'userqueue', 'daysuntilticketclosedbymonth'):
-        return HttpResponseRedirect(reverse("helpdesk:report_index"))
+        return HttpResponseRedirect(reverse("helpdesk:stat_index"))
 
     report_queryset = Ticket.objects.all().select_related().filter(
         queue__in=_get_user_queues(request.user)
@@ -1098,16 +1118,16 @@ def run_report(request, report):
         try:
             saved_query = SavedSearch.objects.get(pk=request.GET.get('saved_query'))
         except SavedSearch.DoesNotExist:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:stat_index'))
         if not (saved_query.shared or saved_query.user == request.user):
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:stat_index'))
 
         import json
         from helpdesk.lib import b64decode
         try:
             query_params = json.loads(b64decode(str(saved_query.query)).decode())
         except:
-            return HttpResponseRedirect(reverse('helpdesk:report_index'))
+            return HttpResponseRedirect(reverse('helpdesk:stat_index'))
 
         report_queryset = apply_query(report_queryset, query_params)
 
@@ -1264,7 +1284,7 @@ def run_report(request, report):
     for series in table:
         series_names.append(series[0])
 
-    return render(request, 'helpdesk/report_output.html', {
+    return render(request, 'helpdesk/stat_output.html', {
         'title': title,
         'charttype': charttype,
         'data': table,
@@ -1274,7 +1294,7 @@ def run_report(request, report):
         'from_saved_query': from_saved_query,
         'saved_query': saved_query,
     })
-run_report = staff_member_required(run_report)
+run_stat = staff_member_required(run_stat)
 
 
 def save_query(request):

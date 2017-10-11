@@ -1,0 +1,100 @@
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% load helpdesk_util_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{{title|default:'Custom Date Report'}}</title>
+
+    <style>
+        @page {
+            size: A3;
+            margin: 1cm;
+        }
+        body {
+            font-family: "Helvetica Neue",Helvetica,Arial,sans-serif;
+        }
+        .text-center {
+            text-align: center !important;
+        }
+        .full-width {
+            width: 100%;
+        }
+        th {
+            background-color: #3D4A53;
+            color: #fafbfb;
+        }
+        .table {
+            border-collapse: collapse;
+            border: 1px solid gray;
+            border-spacing: 0;
+            font-size: 0.9em;
+            table-layout: fixed;
+        }
+        .table td {
+        }
+        .table th, .table td {
+            border-collapse: collapse;
+            border: 1px solid black;
+            padding: 5px;
+        }
+        .table th {
+            text-align: center;
+        }
+
+        .small {
+            font-size: 11px;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h3 class="text-center">Custom Date Report <span class="small">{{date_range.0}} ({{date_range.1.0}} - {{date_range.1.1}})</span></h3>
+    <table class="full-width table">
+        <tr>
+            <th style="width: 35px;">ID#</th>
+            <th>Title</th>
+            <th style="width: 110px;">Location</th>
+            <th style="width: 80px;">Owner</th>
+            <th style="width: 50px;">Priority</th>
+            <th style="width: 70px;">Repair Reported</th>
+            <th style="width: 70px;">Repair Completed</th>
+            <th style="width: 70px;">Time Log</th>
+            <th style="width: 70px;">Amount</th>
+        </tr>
+        {% for ticket in tickets %}
+        <tr data-id="{{ ticket.id }}">
+            <td>{{ ticket.id }}</td>
+            <td>{{ ticket.title }}</td>
+            <td>{{ ticket.queue }}</td>
+            <td>{{ ticket.assigned_to|default:'-' }}</td>
+            <td>{{ ticket.priority|ticket_priority_label_class }}</td>
+            <td>{{ ticket.created|date:'m/d/Y' }}</td>
+            <td>{{ ticket.completed|date:'m/d/Y'|default:'-' }}</td>
+            <td>
+                {% with total_time_tracked=ticket.total_time_tracked %}
+                {% if total_time_tracked %}
+                    {{ total_time_tracked|seconds_to_time:'hour' }}hr over {{ticket.records_time_tracked}} D
+                {% else %}
+                    -
+                {% endif %}
+                {% endwith %}
+            </td>
+            <td>${{ ticket.money_tracks|floatformat:'-2'|intcomma }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="text-center text-muted" colspan="9"><em>[NO RECORD!]</em></td>
+        </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

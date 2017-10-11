@@ -78,7 +78,25 @@ class CustomFieldMixin(object):
         self.fields['custom_%s' % field.name] = fieldclass(**instanceargs)
 
 
+PRIORITY_CHOICES = (
+    (Ticket.PRIORITY_CRITICAL, _('Critical (Immediately)')),
+    (Ticket.PRIORITY_HIGH, _('High (24 Hours)')),
+    (Ticket.PRIORITY_NORMAL, _('Normal (1 Week)')),
+    (Ticket.PRIORITY_LOW, _('Low (2 Weeks)')),
+    (Ticket.PRIORITY_VERY_LOW, _('Very Low (Project: 1 month)')),
+)
+
+
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
+
+    priority = forms.ChoiceField(
+        widget=forms.Select(attrs={'class': 'form-control'}),
+        choices=PRIORITY_CHOICES,
+        required=True,
+        initial=Ticket.PRIORITY_NORMAL,
+        label=_('Priority'),
+        help_text=_("Please select a priority carefully. If unsure, leave it as 'Normal'."),
+    )
 
     class Meta:
         model = Ticket
@@ -164,17 +182,23 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
 
     priority = forms.ChoiceField(
         widget=forms.Select(attrs={'class': 'form-control'}),
-        choices=Ticket.PRIORITY_CHOICES,
+        choices=PRIORITY_CHOICES,
         required=True,
-        initial=3,
+        initial=Ticket.PRIORITY_NORMAL,
         label=_('Priority'),
-        help_text=_("Please select a priority carefully. If unsure, leave it as '3'."),
+        help_text=_("Please select a priority carefully. If unsure, leave it as 'Normal'."),
     )
 
     due_date = forms.DateTimeField(
         widget=forms.TextInput(attrs={'class': 'form-control'}),
         required=False,
         label=_('Due on'),
+    )
+
+    completed = forms.DateTimeField(
+        widget=forms.TextInput(attrs={'class': 'form-control'}),
+        required=False,
+        label=_('Repair Completed At'),
     )
 
     attachment = forms.FileField(
@@ -546,7 +570,7 @@ class AdminTicketNotificationForm(forms.ModelForm):
         label='When status changed to', choices=Ticket.STATUS_CHOICES, required=False,
         help_text=_('Leave blank to be ignored on all statuses, or select those statuses wish to be notified.'))
     priorities = forms.MultipleChoiceField(
-        label='When priorities are', choices=Ticket.PRIORITY_CHOICES, required=False,
+        label='When priorities are', choices=PRIORITY_CHOICES, required=False,
         help_text=_('Leave blank to be ignored on all priorities, or select those priorities wish to be notified.'))
     def clean_statuses(self):
         statuses = self.cleaned_data['statuses']

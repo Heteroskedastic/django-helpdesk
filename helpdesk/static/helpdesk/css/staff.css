@@ -253,7 +253,8 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
 }
 
 #filterForm div.form-group {
-    padding-left: 0 !important;
+    padding-left: 1px !important;
+    padding-right: 1px !important;
 }
 
 #filterForm .form-control {
@@ -360,4 +361,9 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
 
 .unassigned-actions {
     width: 135px;
+}
+
+.custom-date-range-title {
+    color: brown !important;
+    text-transform: none;
 }

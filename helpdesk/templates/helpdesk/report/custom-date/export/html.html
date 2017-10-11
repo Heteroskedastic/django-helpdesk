@@ -1,0 +1,96 @@
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% load helpdesk_util_tags %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>{{title|default:'Custom Date Report'}}</title>
+
+    <!-- Bootstrap Core CSS -->
+    {% if helpdesk_settings.HELPDESK_USE_CDN %}
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    {% else %}
+    <link href="{% static 'helpdesk/vendor/bootstrap/css/bootstrap.min.css' %}" rel="stylesheet">
+    {% endif %}
+    <style>
+        @media print {
+            .print-hidden {
+                display: none;
+            }
+        }
+        .ticket-priority-5-label {
+            background-color: #b5e8b5 !important;
+        }
+        .ticket-priority-4-label {
+            background-color: #7dc57d !important;
+        }
+        .ticket-priority-3-label {
+            background-color: #73ab07 !important;
+        }
+        .ticket-priority-2-label {
+            background-color: #ff7600 !important;
+        }
+        .ticket-priority-1-label {
+            background-color: red !important;
+        }
+    </style>
+
+</head>
+
+<body>
+    <h3 class="text-center">
+        Custom Date Report <small>{{date_range.0}} ({{date_range.1.0}} - {{date_range.1.1}})</small>
+        <button class="btn btn-danger pull-right print-hidden" onclick="window.print()"><span class="glyphicon glyphicon-print"></span> Print</button>
+    </h3>
+
+    <table class="table table-striped table-bordered table-advance sortable">
+        <tr>
+            <th>ID#</th>
+            <th>Title</th>
+            <th>Location</th>
+            <th>Owner</th>
+            <th>Priority</th>
+            <th>Repair Reported</th>
+            <th>Repair Completed</th>
+            <th>Time Log</th>
+            <th>Amount</th>
+        </tr>
+        {% for ticket in tickets %}
+        <tr data-id="{{ ticket.id }}">
+            <td title="{{ticket.ticket}}">{{ ticket.id }}</td>
+            <td>{{ ticket.title }}</td>
+            <td>{{ ticket.queue }}</td>
+            <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
+            <td>{{ ticket.priority|ticket_priority_label_class }}</td>
+            <td>{{ ticket.created|date:'m/d/Y' }}</td>
+            <td>{{ ticket.completed|date:'m/d/Y'|default:'-' }}</td>
+            <td title="{{ ticket.time_tracks|humanize_duration|default:'NO TIME' }}">
+                {% with total_time_tracked=ticket.total_time_tracked %}
+                {% if total_time_tracked %}
+                    {{ total_time_tracked|seconds_to_time:'hour' }}hr over {{ticket.records_time_tracked}} D
+                {% else %}
+                    -
+                {% endif %}
+                {% endwith %}
+            </td>
+            <td>{{ ticket.money_tracks|currency }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="text-center text-muted" colspan="9"><em>[NO RECORD!]</em></td>
+        </tr>
+        {% endfor %}
+    </table>
+
+    <script type="text/javascript">
+            window.print();
+    </script>
+</body>
+</html>

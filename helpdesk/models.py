@@ -404,6 +404,12 @@ class Ticket(models.Model):
         blank=True,
         help_text=_('Date this ticket was first created'),
     )
+    completed = models.DateTimeField(
+        _('Completed'),
+        blank=True,
+        null=True,
+        help_text=_('Repair completed at'),
+    )
 
     modified = models.DateTimeField(
         _('Modified'),

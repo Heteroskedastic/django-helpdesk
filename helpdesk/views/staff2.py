@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 from datetime import timedelta
 
+from cairocffi import context
 from django.db.models.functions import Coalesce
 from django.http import QueryDict, HttpResponseBadRequest, HttpResponse
 from django.contrib.auth import get_user_model
@@ -18,7 +19,7 @@ from django.utils import timezone
 from django.views.generic import View, CreateView
 from django.views.generic.detail import SingleObjectMixin
 
-from helpdesk.filters import TicketsFilter
+from helpdesk.filters import TicketsFilter, CustomDateReportFilter
 from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
 from helpdesk.templatetags.helpdesk_util_tags import seconds_to_time
@@ -178,7 +179,7 @@ class TicketListExportView(TicketListView):
             html=self.__export_html,
         )
 
-    def __export_csv(self, queryset, filename=None):
+    def __export_csv(self, queryset, filename=None, context=None):
         response = HttpResponse(content_type='text/csv')
         filename = '{}.csv'.format(filename or 'tickets')
         response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
@@ -192,11 +193,11 @@ class TicketListExportView(TicketListView):
             writer.writerow(row)
         return response
 
-    def __export_html(self, queryset, filename=None):
+    def __export_html(self, queryset, filename=None, context=None):
         ctx = {'tickets': queryset, 'datetime': timezone.now()}
         return render(self.request, "helpdesk/ticket/export/html.html", ctx)
 
-    def __export_pdf(self, queryset, filename=None):
+    def __export_pdf(self, queryset, filename=None, context=None):
         import weasyprint
         ctx = {'tickets': queryset, 'datetime': timezone.now()}
         filename = '{}.pdf'.format(filename)
@@ -215,7 +216,7 @@ class TicketListExportView(TicketListView):
     def render_result(self, request, context):
         func = self.export_types[self.export_type]
         filename = 'tickets-{}'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
-        return func(context['tickets'].qs, filename=filename)
+        return func(context['tickets'].qs, filename=filename, context=context)
 
 
 class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
@@ -537,13 +538,13 @@ class SavedSearchSwitchSharedView(StaffLoginRequiredMixin, SingleObjectMixin, Vi
         return self.request.META.get('HTTP_REFERER') or reverse('helpdesk:saved_search-list')
 
 
-class RunReportView(StaffLoginRequiredMixin, View):
+class RunStatView(StaffLoginRequiredMixin, View):
 
     def get(self, request, *args, **kwargs):
         report = kwargs.get('report')
         if report not in ('queuemonth', 'usermonth', 'queuestatus', 'queuepriority', 'userstatus', 'userpriority',
                           'userqueue', 'daysuntilticketclosedbymonth') or Ticket.objects.all().count() == 0:
-            return redirect(reverse("helpdesk:report_index"))
+            return redirect(reverse("helpdesk:stat_index"))
 
         user_queues = _get_user_queues(request.user)
         report_queryset = Ticket.objects.all().select_related().filter(queue__in=user_queues)
@@ -557,12 +558,12 @@ class RunReportView(StaffLoginRequiredMixin, View):
                 saved_query = user_saved_queries.get(pk=int(saved_query))
             except (ValueError, SavedSearch.DoesNotExist):
                 warning_message('Saved query does not exists!', request)
-                return redirect(reverse('helpdesk:report_index'))
+                return redirect(reverse('helpdesk:stat_index'))
 
             try:
                 query_params = json.loads(b64decode(str(saved_query.query)).decode())
             except ValueError:
-                return redirect(reverse('helpdesk:report_index'))
+                return redirect(reverse('helpdesk:stat_index'))
             else:
                 query_params = to_query_dict(query_params)
 
@@ -720,7 +721,7 @@ class RunReportView(StaffLoginRequiredMixin, View):
         for series in table:
             series_names.append(series[0])
 
-        return render(request, 'helpdesk/report_output.html', {
+        return render(request, 'helpdesk/stat_output.html', {
             'title': title,
             'charttype': charttype,
             'data': table,
@@ -731,3 +732,114 @@ class RunReportView(StaffLoginRequiredMixin, View):
             'saved_query': saved_query,
             'user_saved_queries': user_saved_queries,
         })
+
+
+class CustomDateReportView(StaffLoginRequiredMixin, View):
+
+    def get_queryset(self, **kwargs):
+        time_track_qs = 'SELECT coalesce(SUM("helpdesk_tickettimetrack"."time"), INTERVAL \'0 seconds\') as sum_time FROM "helpdesk_tickettimetrack"' \
+                        ' WHERE "helpdesk_tickettimetrack"."ticket_id"="helpdesk_ticket"."id"'
+        money_track_qs = 'SELECT coalesce(SUM("helpdesk_ticketmoneytrack"."money"), 0) as sum_money FROM "helpdesk_ticketmoneytrack"' \
+                         ' WHERE "helpdesk_ticketmoneytrack"."ticket_id"="helpdesk_ticket"."id"'
+        return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}
+                                    ).filter(**kwargs).order_by('-id')
+
+    def get(self, request, *args, **kwargs):
+        data = request.GET.copy()
+        user_queues = _get_user_queues(request.user)
+        qs = self.get_queryset(queue__in=user_queues)
+        filter_form = CustomDateReportFilter(data, queryset=qs).form
+        filter_form.is_valid()
+        filter_data = filter_form.cleaned_data
+        if not filter_data.get('created_min') and not filter_data.get('created_max') and not filter_data.get('date_range'):
+            filter_data['date_range'] = data['date_range'] = 'this_month'
+        if filter_data.get('date_range'):
+            min_date, max_date = CustomDateReportFilter.get_range_by_name(data.get('date_range'))
+            data['created_min'] = str(min_date)
+            data['created_max'] = str(max_date)
+        else:
+            if not filter_data.get('created_min'):
+                data['created_min'] = data['created_max']
+            elif not filter_data.get('created_max'):
+                data['created_max'] = data['created_min']
+        tickets = CustomDateReportFilter(data, queryset=qs)
+        ctx = {
+            'date_range': tickets.get_range_display(),
+            'date_range_choices': tickets.DATE_RANGE_CHOICES,
+            'tickets': tickets,
+            'page_size': get_current_page_size(request),
+        }
+        return self.render_result(request, ctx)
+
+    def render_result(self, request, context):
+        return render(request, 'helpdesk/report/custom-date/page.html', context)
+
+
+class CustomDateReportExportView(CustomDateReportView):
+    type_url_kwarg = 'type'
+
+    def serialize_ticket(self, ticket, columns):
+        d = {}
+        for c in columns:
+            field = c[0]
+            title = c[1]
+            value = getattr(ticket, field, None)
+            if field in ('created', 'completed'):
+                value = value.strftime('%m/%d/%Y') if value else '-'
+            elif field == 'time_tracks':
+                total_time_tracked = ticket.total_time_tracked
+                if total_time_tracked:
+                    value = '{} hr over {} D'.format(seconds_to_time(value, format='hour'), ticket.records_time_tracked())
+                else:
+                    value = '-'
+            elif field == 'priority':
+                value = ticket.get_priority_display()
+            d[title] = value
+        return d
+
+    @property
+    def export_types(self):
+        return dict(
+            csv=self.__export_csv,
+            pdf=self.__export_pdf,
+            html=self.__export_html,
+        )
+
+    def __export_csv(self, queryset, filename=None, context=None):
+        response = HttpResponse(content_type='text/csv')
+        filename = '{}.csv'.format(filename or 'tickets')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+        columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Location'), ('assigned_to', 'Owner'),
+                   ('priority', 'Priority'), ('created', 'Repair Reported'), ('completed', 'Repair Completed'),
+                   ('time_tracks', 'Time Log'), ('money_tracks', 'Amount'), ]
+        writer = csv.DictWriter(response, fieldnames=[c[1] for c in columns])
+        writer.writeheader()
+        for ticket in queryset:
+            row = self.serialize_ticket(ticket, columns)
+            writer.writerow(row)
+        return response
+
+    def __export_html(self, queryset, filename=None, context=None):
+        ctx = {'tickets': queryset, 'date_range': context['date_range']}
+        return render(self.request, "helpdesk/report/custom-date/export/html.html", ctx)
+
+    def __export_pdf(self, queryset, filename=None, context=None):
+        import weasyprint
+        ctx = {'tickets': queryset, 'date_range': context['date_range']}
+        filename = '{}.pdf'.format(filename)
+        html = render_to_string("helpdesk/report/custom-date/export/pdf.html", ctx)
+        response = HttpResponse(content_type='application/pdf')
+        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
+        weasyprint.HTML(string=html).write_pdf(response)
+        return response
+
+    def get(self, request, *args, **kwargs):
+        self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()
+        if self.export_type not in self.export_types:
+            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
+        return super(CustomDateReportExportView, self).get(request, *args, **kwargs)
+
+    def render_result(self, request, context):
+        func = self.export_types[self.export_type]
+        filename = 'tickets-{}'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
+        return func(context['tickets'].qs, filename=filename, context=context)

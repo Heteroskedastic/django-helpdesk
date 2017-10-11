@@ -50,6 +50,12 @@
                                 <th>{% trans "Submitted On" %}</th>
                                 <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
                             </tr>
+                            {% if ticket.completed %}
+                            <tr>
+                                <th>{% trans "Repair Completed At" %}</th>
+                                <td class="text-success">{{ ticket.completed|date:"r" }} ({{ ticket.completed|naturaltime }})</td>
+                            </tr>
+                            {% endif %}
 
                             <tr>
                                 <th>{% trans "Assigned To" %}</th>

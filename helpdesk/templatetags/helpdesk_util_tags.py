@@ -67,6 +67,10 @@ def seconds_to_time(delta, format='short'):
         hh, mm = divmod(mm, 60)
         return "%d:%02d:%02d" % (hh, mm, ss)
 
+    if format == 'hour':
+        total_seconds = int(delta.total_seconds())
+        return "{0:.3g}".format(total_seconds/3600.0)
+
     days = ''
     if delta.days:
         days = "%d day%s" % plural(delta.days)
@@ -112,6 +116,18 @@ def sorting_link(context, text, value, field='order_by', direction=''):
 
     return mark_safe('<a href="?{0}" class="{1}">{2}<i class="{3}">'
                      '</i></a>'.format(u, link_css, text, icon))
+
+
+@register.simple_tag(takes_context=True)
+def make_request_param_for_link(context, drop_fields='', **params):
+    dict_ = context.request.GET.copy()
+    for f in drop_fields.split(','):
+        dict_.pop(f, None)
+    for k, v in params.items():
+        dict_[k] = v
+    u = urlencode(OrderedDict(sorted(dict(dict_).items())), True)
+
+    return mark_safe(str(u))
 
 
 @register.filter

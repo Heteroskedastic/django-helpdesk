@@ -61,8 +61,7 @@
 
 <script type='text/javascript' language='javascript'>
 $(document).ready(function() {
-    var $du_date = $('#id_due_date');
-    $du_date.datetimepicker({
+    $('#id_due_date, #id_completed').datetimepicker({
         format: 'YYYY-MM-DD',
         showTodayButton: true,
         useCurrent: false,
