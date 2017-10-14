@@ -2,7 +2,7 @@ import csv
 import json
 
 from collections import defaultdict
-from datetime import timedelta
+from datetime import timedelta, date
 
 from cairocffi import context
 from django.db.models.functions import Coalesce
@@ -741,8 +741,11 @@ class CustomDateReportView(StaffLoginRequiredMixin, View):
                         ' WHERE "helpdesk_tickettimetrack"."ticket_id"="helpdesk_ticket"."id"'
         money_track_qs = 'SELECT coalesce(SUM("helpdesk_ticketmoneytrack"."money"), 0) as sum_money FROM "helpdesk_ticketmoneytrack"' \
                          ' WHERE "helpdesk_ticketmoneytrack"."ticket_id"="helpdesk_ticket"."id"'
-        return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}
-                                    ).filter(**kwargs).order_by('-id')
+        closed_at_field = Case(When(Q(status=Ticket.CLOSED_STATUS), then=F('modified_status')), default=None)
+        # closed_at_null will be used for sorting to show null values at end for desc sorting
+        closed_at_null = Case(When(Q(status=Ticket.CLOSED_STATUS), then=F('modified_status')), default=date(1, 1, 1))
+        return Ticket.objects.extra(select={'money_tracks': money_track_qs, 'time_tracks': time_track_qs}).annotate(
+            closed_at=closed_at_field, closed_at_null=closed_at_null).filter(**kwargs).order_by('-id')
 
     def get(self, request, *args, **kwargs):
         data = request.GET.copy()
@@ -784,12 +787,12 @@ class CustomDateReportExportView(CustomDateReportView):
             field = c[0]
             title = c[1]
             value = getattr(ticket, field, None)
-            if field in ('created', 'completed'):
+            if field in ('created', 'closed_at'):
                 value = value.strftime('%m/%d/%Y') if value else '-'
             elif field == 'time_tracks':
-                total_time_tracked = ticket.total_time_tracked
+                total_time_tracked = ticket.total_time_tracked()
                 if total_time_tracked:
-                    value = '{} hr over {} D'.format(seconds_to_time(value, format='hour'), ticket.records_time_tracked())
+                    value = '{}hr over {} D'.format(seconds_to_time(value, format='hour'), ticket.records_time_tracked())
                 else:
                     value = '-'
             elif field == 'priority':
@@ -810,7 +813,7 @@ class CustomDateReportExportView(CustomDateReportView):
         filename = '{}.csv'.format(filename or 'tickets')
         response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
         columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Location'), ('assigned_to', 'Owner'),
-                   ('priority', 'Priority'), ('created', 'Repair Reported'), ('completed', 'Repair Completed'),
+                   ('priority', 'Priority'), ('created', 'Repair Reported'), ('closed_at', 'Repair Completed'),
                    ('time_tracks', 'Time Log'), ('money_tracks', 'Amount'), ]
         writer = csv.DictWriter(response, fieldnames=[c[1] for c in columns])
         writer.writeheader()

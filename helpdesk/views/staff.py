@@ -292,7 +292,7 @@ def view_ticket(request, ticket_id):
         users = User.objects.filter(is_active=True).order_by(User.USERNAME_FIELD)
 
     # TODO: shouldn't this template get a form to begin with?
-    form = TicketForm(initial={'due_date': ticket.due_date, 'completed': ticket.completed, 'title': ticket.title,
+    form = TicketForm(initial={'due_date': ticket.due_date, 'title': ticket.title,
                                'assigned_to': ticket.assigned_to})
 
     ticketcc_string, show_subscribe = \
@@ -380,12 +380,6 @@ def update_ticket(request, ticket_id, public=False):
     except ValueError:
         due_date = old_due_date
 
-    old_completed = ticket.completed and ticket.completed.date()
-    try:
-        completed = datetime.strptime(request.POST.get('completed', ''), '%Y-%m-%d').date()
-    except ValueError:
-        completed = old_completed
-
     no_changes = all([
         not request.FILES,
         not comment,
@@ -393,7 +387,6 @@ def update_ticket(request, ticket_id, public=False):
         title == ticket.title,
         priority == int(ticket.priority),
         due_date == old_due_date,
-        completed == old_completed,
         (owner == -1) or (not owner and not ticket.assigned_to) or
         (owner and User.objects.get(id=owner) == ticket.assigned_to),
     ])
@@ -509,16 +502,6 @@ def update_ticket(request, ticket_id, public=False):
         )
         c.save()
         ticket.due_date = due_date
-
-    if completed != old_completed:
-        c = TicketChange(
-            followup=f,
-            field=_('Repair Completed At'),
-            old_value=old_completed,
-            new_value=completed,
-        )
-        c.save()
-        ticket.completed = completed
 
     if new_status in (Ticket.RESOLVED_STATUS, Ticket.CLOSED_STATUS):
         if new_status == Ticket.RESOLVED_STATUS or ticket.resolution is None:
@@ -971,7 +954,6 @@ def create_ticket(request):
 
     if request.method == 'POST':
         form = TicketForm(request.POST, request.FILES)
-        form.fields.pop('completed', None)
         form.fields['assigned_to'].queryset = assignable_users
         if form.is_valid():
             ticket = form.save(user=request.user)
@@ -988,7 +970,6 @@ def create_ticket(request):
 
         form = TicketForm(initial=initial_data)
         form.fields['assigned_to'].queryset = assignable_users
-        form.fields.pop('completed', None)
         if helpdesk_settings.HELPDESK_CREATE_TICKET_HIDE_ASSIGNED_TO:
             form.fields['assigned_to'].widget = forms.HiddenInput()
 

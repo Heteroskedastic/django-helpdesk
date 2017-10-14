@@ -404,13 +404,6 @@ class Ticket(models.Model):
         blank=True,
         help_text=_('Date this ticket was first created'),
     )
-    completed = models.DateTimeField(
-        _('Completed'),
-        blank=True,
-        null=True,
-        help_text=_('Repair completed at'),
-    )
-
     modified = models.DateTimeField(
         _('Modified'),
         blank=True,
@@ -632,6 +625,10 @@ class Ticket(models.Model):
         parts = query.split('-')
         queue = '-'.join(parts[0:-1])
         return queue, parts[-1]
+
+    @property
+    def is_closed(self):
+        return self.status == self.CLOSED_STATUS
 
     def total_time_tracked(self, user=None):
         q = self.time_track

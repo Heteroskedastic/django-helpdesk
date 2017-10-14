@@ -50,13 +50,12 @@
                                 <th>{% trans "Submitted On" %}</th>
                                 <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
                             </tr>
-                            {% if ticket.completed %}
+                            {% if ticket.is_closed %}
                             <tr>
-                                <th>{% trans "Repair Completed At" %}</th>
-                                <td class="text-success">{{ ticket.completed|date:"r" }} ({{ ticket.completed|naturaltime }})</td>
+                                <th>{% trans "Closed At" %}</th>
+                                <td class="text-danger">{{ ticket.modified_status|date:"r" }} ({{ ticket.modified_status|naturaltime }})</td>
                             </tr>
                             {% endif %}
-
                             <tr>
                                 <th>{% trans "Assigned To" %}</th>
                                 <td>{{ ticket.get_assigned_to }}{% ifequal ticket.get_assigned_to _('Unassigned') %} <strong><a href='?take'><button type="button" class="btn btn-primary btn-xs"><i class="fa fa-hand-paper-o"></i>&nbsp;{% trans "Take" %}</button></a></strong>{% endifequal %}</td>

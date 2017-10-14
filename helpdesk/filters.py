@@ -98,7 +98,7 @@ class CustomDateReportFilter(FilterSet):
     date_range = filters.ChoiceFilter(method='date_range_filter', choices=(DATE_RANGE_CHOICES))
     order_by = ExtendedOrderingFilter(
         fields=['id', 'queue', 'priority', 'assigned_to', 'title', 'created', 'due_date', 'time_tracks', 'money_tracks',
-                'completed'],
+                'closed_at_null', 'closed_at'],
         ordering_map={
             'queue': 'queue__title',
             'assigned_to': ('assigned_to__first_name', 'assigned_to__last_name'),

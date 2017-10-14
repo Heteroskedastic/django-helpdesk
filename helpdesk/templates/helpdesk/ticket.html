@@ -180,11 +180,6 @@
             <label for="id_due_date">{% trans "Due on" %}</label>
             {{ form.due_date }}
         </div>
-        <div class="form-group">
-            <label for="id_completed">{% trans "Repair Completed At" %}</label>
-            {{ form.completed }}
-        </div>
-
     </div>
 
 </div>
@@ -232,7 +227,7 @@
 $(document).ready(function() {
     bindTableRowModalAction('deleteTicketModal', 'button.ticket-delete', 'Delete Ticket', 'Are you sure to delete? this will remove the ticket permanently!', '{% url "helpdesk:ticket-delete" ticket.pk %}');
     bindTableRowModalAction('takeTicketModal', 'button.ticket-take', 'Delete Ticket', 'Are you sure to take this ticket!', '{% url "helpdesk:ticket-take" ticket.pk %}');
-    $('#id_due_date, #id_completed').datetimepicker({
+    $('#id_due_date').datetimepicker({
         format: 'YYYY-MM-DD',
         showTodayButton: true,
         useCurrent: false,

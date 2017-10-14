@@ -78,7 +78,7 @@
             <td>{{ ticket.assigned_to|default:'-' }}</td>
             <td>{{ ticket.priority|ticket_priority_label_class }}</td>
             <td>{{ ticket.created|date:'m/d/Y' }}</td>
-            <td>{{ ticket.completed|date:'m/d/Y'|default:'-' }}</td>
+            <td>{{ ticket.closed_at|date:'m/d/Y'|default:'-' }}</td>
             <td>
                 {% with total_time_tracked=ticket.total_time_tracked %}
                 {% if total_time_tracked %}

@@ -81,7 +81,7 @@
                 <th>{% sorting_link 'Owner' 'assigned_to' %}</th>
                 <th>{% sorting_link 'Priority' 'priority' %}</th>
                 <th>{% sorting_link 'Repair Reported' 'created' %}</th>
-                <th>{% sorting_link 'Repair Completed' 'completed' %}</th>
+                <th>{% sorting_link 'Repair Completed' 'closed_at_null' %}</th>
                 <th>{% sorting_link 'Time Log' 'time_tracks' %}</th>
                 <th>{% sorting_link 'Amount' 'money_tracks' %}</th>
             </tr>
@@ -94,7 +94,7 @@
                 <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
                 <td>{{ ticket.priority|ticket_priority_label_class }}</td>
                 <td>{{ ticket.created|date:'m/d/Y' }}</td>
-                <td>{{ ticket.completed|date:'m/d/Y'|default:'-' }}</td>
+                <td>{{ ticket.closed_at|date:'m/d/Y'|default:'-' }}</td>
                 <td title="{{ ticket.time_tracks|humanize_duration|default:'NO TIME' }}">
                     {% with total_time_tracked=ticket.total_time_tracked %}
                     {% if total_time_tracked %}

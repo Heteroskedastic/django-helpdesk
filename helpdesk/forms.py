@@ -195,12 +195,6 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         label=_('Due on'),
     )
 
-    completed = forms.DateTimeField(
-        widget=forms.TextInput(attrs={'class': 'form-control'}),
-        required=False,
-        label=_('Repair Completed At'),
-    )
-
     attachment = forms.FileField(
         widget=forms.ClearableFileInput(attrs={'multiple': True}),
         required=False,

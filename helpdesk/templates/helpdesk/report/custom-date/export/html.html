@@ -70,8 +70,8 @@
             <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
             <td>{{ ticket.priority|ticket_priority_label_class }}</td>
             <td>{{ ticket.created|date:'m/d/Y' }}</td>
-            <td>{{ ticket.completed|date:'m/d/Y'|default:'-' }}</td>
-            <td title="{{ ticket.time_tracks|humanize_duration|default:'NO TIME' }}">
+            <td>{{ ticket.closed_at|date:'m/d/Y'|default:'-' }}</td>
+            <td>
                 {% with total_time_tracked=ticket.total_time_tracked %}
                 {% if total_time_tracked %}
                     {{ total_time_tracked|seconds_to_time:'hour' }}hr over {{ticket.records_time_tracked}} D
