@@ -374,7 +374,7 @@ def update_ticket(request, ticket_id, public=False):
     public = request.POST.get('public', False)
     owner = int(request.POST.get('owner', -1))
     priority = int(request.POST.get('priority', ticket.priority))
-    old_due_date = ticket.due_date and ticket.due_date.date()
+    old_due_date = ticket.due_date
     try:
         due_date = datetime.strptime(request.POST.get('due_date', ''), '%Y-%m-%d').date()
     except ValueError:

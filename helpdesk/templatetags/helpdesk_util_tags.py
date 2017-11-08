@@ -1,5 +1,5 @@
 from collections import OrderedDict
-from datetime import timedelta
+from datetime import timedelta, datetime
 from django.utils import timezone
 from django.contrib.humanize.templatetags.humanize import naturaltime, intcomma
 from helpdesk import settings
@@ -135,6 +135,7 @@ def ticket_due_date_humanize(ticket):
     due = ticket.due_date
     if not due:
         return None
+    due = datetime.combine(due, datetime.max.time())
     if ticket.status in (ticket.RESOLVED_STATUS, ticket.CLOSED_STATUS, ticket.DUPLICATE_STATUS):
         return due.strftime('%b %d, %Y')
     replacements = {
@@ -155,7 +156,7 @@ def ticket_due_date_css(ticket):
 
     if ticket.status in (ticket.RESOLVED_STATUS, ticket.CLOSED_STATUS, ticket.DUPLICATE_STATUS):
         return 'text-muted'
-    if due < timezone.now():
+    if due < timezone.now().date():
         return 'text-danger'
 
 
