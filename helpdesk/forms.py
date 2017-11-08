@@ -8,6 +8,7 @@ forms.py - Definitions of newforms-based forms for creating and maintaining
 """
 import re
 import traceback
+from datetime import timedelta
 
 from captcha.fields import ReCaptchaField
 from django.core.exceptions import ObjectDoesNotExist, ValidationError
@@ -89,7 +90,8 @@ PRIORITY_CHOICES = (
 
 class EditTicketForm(CustomFieldMixin, forms.ModelForm):
 
-    priority = forms.ChoiceField(
+    priority = forms.TypedChoiceField(
+        coerce=int,
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=PRIORITY_CHOICES,
         required=True,
@@ -180,7 +182,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
         help_text=_('Please be as descriptive as possible and include all details'),
     )
 
-    priority = forms.ChoiceField(
+    priority = forms.TypedChoiceField(
+        coerce=int,
         widget=forms.Select(attrs={'class': 'form-control'}),
         choices=PRIORITY_CHOICES,
         required=True,
@@ -227,7 +230,8 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                         queue=queue,
                         description=self.cleaned_data['body'],
                         priority=self.cleaned_data['priority'],
-                        due_date=self.cleaned_data['due_date'],
+                        due_date=self.cleaned_data['due_date'] or self.get_due_date_by_priority(
+                            self.cleaned_data['priority']),
                         )
 
         return ticket, queue
@@ -316,6 +320,18 @@ class AbstractTicketForm(CustomFieldMixin, forms.Form):
                 fail_silently=True,
                 files=files,
             )
+
+    @staticmethod
+    def get_due_date_by_priority(priority):
+        days_map = {
+            Ticket.PRIORITY_CRITICAL: 0,
+            Ticket.PRIORITY_HIGH: 1,
+            Ticket.PRIORITY_NORMAL: 7,
+            Ticket.PRIORITY_LOW: 14,
+            Ticket.PRIORITY_VERY_LOW: 30,
+        }
+        today = timezone.now().date()
+        return today + timedelta(days=days_map[priority])
 
 
 class TicketForm(AbstractTicketForm):

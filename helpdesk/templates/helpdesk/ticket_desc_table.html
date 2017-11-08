@@ -50,6 +50,14 @@
                                 <th>{% trans "Submitted On" %}</th>
                                 <td>{{ ticket.created|date:"r" }} ({{ ticket.created|naturaltime }})</td>
                             </tr>
+                            {% if ticket.due_date %}
+                            <tr>
+                                <th>{% trans "Due Date" %}</th>
+                                <td class="{{ ticket|ticket_due_date_css }}" title='{{ ticket.due_date }}'>
+                                    {{ ticket|ticket_due_date_humanize|default:'-' }}
+                                </td>
+                            </tr>
+                            {% endif %}
                             {% if ticket.is_closed %}
                             <tr>
                                 <th>{% trans "Closed At" %}</th>

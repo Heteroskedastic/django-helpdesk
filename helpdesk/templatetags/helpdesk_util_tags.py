@@ -158,6 +158,7 @@ def ticket_due_date_css(ticket):
         return 'text-muted'
     if due < timezone.now().date():
         return 'text-danger'
+    return ''
 
 
 # noinspection PyUnusedLocal
