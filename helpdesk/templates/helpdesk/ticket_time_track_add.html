@@ -26,11 +26,17 @@
             <div class="form-group row {% if form.time.errors %}has-error{% endif %}">
                 <label class="col-md-2 control-label" >Time Spent</label>
                 <div class="col-md-9 time-3part-widget form-inline">
-                    <input class="form-control time-hours" min="0" max="23" placeholder="Hour" type="number"> :
-                    <input class="form-control time-minutes" min="0" max="59" placeholder="Minute" type="number"> :
-                    <input class="form-control time-seconds" min="0" max="59" placeholder="Second" type="number">
-
-                    {% bootstrap_field form.time form_group_class='hidden' show_label=False set_required=False %}
+                    <label>
+                        <p class="text-muted">Hours</p>
+                        <input class="form-control time-hours" min="0" max="23" placeholder="Hour" type="number">
+                    </label>
+                    <label>:</label>
+                    <label>
+                        <p class="text-muted">Minutes</p>
+                        <input class="form-control time-minutes" min="0" max="59" placeholder="Minute" type="number">
+                    </label>
+                    {% bootstrap_field form.time form_group_class='hidden' show_label=False set_required=False show_help=False %}
+                    <span class="help-block">Time spent on ticket. (Hours:Minutes)</span>
                     <span class="help-block">{{form.time.errors}}</span>
                 </div>
             </div>
@@ -67,14 +73,13 @@ $(document).ready(function() {
     function update_time_value(initial) {
         if (initial === true) {
             var st = $('#id_time').val().split(':');
-            $('.time-3part-widget .time-seconds').val((st[st.length - 1]|| '0') * 1)
-            $('.time-3part-widget .time-minutes').val((st[st.length - 2] || '0') * 1)
-            $('.time-3part-widget .time-hours').val((st[st.length - 3]|| '0') * 1)
+            $('.time-3part-widget .time-minutes').val((st[st.length - 2] || '0') * 1);
+            $('.time-3part-widget .time-hours').val((st[st.length - 3]|| '0') * 1);
             return
         }
         var h = $('.time-3part-widget .time-hours').val() || '0',
             m = $('.time-3part-widget .time-minutes').val() || '0',
-            s = $('.time-3part-widget .time-seconds').val() || '0',
+            s = '0',
             time_val = [h, m, s].join(':');
         if (time_val.replace(/:/g, "") * 1 === 0) {
             time_val = null;
