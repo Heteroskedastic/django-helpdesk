@@ -81,6 +81,7 @@ def view_ticket(request):
 
     if ticket and email:
         try:
+            ticket = ticket.split('-')[-1]
             ticket_id = int(ticket)
             ticket = Ticket.objects.get(id=ticket_id, submitter_email__iexact=email)
         except (ObjectDoesNotExist, ValueError):
