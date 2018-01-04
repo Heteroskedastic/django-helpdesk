@@ -132,6 +132,7 @@
                 <th>{% sorting_link 'Created' 'created' %}</th>
                 <th>{% sorting_link 'Due' 'due_date' %}</th>
                 <th>{% sorting_link 'Owner' 'assigned_to' %}</th>
+                <th>{% sorting_link 'Submitter Email' 'submitter_email' %}</th>
                 <th class="ticket-list-table-action-col">
                     <div class="dropdown">
                         <button class="btn btn-sm btn-primary dropdown-toggle bulk-action-dropdown" type="button"
@@ -165,6 +166,7 @@
                 <td><span class="{{ ticket|ticket_due_date_css }}" title='{{ ticket.due_date }}'>{{ ticket|ticket_due_date_humanize|default:'-' }}</span>
                 </td>
                 <td title="{{ ticket.get_assigned_to }}">{{ ticket.assigned_to|default:'-' }}</td>
+                <td>{{ ticket.submitter_email|default:'-' }}</td>
 
                 <td>
                     <button type="button" name="take" class="btn btn-sm btn-primary" {% if user.pk == ticket.assigned_to.pk %}disabled title="Already Assigned to you!" {% else %} title="Take Ticket(Assign to you)" {% endif %}><span class="fa fa-hand-paper-o"></span></button>
@@ -173,7 +175,7 @@
             </tr>
             {% empty %}
             <tr>
-                <td class="text-center text-muted" colspan="13"><em>[NO RECORD!]</em></td>
+                <td class="text-center text-muted" colspan="14"><em>[NO RECORD!]</em></td>
             </tr>
             {% endfor %}
         </table>

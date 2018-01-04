@@ -43,6 +43,11 @@ class ExtendedOrderingFilter(OrderingFilter):
         param = param[1:] if descending else param
         field_name = self.param_map.get(param, param)
         field_name = self.ordering_map.get(field_name, field_name)
+        if callable(field_name):
+            res = field_name(descending)
+            if not isinstance(res, (tuple, list)):
+                res = [res]
+            return res
         if isinstance(field_name, str):
             field_name = (field_name,)
 

@@ -3,7 +3,7 @@ from datetime import timedelta
 from django.conf import settings
 from django import forms
 from django.contrib.auth import get_user_model
-from django.db.models import Q
+from django.db.models import Q, F
 from django.forms import ModelChoiceField
 from django.utils import timezone
 from django_filters import FilterSet, filters, OrderingFilter
@@ -53,11 +53,13 @@ class TicketsFilter(FilterSet):
 
     order_by = ExtendedOrderingFilter(
         fields=['id', 'queue', 'priority', 'assigned_to', 'status', 'title', 'description', 'created', 'due_date',
-                'time_tracks', 'money_tracks', 'time_open'],
+                'time_tracks', 'money_tracks', 'time_open', 'submitter_email'],
         ordering_map={
             'queue': 'queue__title',
             'assigned_to': ('assigned_to__first_name', 'assigned_to__last_name'),
-            'status': ('status', 'modified_status')
+            'status': ('status', 'modified_status'),
+            'submitter_email': lambda desceding: F('submitter_email').desc(nulls_last=True) if desceding else F(
+                'submitter_email').asc(nulls_last=True)
         }
 
     )
@@ -75,7 +77,7 @@ class TicketsFilter(FilterSet):
     class Meta:
         model = Ticket
         fields = [
-             'assigned_to', 'queue', 'status', 'priority', 'created_min', 'created_max', 'keywords',
+             'assigned_to', 'queue', 'status', 'priority', 'created_min', 'created_max', 'keywords', 'submitter_email',
         ]
 
 
