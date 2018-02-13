@@ -157,7 +157,7 @@ class TicketListView(StaffLoginRequiredMixin, View):
             result.append(dict(
                 id=t.id, title=t.title, queue=str(t.queue), priority=t.get_priority_display(),
                 money_tracks=t.money_tracks, status=t.get_status_display(), created=t.created,
-                due_date=t.due_date, assigned_to=str(t.assigned_to),
+                due_date=t.due_date, assigned_to=t.assigned_to and str(t.assigned_to),
                 time_open=seconds_to_time(t.time_open, format='clock'),
                 time_tracks=seconds_to_time(t.time_tracks, format='clock'),
             ))
