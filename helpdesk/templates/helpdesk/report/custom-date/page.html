@@ -165,7 +165,7 @@
             var url = '{0}?{1}'.format(urlPath, params.toString());
             $.get(url).done(function(records) {
                 exportToCSV(exportColumns, prepareRecordsForExport(records), {
-                    fileName: 'tickets.csv', nameField: 'dataKey'
+                    fileName: 'tickets-report.csv', nameField: 'dataKey'
                 });
             }).fail(function(response) {
                 showAlert('Failed to export to csv!', 'danger');
@@ -176,7 +176,7 @@
             var url = '{0}?{1}'.format(urlPath, params.toString());
             $.get(url).done(function(records) {
                 exportToPDF(exportColumns, prepareRecordsForExport(records), {
-                    fileName: 'tickets.pdf',
+                    fileName: 'tickets-report.pdf',
                     jspdfDoc: new jsPDF('p', 'pt', 'a3'),
                     jspdfOptions: {
                         columnStyles: {
