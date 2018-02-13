@@ -172,7 +172,6 @@ urlpatterns = [
 
 urlpatterns += [
     url(r'^ticket/list/$', staff2.TicketListView.as_view(), name='ticket-list'),
-    url(r'^ticket/list/export/(?P<type>\w+)/$', staff2.TicketListExportView.as_view(), name='tickets-export'),
     url(r'^ticket/delete/(?P<pk>\d+)/$', staff2.TicketDeleteView.as_view(), name='ticket-delete'),
     url(r'^ticket/take/(?P<pk>\d+)/$', staff2.TicketTakeView.as_view(), name='ticket-take'),
     url(r'^ticket/delete/bulk/(?P<pk>((\d+),?)+)/$', staff2.TicketsBulkDeleteView.as_view(),
@@ -188,8 +187,6 @@ urlpatterns += [
     url(r'^saved_search/default/(?P<pk>\d+)/$', staff2.SavedSearchSetDefaultView.as_view(),
         name='saved_search-set-default'),
     url(r'^report/custom-date/$', staff2.CustomDateReportView.as_view(), name='report-custom-date'),
-    url(r'^report/custom-date/export/(?P<type>\w+)/$', staff2.CustomDateReportExportView.as_view(),
-        name='report-custom-date-export'),
 ]
 
 urlpatterns += [

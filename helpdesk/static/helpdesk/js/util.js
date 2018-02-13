@@ -112,3 +112,67 @@ function patchChosenRequired(selector) {
         this.setAttribute('style', 'display:visible; position:absolute; clip:rect(0,0,0,0)');
     });
 }
+
+function showAlert(message, type) {
+    var html = "<div class='alert alert-{0} alert-dismissible fade in'  style=\"display: none;\">\n" +
+        "              <button type=\"button\" class=\"close\" data-dismiss=\"alert\" aria-label=\"Close\"><span aria-hidden=\"true\">&times;</span></button>\n" +
+        "              {1}\n" +
+        "            </div>";
+    $('.alert', $('.messages').html(html.format(type||'info', message))).fadeTo(2000, 500);
+}
+
+function exportToCSV(columns, rows, options) {
+    /**
+     * columns: [{name: "COLUMN_NAME", title: "COLUMN_TITLE"}, ...]
+     * rows: [{}, {}, ...]
+     * @type {*[]}
+     */
+    options = options || {};
+    if (typeof saveAs === "undefined") {
+        throw "This require FileSaver.js!";
+    }
+    separator = options.separator || ',';
+    var colNames = [],
+        colTitles = [];
+    columns.forEach(function (col) {
+        var name = col;
+        var title = col;
+        if (typeof col === 'object') {
+            name = col[options.nameField || 'name'];
+            title = col[options.titleField || 'title'];
+        }
+        colNames.push(name);
+        colTitles.push('"{0}"'.format(title || ''));
+    });
+    var csvRows = [colTitles.join(separator)];
+    rows.forEach(function (row) {
+        csvRows.push(colNames.map(function (col) {
+            return '"{0}"'.format(row[col] || '');
+        }).join(separator));
+
+    });
+    var csv = csvRows.join("\r\n");
+    var blob = new Blob([csv], {type: "text/csv;charset=utf-8"});
+    saveAs(blob, options.fileName || 'export.csv');
+}
+
+function exportToPDF(columns, rows, options) {
+    jspdfOptions = Object.assign({
+        theme: 'grid',
+        styles: {
+            //lineColor: [0, 0, 0],
+            overflow: 'linebreak'
+        },
+        headerStyles: {
+            fillColor: [21, 92, 113]
+        },
+        alternateRowStyles: {
+            fillColor: [243, 243, 243]
+        }
+    }, options.jspdfOptions || {});
+
+    // Only pt supported (not mm or in)
+    doc = options.jspdfDoc || new jsPDF('p', 'pt');
+    doc.autoTable(columns, rows, jspdfOptions);
+    doc.save(options.fileName || 'export.pdf');
+}

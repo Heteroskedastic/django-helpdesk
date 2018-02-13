@@ -6,7 +6,7 @@ from datetime import timedelta, date
 
 from cairocffi import context
 from django.db.models.functions import Coalesce
-from django.http import QueryDict, HttpResponseBadRequest, HttpResponse
+from django.http import QueryDict, HttpResponseBadRequest, HttpResponse, JsonResponse
 from django.contrib.auth import get_user_model
 from django.db import transaction
 from django.db.models import Q, Sum, F, Case, When, Value
@@ -150,73 +150,18 @@ class TicketListView(StaffLoginRequiredMixin, View):
         return self.render_result(request, ctx)
 
     def render_result(self, request, context):
-        return render(request, 'helpdesk/ticket/list.html', context)
-
-
-class TicketListExportView(TicketListView):
-    type_url_kwarg = 'type'
-
-    def serialize_ticket(self, ticket, columns):
-        d = {}
-        for c in columns:
-            field = c[0]
-            title = c[1]
-            value = getattr(ticket, field, None)
-            if field in ('time_open', 'time_tracks'):
-                value = seconds_to_time(value, format='clock')
-            elif field == 'priority':
-                value = ticket.get_priority_display()
-            elif field == 'status':
-                value = ticket.get_status_display()
-            d[title] = value
-        return d
-
-    @property
-    def export_types(self):
-        return dict(
-            csv=self.__export_csv,
-            pdf=self.__export_pdf,
-            html=self.__export_html,
-        )
-
-    def __export_csv(self, queryset, filename=None, context=None):
-        response = HttpResponse(content_type='text/csv')
-        filename = '{}.csv'.format(filename or 'tickets')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
-        columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Queue'), ('priority', 'Priority'), ('status', 'Status'),
-                   ('time_open', 'Time Open'), ('time_tracks', 'Time Spent'), ('money_tracks', 'Cost'),
-                   ('created', 'Created'), ('due_date', 'Due'), ('assigned_to', 'Owner')]
-        writer = csv.DictWriter(response, fieldnames=[c[1] for c in columns])
-        writer.writeheader()
-        for ticket in queryset:
-            row = self.serialize_ticket(ticket, columns)
-            writer.writerow(row)
-        return response
-
-    def __export_html(self, queryset, filename=None, context=None):
-        ctx = {'tickets': queryset, 'datetime': timezone.now()}
-        return render(self.request, "helpdesk/ticket/export/html.html", ctx)
-
-    def __export_pdf(self, queryset, filename=None, context=None):
-        import weasyprint
-        ctx = {'tickets': queryset, 'datetime': timezone.now()}
-        filename = '{}.pdf'.format(filename)
-        html = render_to_string("helpdesk/ticket/export/pdf.html", ctx)
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
-        weasyprint.HTML(string=html).write_pdf(response)
-        return response
-
-    def get(self, request, *args, **kwargs):
-        self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()
-        if self.export_type not in self.export_types:
-            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
-        return super(TicketListExportView, self).get(request, *args, **kwargs)
-
-    def render_result(self, request, context):
-        func = self.export_types[self.export_type]
-        filename = 'tickets-{}'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
-        return func(context['tickets'].qs, filename=filename, context=context)
+        if not request.is_ajax():
+            return render(request, 'helpdesk/ticket/list.html', context)
+        result = []
+        for t in context['tickets'].qs:
+            result.append(dict(
+                id=t.id, title=t.title, queue=str(t.queue), priority=t.get_priority_display(),
+                money_tracks=t.money_tracks, status=t.get_status_display(), created=t.created,
+                due_date=t.due_date, assigned_to=str(t.assigned_to),
+                time_open=seconds_to_time(t.time_open, format='clock'),
+                time_tracks=seconds_to_time(t.time_tracks, format='clock'),
+            ))
+        return JsonResponse(result, safe=False)
 
 
 class TicketDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
@@ -775,74 +720,19 @@ class CustomDateReportView(StaffLoginRequiredMixin, View):
         return self.render_result(request, ctx)
 
     def render_result(self, request, context):
-        return render(request, 'helpdesk/report/custom-date/page.html', context)
-
-
-class CustomDateReportExportView(CustomDateReportView):
-    type_url_kwarg = 'type'
-
-    def serialize_ticket(self, ticket, columns):
-        d = {}
-        for c in columns:
-            field = c[0]
-            title = c[1]
-            value = getattr(ticket, field, None)
-            if field in ('created', 'closed_at'):
-                value = value.strftime('%m/%d/%Y') if value else '-'
-            elif field == 'time_tracks':
-                total_time_tracked = ticket.total_time_tracked()
-                if total_time_tracked:
-                    value = '{}hr over {} D'.format(seconds_to_time(value, format='hour'), ticket.records_time_tracked())
-                else:
-                    value = '-'
-            elif field == 'priority':
-                value = ticket.get_priority_display()
-            d[title] = value
-        return d
-
-    @property
-    def export_types(self):
-        return dict(
-            csv=self.__export_csv,
-            pdf=self.__export_pdf,
-            html=self.__export_html,
-        )
-
-    def __export_csv(self, queryset, filename=None, context=None):
-        response = HttpResponse(content_type='text/csv')
-        filename = '{}.csv'.format(filename or 'tickets')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
-        columns = [('id', 'ID'), ('title', 'Title'), ('queue', 'Location'), ('assigned_to', 'Owner'),
-                   ('priority', 'Priority'), ('created', 'Repair Reported'), ('closed_at', 'Repair Completed'),
-                   ('time_tracks', 'Time Log'), ('money_tracks', 'Amount'), ]
-        writer = csv.DictWriter(response, fieldnames=[c[1] for c in columns])
-        writer.writeheader()
-        for ticket in queryset:
-            row = self.serialize_ticket(ticket, columns)
-            writer.writerow(row)
-        return response
-
-    def __export_html(self, queryset, filename=None, context=None):
-        ctx = {'tickets': queryset, 'date_range': context['date_range']}
-        return render(self.request, "helpdesk/report/custom-date/export/html.html", ctx)
-
-    def __export_pdf(self, queryset, filename=None, context=None):
-        import weasyprint
-        ctx = {'tickets': queryset, 'date_range': context['date_range']}
-        filename = '{}.pdf'.format(filename)
-        html = render_to_string("helpdesk/report/custom-date/export/pdf.html", ctx)
-        response = HttpResponse(content_type='application/pdf')
-        response['Content-Disposition'] = 'attachment; filename={}'.format(filename)
-        weasyprint.HTML(string=html).write_pdf(response)
-        return response
-
-    def get(self, request, *args, **kwargs):
-        self.export_type = (kwargs.pop(self.type_url_kwarg, '') or '').lower()
-        if self.export_type not in self.export_types:
-            return HttpResponseBadRequest('Invalid export type: {}'.format(self.export_type))
-        return super(CustomDateReportExportView, self).get(request, *args, **kwargs)
-
-    def render_result(self, request, context):
-        func = self.export_types[self.export_type]
-        filename = 'tickets-{}'.format(timezone.now().strftime('%Y%m%d%H%M%S'))
-        return func(context['tickets'].qs, filename=filename, context=context)
+        if not request.is_ajax():
+            return render(request, 'helpdesk/report/custom-date/page.html', context)
+        result = []
+        for t in context['tickets'].qs:
+            time_tracks = t.total_time_tracked()
+            if time_tracks:
+                time_tracks = '{}hr over {} D'.format(
+                    seconds_to_time(time_tracks, format='hour'), t.records_time_tracked())
+            result.append(dict(
+                id=t.id, title=t.title, queue=str(t.queue), priority=t.get_priority_display(),
+                money_tracks=t.money_tracks, status=t.get_status_display(), created=t.created.date(),
+                closed_at=t.closed_at and t.closed_at.date(),
+                due_date=t.due_date, assigned_to=t.assigned_to and str(t.assigned_to),
+                time_tracks=time_tracks,
+            ))
+        return JsonResponse(result, safe=False)

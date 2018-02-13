@@ -22,9 +22,8 @@
             <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-download"></span><span class="hidden-xs"> Export
             </span> <span class="caret"></span></button>
             <ul class="dropdown-menu dropdown-menu-right">
-                <li><a href="{% url 'helpdesk:report-custom-date-export' type='csv' %}?{{request.GET.urlencode}}" title="Export to CSV"><span class="fa fa-fw fa-file-excel-o"></span> CSV</a></li>
-                <li><a href="{% url 'helpdesk:report-custom-date-export' type='pdf' %}?{{request.GET.urlencode}}" title="Export to PDF"><span class="fa fa-fw fa-file-pdf-o"></span> PDF</a></li>
-                <li><a target="_blank" href="{% url 'helpdesk:report-custom-date-export' type='html' %}?{{request.GET.urlencode}}" title="Export to HTML(Print)"><span class="fa fa-fw fa-print"></span> Print</a></li>
+                <li><a href="javascript:" id="pdf-export" title="Export to PDF"><span class="fa fa-fw fa-file-pdf-o"></span> PDF</a></li>
+                <li><a href="javascript:" id="csv-export" title="Export to CSV"><span class="fa fa-fw fa-file-excel-o"></span> CSV</a></li>
             </ul>
         </span>
     </span>
@@ -130,9 +129,74 @@
 <script src="{% static 'helpdesk/js/moment.min.js' %}"></script>
 <script src="{% static 'helpdesk/js/bootstrap-datetimepicker.min.js' %}"></script>
 <script src="{% static 'helpdesk/js/util.js' %}"></script>
+<script src="{% static 'helpdesk/js/jspdf.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/jspdf.plugin.autotable.js' %}"></script>
+<script src="{% static 'helpdesk/js/FileSaver.min.js' %}"></script>
 
 <script type="text/javascript" charset="utf-8">
+    var urlPath = window.location.pathname,
+        urlParams = window.location.search,
+        exportColumns = [
+            {title: 'ID', dataKey: 'id'},
+            {title: 'Title', dataKey: 'title'},
+            {title: 'Location', dataKey: 'queue'},
+            {title: 'Owner', dataKey: 'assigned_to'},
+            {title: 'Priority', dataKey: 'priority'},
+            {title: 'Repair Reported', dataKey: 'created'},
+            {title: 'Repair Completed', dataKey: 'closed_at'},
+            {title: 'Time Log', dataKey: 'time_tracks'},
+            {title: 'Amount', dataKey: 'money_tracks'}
+        ];
+
+    function prepareRecordsForExport(records) {
+        return records.map(function (r) {
+            r.money_tracks = '${0}'.format(r.money_tracks);
+            r.closed_at = r.closed_at || '-';
+            r.assigned_to = r.assigned_to || '-';
+            r.time_tracks = r.time_tracks || '-';
+            return r;
+        });
+
+    }
+
     $(document).ready(function () {
+        $('#csv-export').on('click', function() {
+            var params = new URLSearchParams(urlParams);
+            var url = '{0}?{1}'.format(urlPath, params.toString());
+            $.get(url).done(function(records) {
+                exportToCSV(exportColumns, prepareRecordsForExport(records), {
+                    fileName: 'tickets.csv', nameField: 'dataKey'
+                });
+            }).fail(function(response) {
+                showAlert('Failed to export to csv!', 'danger');
+            })
+        });
+        $('#pdf-export').on('click', function() {
+            var params = new URLSearchParams(urlParams);
+            var url = '{0}?{1}'.format(urlPath, params.toString());
+            $.get(url).done(function(records) {
+                exportToPDF(exportColumns, prepareRecordsForExport(records), {
+                    fileName: 'tickets.pdf',
+                    jspdfDoc: new jsPDF('p', 'pt', 'a3'),
+                    jspdfOptions: {
+                        columnStyles: {
+                            id: {columnWidth: 35},
+                            queue: {columnWidth: 110},
+                            priority: {columnWidth: 50},
+                            status: {columnWidth: 60},
+                            time_open: {columnWidth: 55},
+                            time_tracks: {columnWidth: 55},
+                            money_tracks: {columnWidth: 45},
+                            created: {columnWidth: 70},
+                            closed_at: {columnWidth: 70},
+                            assigned_to: {columnWidth: 80}
+                        }
+                    }
+                });
+            }).fail(function(response) {
+                showAlert('Failed to export to pdf!', 'danger');
+            })
+        });
         $('[data-toggle="tooltip"]').tooltip();
         $('.datepicker-widget').datetimepicker({
             format: 'YYYY-MM-DD',
