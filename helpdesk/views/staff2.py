@@ -1,17 +1,13 @@
-import csv
 import json
 
 from collections import defaultdict
-from datetime import timedelta, date
+from datetime import date
 
-from cairocffi import context
-from django.db.models.functions import Coalesce
-from django.http import QueryDict, HttpResponseBadRequest, HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.contrib.auth import get_user_model
 from django.db import transaction
-from django.db.models import Q, Sum, F, Case, When, Value
-from django.shortcuts import render, redirect, get_object_or_404
-from django.template.loader import render_to_string
+from django.db.models import Q, F, Case, When, Value
+from django.shortcuts import render, redirect
 from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
@@ -24,8 +20,8 @@ from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
 from helpdesk.templatetags.helpdesk_util_tags import seconds_to_time
 from helpdesk.utils import StaffLoginRequiredMixin, get_current_page_size, success_message, BulkableActionMixin, \
-    error_message, warning_message, to_bool, send_form_errors, to_query_dict, OuterRef, Subquery
-from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketTimeTrack, TicketMoneyTrack
+    error_message, warning_message, to_bool, send_form_errors, to_query_dict
+from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import b64decode, b64encode
 
