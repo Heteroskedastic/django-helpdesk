@@ -31,7 +31,7 @@
     {% endif %}
     </span>
     <span class="pull-right">
-        <span class="dropdown">
+        <span class="btn-group">
             <button class="btn btn-info dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-download"></span><span class="hidden-xs"> Export
             </span> <span class="caret"></span></button>
             <ul class="dropdown-menu dropdown-menu-right">
@@ -41,7 +41,7 @@
         </span>
         <a href="{% url 'helpdesk:submit' %}" class="btn btn-success" title="Submit New Ticket"><span class="fa fa-plus"></span> <span class="hidden-xs">New Ticket</span></a>
         {% if user_saved_queries %}
-        <span class="dropdown">
+        <span class="btn-group">
             <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown"><span class="fa fa-filter"></span> <span class="hidden-xs">Switch Query</span>
                 <span class="caret"></span></button>
             <ul class="dropdown-menu saved-query-dropdown dropdown-menu-right">
@@ -198,7 +198,7 @@
         </div>
         <div class="form-group">
             <div class="checkbox">
-                <label><input type="checkbox" name="shared"> Share this query with other users?</label></div>
+                <label><input type="checkbox" name="shared"> Share this filter with other users?</label></div>
         </div>
         <div class="form-group">
             <button type="submit" name="save-query-ok" class="btn btn-sm btn-success">
