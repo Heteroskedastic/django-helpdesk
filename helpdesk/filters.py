@@ -15,7 +15,7 @@ User = get_user_model()
 
 
 class TicketsFilter(FilterSet):
-    no_assigned = filters.BooleanFilter(name='assigned_to', method='no_assigned_filter')
+    no_assigned = filters.BooleanFilter(field_name='assigned_to', method='no_assigned_filter')
     assigned_to = filters.ModelChoiceFilter(
         empty_label='', required=False, queryset=User.objects.filter(is_staff=True, is_active=True).all(),
         widget=forms.Select(attrs={
@@ -38,11 +38,11 @@ class TicketsFilter(FilterSet):
         widget=forms.SelectMultiple(attrs={
             'data-placeholder': 'Filter by Priority',
             'class': 'form-control chosen-select'}))
-    created_min = filters.DateFilter(name='created', lookup_expr='gte', required=False,
+    created_min = filters.DateFilter(field_name='created', lookup_expr='gte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'From Date',
                                          'class': 'form-control datepicker-widget'}))
-    created_max = filters.DateFilter(name='created', lookup_expr='lte', required=False,
+    created_max = filters.DateFilter(field_name='created', lookup_expr='lte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'To Date',
                                          'class': 'form-control datepicker-widget'}))
@@ -89,11 +89,11 @@ class CustomDateReportFilter(FilterSet):
         ('this_month', 'This Month'),
         ('this_year', 'This Year')
     )
-    created_min = filters.DateFilter(name='created', lookup_expr='gte', required=False,
+    created_min = filters.DateFilter(field_name='created', lookup_expr='gte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'From Date',
                                          'class': 'form-control datepicker-widget'}))
-    created_max = filters.DateFilter(name='created', lookup_expr='lte', required=False,
+    created_max = filters.DateFilter(field_name='created', lookup_expr='lte', required=False,
                                      widget=forms.DateInput(attrs={
                                          'placeholder': 'To Date',
                                          'class': 'form-control datepicker-widget'}))
