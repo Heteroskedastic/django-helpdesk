@@ -407,3 +407,7 @@ table.table caption {
 .no-padding {
     padding: 0 !important;
 }
+
+button.collapse-link {
+    display: inline-flex;
+}
