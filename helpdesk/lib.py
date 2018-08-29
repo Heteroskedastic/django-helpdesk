@@ -119,7 +119,8 @@ def send_templated_mail(template_name,
 
     if files:
         for filename, filefield in files:
-            msg.attach_file(filefield.path)
+            content = filefield.read()
+            msg.attach(filename, content)
 
     return msg.send(fail_silently)
 

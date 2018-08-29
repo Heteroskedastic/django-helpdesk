@@ -9,6 +9,7 @@ models.py - Model (and hence database) definitions. This is the core of the
 
 from __future__ import unicode_literals
 
+import os
 import re
 
 from django.contrib.auth.models import Permission
@@ -21,6 +22,8 @@ from django.db.models import Q
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _, ugettext
 from django.utils.encoding import python_2_unicode_compatible
+
+from helpdesk.utils import get_random_upload_path
 
 
 @python_2_unicode_compatible
@@ -808,6 +811,10 @@ def attachment_path(instance, filename):
     return os.path.join(path, filename)
 
 
+def attachment_file_path_func(instance, filename):
+    return get_random_upload_path(os.path.join('helpdesk', 'attachment'), filename)
+
+
 @python_2_unicode_compatible
 class Attachment(models.Model):
     """
@@ -822,7 +829,7 @@ class Attachment(models.Model):
 
     file = models.FileField(
         _('File'),
-        upload_to=attachment_path,
+        upload_to=attachment_file_path_func,
         max_length=1000,
     )
 
