@@ -150,41 +150,6 @@ class PerQueueStaffMembershipTestCase(TestCase):
             'Basic ticket stats were limited by queue membership for a superuser'
         )
 
-    def test_ticket_list_per_queue_user_restrictions(self):
-        """
-        Ensure that while the superuser can list all tickets, user_1 can only
-        list the 1 ticket in his queue and user_2 can list only the 2 tickets
-        in his queue.
-        """
-        # Regular users
-        for identifier in self.IDENTIFIERS:
-            self.client.login(username='User_%d' % identifier, password=str(identifier))
-            response = self.client.get(reverse('helpdesk:list'))
-            self.assertEqual(
-                len(response.context['tickets']),
-                identifier * 2,
-                'Ticket list was not properly limited by queue membership'
-            )
-            self.assertEqual(
-                len(response.context['queue_choices']),
-                1,
-                'Queue choices were not properly limited by queue membership'
-            )
-            self.assertEqual(
-                response.context['queue_choices'][0],
-                Queue.objects.get(title="Queue %d" % identifier),
-                'Queue choices were not properly limited by queue membership'
-            )
-
-        # Superuser
-        self.client.login(username='superuser', password='superuser')
-        response = self.client.get(reverse('helpdesk:list'))
-        self.assertEqual(
-            len(response.context['tickets']),
-            6,
-            'Ticket list was limited by queue membership for a superuser'
-        )
-
     def test_ticket_reports_per_queue_user_restrictions(self):
         """
         Ensure that while the superuser can generate reports on all queues and

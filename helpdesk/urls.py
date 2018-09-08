@@ -37,14 +37,6 @@ urlpatterns = [
         staff.dashboard,
         name='dashboard'),
 
-    url(r'^tickets/$',
-        staff.ticket_list,
-        name='list'),
-
-    url(r'^tickets/update/$',
-        staff.mass_update,
-        name='mass_update'),
-
     url(r'^tickets/submit/$',
         staff.create_ticket,
         name='submit'),
@@ -72,14 +64,6 @@ urlpatterns = [
     url(r'^tickets/(?P<ticket_id>[0-9]+)/delete/$',
         staff.delete_ticket,
         name='delete'),
-
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/hold/$',
-        staff.hold_ticket,
-        name='hold'),
-
-    url(r'^tickets/(?P<ticket_id>[0-9]+)/unhold/$',
-        staff.unhold_ticket,
-        name='unhold'),
 
     url(r'^tickets/(?P<ticket_id>[0-9]+)/cc/$',
         staff.ticket_cc,
@@ -144,14 +128,6 @@ urlpatterns = [
     url(r'^reports/(?P<report>\w+)/$',
         staff2.RunStatView.as_view(),
         name='run_stat'),
-
-    url(r'^save_query/$',
-        staff.save_query,
-        name='savequery'),
-
-    url(r'^delete_query/(?P<id>[0-9]+)/$',
-        staff.delete_saved_query,
-        name='delete_query'),
 
     url(r'^settings/$',
         staff.user_settings,
