@@ -15,7 +15,7 @@ from django.core.exceptions import ObjectDoesNotExist, ValidationError
 from django.core.validators import validate_email
 from django.utils.six import StringIO
 from django import forms
-from django.forms import extras
+from django.forms import extras, SelectMultiple
 from django.conf import settings
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth import get_user_model
@@ -24,7 +24,7 @@ from django.utils import timezone
 from helpdesk.lib import send_templated_mail, safe_template_context, process_attachments
 from helpdesk.models import (Ticket, Queue, FollowUp, Attachment, IgnoreEmail, TicketCC,
                              CustomField, TicketCustomFieldValue, TicketDependency, TicketTimeTrack, TicketMoneyTrack,
-                             TicketNotification, SavedSearch)
+                             TicketNotification, SavedSearch, EmailTemplate, SMSTemplate)
 from helpdesk import settings as helpdesk_settings
 
 User = get_user_model()
@@ -575,12 +575,23 @@ class TicketMoneyTrackForm(forms.ModelForm):
         exclude = ('ticket', 'tracked_by',)
 
 
+class CommoSeparatedSelectMultipleWidget(SelectMultiple):
+    def format_value(self, value):
+        if not value:
+            value = []
+        else:
+            value = value.split(',')
+        return super(CommoSeparatedSelectMultipleWidget, self).format_value(value)
+
+    
 class AdminTicketNotificationForm(forms.ModelForm):
     statuses = forms.MultipleChoiceField(
         label='When status changed to', choices=Ticket.STATUS_CHOICES, required=False,
+        widget=CommoSeparatedSelectMultipleWidget(),
         help_text=_('Leave blank to be ignored on all statuses, or select those statuses wish to be notified.'))
     priorities = forms.MultipleChoiceField(
         label='When priorities are', choices=PRIORITY_CHOICES, required=False,
+        widget=CommoSeparatedSelectMultipleWidget(),
         help_text=_('Leave blank to be ignored on all priorities, or select those priorities wish to be notified.'))
     def clean_statuses(self):
         statuses = self.cleaned_data['statuses']
@@ -634,3 +645,53 @@ class SavedSearchAddForm(forms.ModelForm):
     class Meta:
         model = SavedSearch
         fields = ['title', 'shared', 'query']
+
+
+class QueueEditForm(forms.ModelForm):
+    class Meta:
+        model = Queue
+        fields = ['title', 'slug', 'email_address', 'allow_public_submission', 'default_owner']
+
+    def __init__(self, *args, **kwargs):
+        super(QueueEditForm, self).__init__(*args, **kwargs)
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            if field_name in ('default_owner',):
+                field.widget.attrs['data-placeholder'] = str(field.label)
+
+
+class QueueAddForm(QueueEditForm):
+    pass
+
+
+class TicketNotificationEditForm(AdminTicketNotificationForm):
+    def __init__(self, *args, **kwargs):
+        super(TicketNotificationEditForm, self).__init__(*args, **kwargs)
+        for field_name in self.fields:
+            field = self.fields[field_name]
+            if field_name in ('queues', 'statuses', 'priorities'):
+                field.widget.attrs['data-placeholder'] = str(field.label)
+
+
+class TicketNotificationAddForm(TicketNotificationEditForm):
+    pass
+
+
+class EmailTemplateEditForm(forms.ModelForm):
+    class Meta:
+        model = EmailTemplate
+        fields = '__all__'
+
+
+class EmailTemplateAddForm(EmailTemplateEditForm):
+    pass
+
+
+class SMSTemplateEditForm(forms.ModelForm):
+    class Meta:
+        model = SMSTemplate
+        fields = '__all__'
+
+
+class SMSTemplateAddForm(SMSTemplateEditForm):
+    pass

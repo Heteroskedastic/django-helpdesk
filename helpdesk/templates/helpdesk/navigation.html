@@ -94,6 +94,9 @@
                     <i class="fa fa-user fa-fw"></i> {{ user.get_username }} <i class="fa fa-caret-down"></i>
                 </a>
                 <ul class="dropdown-menu dropdown-user">
+                    <li><a href="{% url 'helpdesk:logout' %}"><i class="fa fa-sign-out fa-fw"></i> {% trans "Logout" %}</a>
+                    </li>
+                    <li class="divider"></li>
                     <li><a href="{% url 'helpdesk:user_settings' %}"><i class="fa fa-gear fa-fw"></i> {% trans "User Settings" %}</a>
                     </li>
                     <li><a href='{% url 'helpdesk:rss_index' %}'><i class="fa fa-rss-square fa-fw"></i> {% trans "RSS Feeds" %}</a></li>
@@ -101,11 +104,14 @@
                     <li><a href="{% url 'auth_password_change' %}"><i class="fa fa-user-secret fa-fw"></i> {% trans "Change password" %}</a></li>
                     {% endif %}
                     <li class="divider"></li>
-                    {% if user.is_superuser %}
-                    <li><a href='{% url 'helpdesk:system_settings' %}'><i class="fa fa-gears fa-fw"></i> {% trans "System Settings" %}</a></li>
-                    <li class="divider"></li>
-                    {% endif %}
-                    <li><a href="{% url 'helpdesk:logout' %}"><i class="fa fa-sign-out fa-fw"></i> {% trans "Logout" %}</a>
+                    <li class="dropdown-submenu pull-left">
+                        <a tabindex="-1" href="#"><i class="fa fa-gears fa-fw"></i> {% trans "System Settings" %}</a>
+                        <ul class="dropdown-menu">
+                            <li class="{% disable_ifnot perms.helpdesk.view_queue %}"><a href="{% url 'helpdesk:queue-list' %}"><i class="fa fa-list-ul fa-fw"></i> {% trans "Maintain Queues" %}</a></li>
+                            <li class="{% disable_ifnot perms.helpdesk.view_emailtemplate %}"><a href="{% url 'helpdesk:email_template-list' %}"><i class="fa fa-envelope fa-fw"></i> {% trans "Maintain E-Mail Templates" %}</a></li>
+                            <li class="{% disable_ifnot perms.helpdesk.view_smstemplate %}"><a href="{% url 'helpdesk:sms_template-list' %}"><i class="fa fa-phone-square fa-fw"></i> {% trans "Maintain SMS Templates" %}</a></li>
+                            <li class="{% disable_ifnot perms.helpdesk.view_ticketnotification %}"><a href="{% url 'helpdesk:ticket_notification-list' %}"><i class="fa fa-send fa-fw"></i> {% trans "Ticket Notifications" %}</a></li>
+                        </ul>
                     </li>
                 </ul>
                 <!-- /.dropdown-user -->

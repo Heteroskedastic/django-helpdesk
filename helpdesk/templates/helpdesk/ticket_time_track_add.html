@@ -21,7 +21,7 @@
 <div class="panel panel-default">
     <!-- /.panel-heading -->
     <div class="panel-body">
-        <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
+        <form id="group-from" class="custom-chosen-container form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
           {% csrf_token %}
             <div class="form-group row {% if form.time.errors %}has-error{% endif %}">
                 <label class="col-md-2 control-label" >Time Spent</label>

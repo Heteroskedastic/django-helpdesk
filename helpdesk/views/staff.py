@@ -44,6 +44,7 @@ from helpdesk.models import (
     IgnoreEmail, TicketCC, TicketDependency,
     TicketTimeTrack, TicketMoneyTrack)
 from helpdesk import settings as helpdesk_settings
+from helpdesk.utils import success_message, send_form_errors
 
 User = get_user_model()
 
@@ -957,6 +958,9 @@ def user_settings(request):
         if form.is_valid():
             s.settings = form.cleaned_data
             s.save()
+            success_message('user settings saved successfully!', request)
+        else:
+            send_form_errors(form, request)
     else:
         form = UserSettingsForm(s.settings)
         form.fields['default_ticket_saved_query'].queryset = user_saved_query
@@ -1225,11 +1229,11 @@ class AddTicketTimeTrackView(CreateView):
         return self.get_ticket().get_absolute_url()
 
 
-def _has_access_change_track_Time(user, track_time):
+def _has_access_change_track_time(user, track_time):
     return (user == track_time.tracked_by) or user.has_perm('helpdesk.change_others_tickettimetrack')
 
 
-def _has_access_delete_track_Time(user, track_time):
+def _has_access_delete_track_time(user, track_time):
     return (user == track_time.tracked_by) or user.has_perm('helpdesk.delete_others_tickettimetrack')
 
 
@@ -1242,7 +1246,7 @@ class UpdateTicketTimeTrackView(UpdateView):
 
     def get_object(self, queryset=None):
         object = super(UpdateTicketTimeTrackView, self).get_object(queryset=queryset)
-        if not _has_access_change_track_Time(self.request.user, object):
+        if not _has_access_change_track_time(self.request.user, object):
             raise PermissionDenied()
         return object
 
@@ -1265,7 +1269,7 @@ class DeleteTicketTimeTrackView(DeleteView):
 
     def get_object(self, queryset=None):
         object = super(DeleteTicketTimeTrackView, self).get_object(queryset=queryset)
-        if not _has_access_delete_track_Time(self.request.user, object):
+        if not _has_access_delete_track_time(self.request.user, object):
             raise PermissionDenied()
         return object
 

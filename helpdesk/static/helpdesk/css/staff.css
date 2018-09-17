@@ -367,3 +367,10 @@ table.ticket-stats tbody th, table.ticket-stats tbody tr {
     color: brown !important;
     text-transform: none;
 }
+
+.queues-list-table-action-col,
+.ticket_notifications-list-table-action-col,
+.email_templates-list-table-action-col,
+.sms_templates-list-table-action-col {
+    width: 100px;
+}

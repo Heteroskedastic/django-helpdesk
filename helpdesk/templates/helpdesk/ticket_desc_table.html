@@ -69,7 +69,7 @@
 
                             <tr>
                                 <th>{% trans "Submitter E-Mail" %}</th>
-                                <td>{{ ticket.submitter_email }}{% if user.is_superuser %} <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
+                                <td>{{ ticket.submitter_email }}{% if perms.helpdesk.add_ignoreemail %} <strong><a href='{% url 'helpdesk:email_ignore_add' %}?email={{ ticket.submitter_email }}'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-eye-slash"></i>&nbsp;{% trans "Ignore" %}</button></a></strong>{% endif %}</td>
                             </tr>
 
                             <tr>

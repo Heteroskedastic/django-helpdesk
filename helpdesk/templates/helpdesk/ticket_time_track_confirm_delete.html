@@ -14,7 +14,7 @@
 {% blocktrans with ticket=object.ticket %}<h2 class="page-title">Delete Time Track "{{object}}" of "{{ticket}}"</h2>{% endblocktrans %}
 <div class="row">
     <div class="col-md-12">
-        <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
+        <form id="group-from" class="custom-chosen-container form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
           {% csrf_token %}
             <div class="">
                 <p class="text-danger">{% blocktrans with ticket=object.ticket %}Are you sure you want to delete Time Track "{{object}}" of "{{ticket}}" ticket?{% endblocktrans %}</p>

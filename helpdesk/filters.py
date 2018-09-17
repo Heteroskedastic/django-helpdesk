@@ -8,7 +8,7 @@ from django.forms import ModelChoiceField
 from django.utils import timezone
 from django_filters import FilterSet, filters, OrderingFilter
 
-from helpdesk.models import Ticket, Queue
+from helpdesk.models import Ticket, Queue, TicketNotification, EmailTemplate, SMSTemplate
 from helpdesk.utils import ExtendedOrderingFilter
 
 User = get_user_model()
@@ -150,3 +150,51 @@ class CustomDateReportFilter(FilterSet):
     class Meta:
         model = Ticket
         fields = ['created_min', 'created_max',]
+
+
+class QueuesFilter(FilterSet):
+    order_by = ExtendedOrderingFilter(
+        fields=['id', 'title', 'slug', 'email_address'],
+    )
+
+    class Meta:
+        model = Queue
+        fields = [
+            'title', 'email_address', 'allow_public_submission', 'default_owner',
+        ]
+
+
+class TicketNotificationsFilter(FilterSet):
+    order_by = ExtendedOrderingFilter(
+        fields=['id', 'name', 'notify_type', 'to'],
+    )
+
+    class Meta:
+        model = TicketNotification
+        fields = [
+            'name', 'notify_type', 'to'
+        ]
+
+
+class EmailTemplatesFilter(FilterSet):
+    order_by = ExtendedOrderingFilter(
+        fields=['id', 'template_name', 'subject', 'heading', 'locale'],
+    )
+
+    class Meta:
+        model = EmailTemplate
+        fields = [
+            'template_name', 'subject', 'heading', 'locale'
+        ]
+
+
+class SMSTemplatesFilter(FilterSet):
+    order_by = ExtendedOrderingFilter(
+        fields=['id', 'template_name', 'locale'],
+    )
+
+    class Meta:
+        model = SMSTemplate
+        fields = [
+            'template_name', 'locale'
+        ]

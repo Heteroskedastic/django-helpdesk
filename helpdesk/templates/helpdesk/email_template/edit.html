@@ -1,0 +1,57 @@
+{% extends "helpdesk/staff_base.html" %}
+{% load bootstrap3 %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "Add New Email Template" %}{% endblock %}
+{% load pagination_tags %}
+{% load helpdesk_util_tags %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+<li>System Settings</li>
+<li><a href="{% url 'helpdesk:email_template-list' %}">Email Templates</a></li>
+<li>Edit Email Template</li>
+{% endblock %}
+
+{% block content %}
+<legend><h2 class="page-title">Edit Email Template: "{{ object }}"</h2></legend>
+<form id="group-from" class="custom-chosen-container form-horizontal" enctype="multipart/form-data" method="post">
+  {% csrf_token %}
+  {% bootstrap_form form layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' %}
+  <hr>
+  <div class="form-group">
+    <label class="col-md-2 control-label"></label>
+    <div class="col-md-9">
+      <button type="submit" class="btn btn-primary" name="submit" {% if not perms.helpdesk.change_emailtemplate %}title="No Permission" disabled{% endif %}><span class="fa fa-save"></span> Save</button>
+      <a class="btn btn-default" href="{% url 'helpdesk:email_template-list' %}"><span class="fa fa-close"></span> Cancel</a>
+      <span class="pull-right">
+        <button type="button" class="btn btn-danger" name="delete" {% if not perms.helpdesk.delete_emailtemplate %}title="No Permission" disabled{% endif %}><span class="fa fa-trash"></span> Delete</button>
+      </span>
+    </div>
+  </div>
+
+</form>
+
+{% url 'helpdesk:email_template-delete' object.id as delete_action%}
+{% include "partials/action_modal.html" with prefix_id='delete' action=delete_action title='Delete Group' message='Are you sure to delete? this will remove the group permanently!' message_class='text-danger' %}
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'js/util.js' %}"></script>
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function () {
+  $('#id_queues').chosen({allow_single_deselect: true});
+  $('#id_statuses').chosen({allow_single_deselect: true});
+  $('#id_priorities').chosen({allow_single_deselect: true});
+  $('button[name=delete]').click(function () {
+    $('#deleteModal').modal('show');
+  });
+});
+</script>
+
+{% endblock extra_js %}

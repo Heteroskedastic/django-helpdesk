@@ -276,6 +276,9 @@ class Queue(models.Model):
         ordering = ('title',)
         verbose_name = _('Queue')
         verbose_name_plural = _('Queues')
+        permissions = (
+            ('queue_super_access', 'Has super access to Queue'),
+        )
 
     def _from_address(self):
         """
@@ -601,6 +604,9 @@ class Ticket(models.Model):
         ordering = ('id',)
         verbose_name = _('Ticket')
         verbose_name_plural = _('Tickets')
+        permissions = (
+            ('ticket_super_access', 'Has super access to Ticket'),
+        )
 
     def __str__(self):
         return '#%s - %s' % (self.id, self.title)
@@ -1169,6 +1175,9 @@ class SavedSearch(models.Model):
     class Meta:
         verbose_name = _('Saved search')
         verbose_name_plural = _('Saved searches')
+        permissions = (
+            ('saved_search_super_access', 'Has super access to SavedSearch'),
+        )
 
 
 @python_2_unicode_compatible

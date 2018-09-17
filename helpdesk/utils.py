@@ -4,22 +4,36 @@ import string
 import uuid
 
 from django.contrib import messages
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.mixins import PermissionRequiredMixin
 from django.contrib.auth.views import redirect_to_login
 from django.db.models import F, Expression
 from django.http import JsonResponse, QueryDict
 from django.core.urlresolvers import reverse
+from django.shortcuts import render
 from django.utils import six
 from django.utils.safestring import mark_safe
 from django_filters import OrderingFilter
+from django.core.exceptions import PermissionDenied
 from django_filters.filters import EMPTY_VALUES
 
 from helpdesk import settings as helpdesk_settings
 
 
-class StaffLoginRequiredMixin(LoginRequiredMixin):
+class StaffLoginRequiredMixin(PermissionRequiredMixin):
+    permission_required = ()
+
     def get_login_url(self):
         return reverse('helpdesk:login')
+
+    def get_permission_required(self):
+        perms = self.permission_required or ()
+        if isinstance(perms, dict):
+            perms = perms.get(self.request.method.lower(), ()) or ()
+
+        if isinstance(perms, six.string_types):
+            perms = (perms,)
+
+        return perms
 
     def handle_no_authenticated(self):
         if self.request.is_ajax():
@@ -28,13 +42,22 @@ class StaffLoginRequiredMixin(LoginRequiredMixin):
                                  self.get_login_url(),
                                  self.get_redirect_field_name())
 
+    def handle_no_permission(self):
+        if self.request.is_ajax():
+            return JsonResponse({'error': 'Permission Denied'}, status=403)
+        if self.raise_exception:
+            raise PermissionDenied(self.get_permission_denied_message())
+        return render(self.request, "helpdesk/no-permission.html", status=403)
+
     def dispatch(self, request, *args, **kwargs):
         if not request.user.is_authenticated():
             return self.handle_no_authenticated()
         if not request.user.is_staff:
-            msg = 'Please enter the correct username and password for a superuser account!'
+            msg = 'Please enter the correct username and password for a staff account!'
             messages.error(request, mark_safe(msg), extra_tags='danger')
             return self.handle_no_authenticated()
+        if not self.has_permission():
+            return self.handle_no_permission()
         return super(StaffLoginRequiredMixin, self).dispatch(request, *args, **kwargs)
 
 

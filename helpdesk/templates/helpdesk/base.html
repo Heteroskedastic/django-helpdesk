@@ -92,7 +92,7 @@
 
     <script type="text/javascript">
         $(document).ready(function () {
-            $('body').on('click', 'a[disabled], a.disabled', function (event) {
+            $('body').on('click', 'a[disabled], a.disabled, li.disabled a', function (event) {
                 event.preventDefault();
             });
             setTimeout(function () {

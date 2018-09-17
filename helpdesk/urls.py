@@ -163,6 +163,28 @@ urlpatterns += [
     url(r'^saved_search/default/(?P<pk>\d+)/$', staff2.SavedSearchSetDefaultView.as_view(),
         name='saved_search-set-default'),
     url(r'^report/custom-date/$', staff2.CustomDateReportView.as_view(), name='report-custom-date'),
+    url(r'^queue/list/$', staff2.QueueListView.as_view(), name='queue-list'),
+    url(r'^queue/add/$', staff2.QueueAddView.as_view(), name='queue-add'),
+    url(r'^queue/edit/(?P<pk>\d+)/$', staff2.QueueEditView.as_view(), name='queue-edit'),
+    url(r'^queue/delete/(?P<pk>\d+)/$', staff2.QueueDeleteView.as_view(), name='queue-delete'),
+    url(r'^ticket-notification/list/$', staff2.TicketNotificationListView.as_view(), name='ticket_notification-list'),
+    url(r'^ticket-notification/add/$', staff2.TicketNotificationAddView.as_view(), name='ticket_notification-add'),
+    url(r'^ticket-notification/edit/(?P<pk>\d+)/$', staff2.TicketNotificationEditView.as_view(),
+        name='ticket_notification-edit'),
+    url(r'^ticket-notification/delete/(?P<pk>\d+)/$', staff2.TicketNotificationDeleteView.as_view(),
+        name='ticket_notification-delete'),
+    url(r'^email-template/list/$', staff2.EmailTemplateListView.as_view(), name='email_template-list'),
+    url(r'^email-template/add/$', staff2.EmailTemplateAddView.as_view(), name='email_template-add'),
+    url(r'^email-template/edit/(?P<pk>\d+)/$', staff2.EmailTemplateEditView.as_view(),
+        name='email_template-edit'),
+    url(r'^email-template/delete/(?P<pk>\d+)/$', staff2.EmailTemplateDeleteView.as_view(),
+        name='email_template-delete'),
+    url(r'^sms-template/list/$', staff2.SMSTemplateListView.as_view(), name='sms_template-list'),
+    url(r'^sms-template/add/$', staff2.SMSTemplateAddView.as_view(), name='sms_template-add'),
+    url(r'^sms-template/edit/(?P<pk>\d+)/$', staff2.SMSTemplateEditView.as_view(),
+        name='sms_template-edit'),
+    url(r'^sms-template/delete/(?P<pk>\d+)/$', staff2.SMSTemplateDeleteView.as_view(),
+        name='sms_template-delete'),
 ]
 
 urlpatterns += [
@@ -237,8 +259,4 @@ urlpatterns += [
     url(r'^help/context/$',
         TemplateView.as_view(template_name='helpdesk/help_context.html'),
         name='help_context'),
-
-    url(r'^system_settings/$',
-        DirectTemplateView.as_view(template_name='helpdesk/system_settings.html'),
-        name='system_settings'),
 ]

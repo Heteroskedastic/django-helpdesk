@@ -65,7 +65,7 @@
                                 <a href="{% url 'helpdesk:followup_edit' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-edit"></i>&nbsp;{% trans "Edit" %}</button></a>
                                 {% endif %}
                             {% endif %}
-                            {% if user.is_superuser and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
+                            {% if perms.helpdesk.ticket_super_access and helpdesk_settings.HELPDESK_SHOW_DELETE_BUTTON_SUPERUSER_FOLLOW_UP %}
                                 <a href="{% url 'helpdesk:followup_delete' ticket.id followup.id %}" class='followup-edit'><button type="button" class="btn btn-warning btn-xs"><i class="fa fa-trash"></i>&nbsp;{% trans "Delete" %}</button></a>
                             {% endif %}
                         </div>

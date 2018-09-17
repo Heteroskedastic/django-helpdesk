@@ -1,0 +1,97 @@
+{% extends "helpdesk/staff_base.html" %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "Ticket Notifications" %}{% endblock %}
+{% load pagination_tags %}
+{% load helpdesk_util_tags %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+<li>System Settings</li>
+<li>Ticket Notifications</li>
+{% endblock %}
+
+{% block content %}
+<legend>
+<h2 class="page-title">
+    Ticket Notifications
+    <span class="pull-right">
+        <a href="{% url 'helpdesk:ticket_notification-add' %}" class="btn btn-success" {% if not perms.helpdesk.add_ticketnotification %}title="No Permission" disabled{% endif %} title="Add New Ticket Notification"><span class="fa fa-plus"></span> <span class="hidden-xs">New Ticket Notification</span></a>
+    </span>
+</h2>
+</legend>
+<div class="panel panel-default" id="tickets-list">
+    <form id="filterForm" class="form-inline" role="form" action="">
+        {% if request.GET.order_by %}
+        <input type="hidden" name="order_by" value="{{ request.GET.order_by }}">
+        {% endif %}
+        <input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+    </form>
+    {% with ticket_notifications.qs as qs %}
+    <table class="table table-striped table-hover table-advance sortable">
+        <thead>
+        <tr>
+            <th>{% sorting_link 'Display Name' 'name' %}</th>
+            <th>{% sorting_link 'Notify Type' 'notify_type' %}</th>
+            <th>{% sorting_link 'E-Mail Address or SMS Number' 'to' %}</th>
+            <th>Statuses</th>
+            <th>Priorities</th>
+            <th>Queues</th>
+            <th class="ticket_notifications-list-table-action-col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% autopaginate qs page_size %}
+        {% for r in qs %}
+        <tr data-id="{{ r.id }}">
+            <td><a href="{% url 'helpdesk:ticket_notification-edit' r.pk %}">{{r.name}}</a></td>
+            <td>{{ r.get_notify_type_display }}</td>
+            <td>{{ r.to }}</td>
+            <td>{{ r.statuses_display }}</td>
+            <td>{{ r.priorities_display }}</td>
+            <td>{{ r.queues_display }}</td>
+            <td>
+                <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" {% if not perms.helpdesk.delete_ticketnotification %}title="No Permission" disabled{% endif %} title="Delete Ticket Notification"><span class="fa fa-trash"></span><span class="hidden-xs"> Delete</span></button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="text-center text-muted" colspan="7"><em>[NO RECORD!]</em></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="panel-footer">
+        {% paginate %}
+        <div class="pull-right mar-top10">
+            {% pagination_info %}
+            {% page_size_combo %}
+        </div>
+    </div>
+    {% endwith %}
+</div>
+{% include "helpdesk/partials/action_modal.html" with prefix_id='delete' message_class='text-danger' %}
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
+
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function () {
+    $('.page-size').chosen({disable_search: true, allow_single_deselect: true}).on('change', function () {
+        $('input[name=page_size]').val($(this).val());
+        $('#filterForm').submit();
+    });
+    bindTableRowModalAction('deleteModal', 'button[name=delete]', 'Delete Query', 'Are you sure to delete?', function (recordId) {
+        var baseAction = '{% url "helpdesk:ticket_notification-delete" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
+});
+</script>
+
+{% endblock extra_js %}

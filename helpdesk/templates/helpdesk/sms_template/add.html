@@ -1,0 +1,46 @@
+{% extends "helpdesk/staff_base.html" %}
+{% load bootstrap3 %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "Add New SMS Template" %}{% endblock %}
+{% load pagination_tags %}
+{% load helpdesk_util_tags %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+<li>System Settings</li>
+<li><a href="{% url 'helpdesk:sms_template-list' %}">SMS Templates</a></li>
+<li>Add New SMS Template</li>
+{% endblock %}
+
+{% block content %}
+<legend><h2 class="page-title">Add New SMS Template</h2></legend>
+<form id="group-from" class="custom-chosen-container form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
+  {% csrf_token %}
+  {% bootstrap_form form layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' %}
+  <hr>
+  <div class="form-group">
+    <label class="col-md-2 control-label"></label>
+    <div class="col-md-9">
+      <button type="submit" class="btn btn-primary" name="submit"><span class="fa fa-save"></span> Save</button>
+      <a class="btn btn-default" href="{% url 'helpdesk:sms_template-list' %}"><span class="fa fa-close"></span> Cancel</a>
+    </div>
+  </div>
+</form>
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function () {
+  $('#id_queues').chosen({allow_single_deselect: true});
+  $('#id_statuses').chosen({allow_single_deselect: true});
+  $('#id_priorities').chosen({allow_single_deselect: true});
+});
+</script>
+
+{% endblock extra_js %}

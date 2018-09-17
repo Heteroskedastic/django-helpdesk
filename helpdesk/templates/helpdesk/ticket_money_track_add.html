@@ -21,7 +21,7 @@
 <div class="panel panel-default">
     <!-- /.panel-heading -->
     <div class="panel-body">
-        <form id="group-from" class="form-chosen-containing form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
+        <form id="group-from" class="custom-chosen-container form-horizontal" enctype="multipart/form-data" method="post" autocomplete="false">
           {% csrf_token %}
           {% bootstrap_field form.money layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' addon_before='<span class="fa fa-dollar"></span>' %}
           {% bootstrap_form form layout='horizontal' form_group_class='form-group row' horizontal_label_class='col-md-2' exclude='money' %}

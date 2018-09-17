@@ -1,0 +1,89 @@
+{% extends "helpdesk/staff_base.html" %}
+{% load i18n humanize %}
+{% load static from staticfiles %}
+{% block helpdesk_title %}{% trans "SMS Templates" %}{% endblock %}
+{% load pagination_tags %}
+{% load helpdesk_util_tags %}
+
+{% block extra_css %}
+<link href="{% static 'helpdesk/css/chosen.min.css' %}" rel="stylesheet">
+{% endblock extra_css %}
+
+{% block breadcrumb_items %}
+<li>System Settings</li>
+<li>SMS Templates</li>
+{% endblock %}
+
+{% block content %}
+<legend>
+<h2 class="page-title">
+    SMS Templates
+    <span class="pull-right">
+        <a href="{% url 'helpdesk:sms_template-add' %}" class="btn btn-success" {% if not perms.helpdesk.add_smstemplate %}title="No Permission" disabled{% endif %} title="Add New SMS Template"><span class="fa fa-plus"></span> <span class="hidden-xs">New SMS Template</span></a>
+    </span>
+</h2>
+</legend>
+<div class="panel panel-default" id="tickets-list">
+    <form id="filterForm" class="form-inline" role="form" action="">
+        {% if request.GET.order_by %}
+        <input type="hidden" name="order_by" value="{{ request.GET.order_by }}">
+        {% endif %}
+        <input type="hidden" name="page_size" value="{{ request.GET.page_size }}">
+    </form>
+    {% with sms_templates.qs as qs %}
+    <table class="table table-striped table-hover table-advance sortable">
+        <thead>
+        <tr>
+            <th>{% sorting_link 'Template Name' 'template_name' %}</th>
+            <th>{% sorting_link 'Locale' 'locale' %}</th>
+            <th class="sms_templates-list-table-action-col">Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% autopaginate qs page_size %}
+        {% for r in qs %}
+        <tr data-id="{{ r.id }}">
+            <td><a href="{% url 'helpdesk:sms_template-edit' r.pk %}">{{r.template_name}}</a></td>
+            <td>{{ r.locale }}</td>
+            <td>
+                <button type="button" name="delete" class="btn btn-sm btn-danger" href="#" {% if not perms.helpdesk.delete_smstemplate %}title="No Permission" disabled{% endif %} title="Delete SMS Template"><span class="fa fa-trash"></span><span class="hidden-xs"> Delete</span></button>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td class="text-center text-muted" colspan="3"><em>[NO RECORD!]</em></td>
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div class="panel-footer">
+        {% paginate %}
+        <div class="pull-right mar-top10">
+            {% pagination_info %}
+            {% page_size_combo %}
+        </div>
+    </div>
+    {% endwith %}
+</div>
+{% include "helpdesk/partials/action_modal.html" with prefix_id='delete' message_class='text-danger' %}
+
+{% endblock content %}
+
+{% block extra_js %}
+<script src="{% static 'helpdesk/js/chosen.jquery.min.js' %}"></script>
+<script src="{% static 'helpdesk/js/util.js' %}"></script>
+
+<script type="text/javascript" charset="utf-8">
+$(document).ready(function () {
+    $('.page-size').chosen({disable_search: true, allow_single_deselect: true}).on('change', function () {
+        $('input[name=page_size]').val($(this).val());
+        $('#filterForm').submit();
+    });
+    bindTableRowModalAction('deleteModal', 'button[name=delete]', 'Delete Query', 'Are you sure to delete?', function (recordId) {
+        var baseAction = '{% url "helpdesk:sms_template-delete" 0 %}';
+        return baseAction.slice(0, -2) + recordId + '/';
+    });
+});
+</script>
+
+{% endblock extra_js %}

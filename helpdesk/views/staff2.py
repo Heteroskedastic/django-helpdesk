@@ -12,16 +12,19 @@ from django.utils.dates import MONTHS_3
 from django.utils.translation import ugettext as _
 from django.core.urlresolvers import reverse
 from django.utils import timezone
-from django.views.generic import View, CreateView
+from django.views.generic import View, CreateView, UpdateView
 from django.views.generic.detail import SingleObjectMixin
 
-from helpdesk.filters import TicketsFilter, CustomDateReportFilter
-from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm
+from helpdesk.filters import TicketsFilter, CustomDateReportFilter, QueuesFilter, TicketNotificationsFilter, \
+    EmailTemplatesFilter, SMSTemplatesFilter
+from helpdesk.forms import TicketsBulkAssignForm, SavedSearchAddForm, QueueAddForm, QueueEditForm, \
+    TicketNotificationEditForm, TicketNotificationAddForm, EmailTemplateEditForm, EmailTemplateAddForm, \
+    SMSTemplateEditForm, SMSTemplateAddForm
 from helpdesk.lib import safe_template_context, send_templated_mail
 from helpdesk.templatetags.helpdesk_util_tags import seconds_to_time
 from helpdesk.utils import StaffLoginRequiredMixin, get_current_page_size, success_message, BulkableActionMixin, \
     error_message, warning_message, to_bool, send_form_errors, to_query_dict
-from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch
+from helpdesk.models import Ticket, Queue, FollowUp, SavedSearch, TicketNotification, EmailTemplate, SMSTemplate
 from helpdesk import settings as helpdesk_settings
 from helpdesk.lib import b64decode, b64encode
 
@@ -38,7 +41,7 @@ def _get_user_queues(user):
     all_queues = Queue.objects.all()
     limit_queues_by_user = \
         helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION \
-        and not user.is_superuser
+        and not user.has_perm('helpdesk.queue_super_access')
     if limit_queues_by_user:
         id_list = [q.pk for q in all_queues if user.has_perm(q.permission_name)]
         return all_queues.filter(pk__in=id_list)
@@ -53,7 +56,7 @@ def _has_access_to_queue(user, queue):
     :param queue: The django-helpdesk Queue instance
     :return: True if the user has permission (either by default or explicitly), false otherwise
     """
-    if user.is_superuser or not helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
+    if user.has_perm('helpdesk.queue_super_access') or not helpdesk_settings.HELPDESK_ENABLE_PER_QUEUE_STAFF_PERMISSION:
         return True
     else:
         return user.has_perm(queue.permission_name)
@@ -66,7 +69,7 @@ def _has_access_to_saved_search(user, saved_search):
     :param saved_search: The django-helpdesk SavedSearch instance
     :return: True if the user has permission (either by default or explicitly), false otherwise
     """
-    if user.is_superuser:
+    if user.has_perm('helpdesk.saved_search_super_access'):
         return True
     return saved_search.user_id == user.pk
 
@@ -732,3 +735,239 @@ class CustomDateReportView(StaffLoginRequiredMixin, View):
                 time_tracks=time_tracks,
             ))
         return JsonResponse(result, safe=False)
+
+
+# noinspection PyMethodMayBeStatic
+class QueueListView(StaffLoginRequiredMixin, View):
+    permission_required = 'helpdesk.view_queue'
+    template_name = "helpdesk/queue/list.html"
+
+    # noinspection PyUnusedLocal
+    def get(self, request, *args, **kwargs):
+        data = request.GET.copy()
+        queues = QueuesFilter(data, queryset=Queue.objects.order_by('-id').all())
+        ctx = {'queues': queues, 'page_size': get_current_page_size(request)}
+        return render(request, self.template_name, ctx)
+
+
+class QueueAddView(StaffLoginRequiredMixin, CreateView):
+    permission_required = 'helpdesk.add_queue'
+    form_class = QueueAddForm
+    template_name = "helpdesk/queue/add.html"
+
+    def form_valid(self, form):
+        result = super(QueueAddView, self).form_valid(form)
+        success_message('Queue "{}" created successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:queue-list')
+
+
+class QueueEditView(StaffLoginRequiredMixin, UpdateView):
+    permission_required = 'helpdesk.view_queue'
+    pk_url_kwarg = 'pk'
+    form_class = QueueEditForm
+    model = Queue
+    template_name = 'helpdesk/queue/edit.html'
+
+    def form_valid(self, form):
+        result = super(QueueEditView, self).form_valid(form)
+        success_message('Queue "{}" updated successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:queue-list')
+
+
+class QueueDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
+    permission_required = 'helpdesk.delete_queue'
+    model = Queue
+    pk_url_kwarg = 'pk'
+
+    # noinspection PyUnusedLocal
+    def post(self, request, *args, **kwargs):
+        queue = self.get_object()
+        queue_display = str(queue)
+        queue.delete()
+        success_message('Queue "{}" deleted successfully!'.format(queue_display), self.request)
+        return redirect(reverse('helpdesk:queue-list'))
+
+
+# noinspection PyMethodMayBeStatic
+class TicketNotificationListView(StaffLoginRequiredMixin, View):
+    permission_required = 'helpdesk.view_ticketnotification'
+    template_name = "helpdesk/ticket_notification/list.html"
+
+    # noinspection PyUnusedLocal
+    def get(self, request, *args, **kwargs):
+        data = request.GET.copy()
+        ticket_notifications = TicketNotificationsFilter(data, queryset=TicketNotification.objects.order_by('-id').all())
+        ctx = {'ticket_notifications': ticket_notifications, 'page_size': get_current_page_size(request)}
+        return render(request, self.template_name, ctx)
+
+
+class TicketNotificationAddView(StaffLoginRequiredMixin, CreateView):
+    permission_required = 'helpdesk.add_ticketnotification'
+    form_class = TicketNotificationAddForm
+    template_name = "helpdesk/ticket_notification/add.html"
+
+    def form_valid(self, form):
+        result = super(TicketNotificationAddView, self).form_valid(form)
+        success_message('Ticket Notification "{}" created successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:ticket_notification-list')
+
+
+class TicketNotificationEditView(StaffLoginRequiredMixin, UpdateView):
+    permission_required = 'helpdesk.view_ticketnotification'
+    pk_url_kwarg = 'pk'
+    form_class = TicketNotificationEditForm
+    model = TicketNotification
+    template_name = 'helpdesk/ticket_notification/edit.html'
+
+    def form_valid(self, form):
+        result = super(TicketNotificationEditView, self).form_valid(form)
+        success_message('Ticket Notification "{}" updated successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:ticket_notification-list')
+
+
+class TicketNotificationDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
+    permission_required = 'helpdesk.delete_ticketnotification'
+    model = TicketNotification
+    pk_url_kwarg = 'pk'
+
+    # noinspection PyUnusedLocal
+    def post(self, request, *args, **kwargs):
+        ticket_notification = self.get_object()
+        ticket_notification_display = str(ticket_notification)
+        ticket_notification.delete()
+        success_message('Ticket Notification "{}" deleted successfully!'.format(ticket_notification_display), self.request)
+        return redirect(reverse('helpdesk:ticket_notification-list'))
+
+
+# noinspection PyMethodMayBeStatic
+class EmailTemplateListView(StaffLoginRequiredMixin, View):
+    permission_required = 'helpdesk.view_emailtemplate'
+    template_name = "helpdesk/email_template/list.html"
+
+    # noinspection PyUnusedLocal
+    def get(self, request, *args, **kwargs):
+        data = request.GET.copy()
+        email_templates = EmailTemplatesFilter(data, queryset=EmailTemplate.objects.order_by('-id').all())
+        ctx = {'email_templates': email_templates, 'page_size': get_current_page_size(request)}
+        return render(request, self.template_name, ctx)
+
+
+class EmailTemplateAddView(StaffLoginRequiredMixin, CreateView):
+    permission_required = 'helpdesk.add_emailtemplate'
+    form_class = EmailTemplateAddForm
+    template_name = "helpdesk/email_template/add.html"
+
+    def form_valid(self, form):
+        result = super(EmailTemplateAddView, self).form_valid(form)
+        success_message('Email Template "{}" created successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:email_template-list')
+
+
+class EmailTemplateEditView(StaffLoginRequiredMixin, UpdateView):
+    permission_required = 'helpdesk.view_emailtemplate'
+    pk_url_kwarg = 'pk'
+    form_class = EmailTemplateEditForm
+    model = EmailTemplate
+    template_name = 'helpdesk/email_template/edit.html'
+
+    def form_valid(self, form):
+        result = super(EmailTemplateEditView, self).form_valid(form)
+        success_message('Email Template "{}" updated successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:email_template-list')
+
+
+class EmailTemplateDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
+    permission_required = 'helpdesk.delete_emailtemplate'
+    model = EmailTemplate
+    pk_url_kwarg = 'pk'
+
+    # noinspection PyUnusedLocal
+    def post(self, request, *args, **kwargs):
+        email_template = self.get_object()
+        email_template_display = str(email_template)
+        email_template.delete()
+        success_message('Email Template "{}" deleted successfully!'.format(email_template_display), self.request)
+        return redirect(reverse('helpdesk:email_template-list'))
+
+
+# noinspection PyMethodMayBeStatic
+class SMSTemplateListView(StaffLoginRequiredMixin, View):
+    permission_required = 'helpdesk.view_emailtemplate'
+    template_name = "helpdesk/sms_template/list.html"
+
+    # noinspection PyUnusedLocal
+    def get(self, request, *args, **kwargs):
+        data = request.GET.copy()
+        sms_templates = SMSTemplatesFilter(data, queryset=SMSTemplate.objects.order_by('-id').all())
+        ctx = {'sms_templates': sms_templates, 'page_size': get_current_page_size(request)}
+        return render(request, self.template_name, ctx)
+
+
+class SMSTemplateAddView(StaffLoginRequiredMixin, CreateView):
+    permission_required = 'helpdesk.add_emailtemplate'
+    form_class = SMSTemplateAddForm
+    template_name = "helpdesk/sms_template/add.html"
+
+    def form_valid(self, form):
+        result = super(SMSTemplateAddView, self).form_valid(form)
+        success_message('SMS Template "{}" created successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:sms_template-list')
+
+
+class SMSTemplateEditView(StaffLoginRequiredMixin, UpdateView):
+    permission_required = 'helpdesk.view_emailtemplate'
+    pk_url_kwarg = 'pk'
+    form_class = SMSTemplateEditForm
+    model = SMSTemplate
+    template_name = 'helpdesk/sms_template/edit.html'
+
+    def form_valid(self, form):
+        result = super(SMSTemplateEditView, self).form_valid(form)
+        success_message('SMS Template "{}" updated successfully.'.format(
+            self.object), self.request)
+        return result
+
+    def get_success_url(self):
+        return reverse('helpdesk:sms_template-list')
+
+
+class SMSTemplateDeleteView(StaffLoginRequiredMixin, SingleObjectMixin, View):
+    permission_required = 'helpdesk.delete_emailtemplate'
+    model = SMSTemplate
+    pk_url_kwarg = 'pk'
+
+    # noinspection PyUnusedLocal
+    def post(self, request, *args, **kwargs):
+        sms_template = self.get_object()
+        sms_template_display = str(sms_template)
+        sms_template.delete()
+        success_message('SMS Template "{}" deleted successfully!'.format(sms_template_display), self.request)
+        return redirect(reverse('helpdesk:sms_template-list'))
